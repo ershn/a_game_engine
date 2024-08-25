@@ -138,10 +138,12 @@
     <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Meshes.cpp" />
-    <ClCompile Include="src\ShaderProgram.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Shaders.cpp" />
     <ClCompile Include="src\third_parties\gl.c" />
     <ClCompile Include="src\Transformations.cpp" />
+    <ClCompile Include="src\UniformBuffer.cpp" />
+    <ClCompile Include="src\UniformBuffers.cpp" />
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -149,9 +151,11 @@
     <ClInclude Include="include\Matrix.hpp" />
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\Meshes.hpp" />
-    <ClInclude Include="include\ShaderProgram.hpp" />
+    <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="include\Shaders.hpp" />
     <ClInclude Include="include\Transformations.hpp" />
+    <ClInclude Include="include\UniformBuffer.hpp" />
+    <ClInclude Include="include\UniformBuffers.hpp" />
     <ClInclude Include="include\Vector.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

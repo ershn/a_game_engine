@@ -11,6 +11,7 @@
 #include "Meshes.hpp"
 #include "Shaders.hpp"
 #include "Transformations.hpp"
+#include "UniformBuffers.hpp"
 
 using namespace Age;
 using Math::Matrix4;
@@ -147,13 +148,8 @@ void run()
     Gfx::VertexLightingShader program{"shaders/basic.vert", "shaders/basic.frag"};
     program.bind_shared_matrices_block(0);
 
-    GLuint uniform_buffer_object{};
-    glGenBuffers(1, &uniform_buffer_object);
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(Math::Matrix4), nullptr, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniform_buffer_object, 0, sizeof(Math::Matrix4));
+    Gfx::SharedMatricesUniformBuffer shared_matrices{};
+    shared_matrices.bind(0);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -229,6 +225,8 @@ void run()
 
         Matrix4 cam_matrix{camera_matrix(camera_pos, camera_pos + camera_forward, world_up)};
 
+        shared_matrices.set_clip_matrix(g_perspective_matrix);
+
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClearDepth(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -237,12 +235,6 @@ void run()
         {
             Gfx::Shader::Use use{program};
             program.set_camera_matrix(cam_matrix);
-            // program.set_clip_matrix(g_perspective_matrix);
-
-            glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Math::Matrix4),
-                            static_cast<const float *>(g_perspective_matrix));
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
             {
                 Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
