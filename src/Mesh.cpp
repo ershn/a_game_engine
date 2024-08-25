@@ -3,6 +3,7 @@
 #include <numbers>
 
 #include "Mesh.hpp"
+#include "Vector.hpp"
 
 namespace Age::Gfx
 {
@@ -50,19 +51,16 @@ void Mesh::draw() const
 CylinderMesh::CylinderMesh(std::size_t side_count)
     : _side_count{side_count}
 {
+    using Math::Vector3;
+
     std::size_t side_vertex_count{side_count * 2};
     std::size_t vertex_count{side_vertex_count + 2};
     std::size_t index_count{side_vertex_count + 2 + (side_count + 2) * 2};
-    auto vertex_buffer{std::make_unique<GLfloat[]>(vertex_count * 3)};
+    auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count)};
     auto index_buffer{std::make_unique<GLushort[]>(index_count)};
 
-    vertex_buffer[0] = 0.0f;
-    vertex_buffer[1] = 0.5f;
-    vertex_buffer[2] = 0.0f;
-
-    vertex_buffer[3] = 0.0f;
-    vertex_buffer[4] = -0.5f;
-    vertex_buffer[5] = 0.0f;
+    vertex_buffer[0] = Vector3{0.0f, 0.5f, 0.0f};
+    vertex_buffer[1] = Vector3{0.0f, -0.5f, 0.0f};
 
     float angle_increment{std::numbers::pi_v<float> * 2.0f / side_count};
     for (std::size_t side_index{}; side_index < side_count; side_index++)
@@ -71,13 +69,8 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
         float z{std::cos(angle) * 0.5f};
         float x{std::sin(angle) * 0.5f};
 
-        vertex_buffer[6 + side_index * 3 * 2] = x;
-        vertex_buffer[6 + side_index * 3 * 2 + 1] = 0.5f;
-        vertex_buffer[6 + side_index * 3 * 2 + 2] = z;
-
-        vertex_buffer[6 + side_index * 3 * 2 + 3] = x;
-        vertex_buffer[6 + side_index * 3 * 2 + 4] = -0.5f;
-        vertex_buffer[6 + side_index * 3 * 2 + 5] = z;
+        vertex_buffer[2 + side_index * 2] = Vector3{x, 0.5f, z};
+        vertex_buffer[2 + side_index * 2 + 1] = Vector3{x, -0.5f, z};
 
         index_buffer[side_index * 2] = static_cast<GLushort>(2 + side_index * 2);
         index_buffer[side_index * 2 + 1] = static_cast<GLushort>(2 + side_index * 2 + 1);
@@ -102,7 +95,7 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
 
     glGenBuffers(1, &_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(GLfloat), vertex_buffer.get(),
+    glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(Vector3), vertex_buffer.get(),
                  GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
