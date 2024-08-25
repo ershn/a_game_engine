@@ -1,0 +1,11 @@
+# Project files
+Age.vcxproj.filters
+Age.vcxproj.user
+
+# Build files
+Age/
+x64/
+
+# IDE files
+.vs/
+.vscode/
