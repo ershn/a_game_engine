@@ -71,8 +71,8 @@ Vector3 &Vector3::normalize()
     if (length == 0.0f)
         throw std::domain_error("Cannot normalize a vector of length 0");
 
-    float scale{1.0f / length};
-    *this *= scale;
+    float ratio{1.0f / length};
+    *this *= ratio;
     return *this;
 }
 
@@ -221,6 +221,11 @@ float &Vector4::operator[](size_t index)
     }
 }
 
+Vector3 Vector4::xyz() const
+{
+    return Vector3{x, y, z};
+}
+
 float Vector4::length() const
 {
     return std::sqrt(x * x + y * y + z * z + w * w);
@@ -232,8 +237,8 @@ Vector4 &Vector4::normalize()
     if (length == 0.0f)
         throw std::domain_error("Cannot normalize a vector of length 0");
 
-    float scale{1.0f / length};
-    *this *= scale;
+    float ratio{1.0f / length};
+    *this *= ratio;
     return *this;
 }
 

@@ -13,10 +13,10 @@ const float plane_vertex_positions[] = {
 };
 
 const float plane_vertex_colors[] = {
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f
+    0.859f, 0.533f, 0.416f,
+    0.859f, 0.533f, 0.416f,
+    0.859f, 0.533f, 0.416f,
+    0.859f, 0.533f, 0.416f,
 };
 
 const GLushort plane_vertex_indices[] = {
@@ -36,14 +36,14 @@ const float cube_vertex_positions[] = {
 };
 
 const float cube_vertex_colors[] = {
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f
+    0.518f, 0.71f, 0.671f,
+    0.518f, 0.71f, 0.671f,
+    0.518f, 0.71f, 0.671f,
+    0.518f, 0.71f, 0.671f,
+    0.463f, 0.961f, 0.859f,
+    0.463f, 0.961f, 0.859f,
+    0.463f, 0.961f, 0.859f,
+    0.463f, 0.961f, 0.859f,
 };
 
 const GLushort cube_vertex_indices[] = {

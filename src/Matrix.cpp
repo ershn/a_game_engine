@@ -63,6 +63,16 @@ Matrix4 &Matrix4::operator*=(float scalar)
     return *this;
 }
 
+Vector4 Matrix4::operator*(const Vector4 &rhs) const
+{
+    Vector4 result{};
+    result[0] = row(0).dot(rhs);
+    result[1] = row(1).dot(rhs);
+    result[2] = row(2).dot(rhs);
+    result[3] = row(3).dot(rhs);
+    return result;
+}
+
 Matrix4 Matrix4::operator+(const Matrix4 &rhs) const
 {
     Matrix4 result{*this};

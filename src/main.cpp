@@ -16,6 +16,7 @@
 using namespace Age;
 using Math::Matrix4;
 using Math::Vector3;
+using Math::Vector4;
 
 const float mouse_sensitivity{0.005f};
 
@@ -145,8 +146,11 @@ void run()
     std::cout << "Loaded OpenGL " << GLAD_VERSION_MAJOR(version) << "."
               << GLAD_VERSION_MINOR(version) << std::endl;
 
-    Gfx::VertexLightingShader program{"shaders/basic.vert", "shaders/basic.frag"};
-    program.bind_shared_matrices_block(0);
+    Gfx::BasicShader no_lighting_shader{"shaders/basic.vert", "shaders/basic.frag"};
+    no_lighting_shader.bind_shared_matrices_block(0);
+    Gfx::DiffuseLightingShader diffuse_lighting_shader{"shaders/diffuse_lighting.vert",
+                                                       "shaders/basic.frag"};
+    diffuse_lighting_shader.bind_shared_matrices_block(0);
 
     Gfx::SharedMatricesUniformBuffer shared_matrices{};
     shared_matrices.bind(0);
@@ -179,6 +183,10 @@ void run()
     const Gfx::Mesh &plane_mesh{Gfx::load_plane_mesh()};
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
     const Gfx::CylinderMesh cylinder_mesh{30};
+
+    Vector4 direction_to_light{1.0f, 1.0f, 1.0f, 0.0f};
+    direction_to_light.normalize();
+    Vector4 light_intensity{1.0f, 1.0f, 1.0f, 1.0f};
 
     float camera_yaw{Math::radians(180.0f)};
     float camera_pitch{Math::radians(90.0f)};
@@ -227,37 +235,42 @@ void run()
 
         shared_matrices.set_clip_matrix(g_perspective_matrix);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.294f, 0.22f, 0.192f, 1.0f);
         glClearDepth(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cube_x_rotation += delta_time * 40.0f;
         {
-            Gfx::Shader::Use use{program};
-            program.set_camera_matrix(cam_matrix);
+            Gfx::Shader::Use use{no_lighting_shader};
 
-            {
-                Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
-                                     Math::x_rotation_matrix(Math::radians(-90.0f)) *
-                                     Math::scaling_matrix(Vector3{20.0f, 20.0f, 1.0f})};
-                program.set_world_matrix(world_matrix);
-                plane_mesh.draw();
-            }
+            Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
+                                 Math::x_rotation_matrix(Math::radians(-90.0f)) *
+                                 Math::scaling_matrix(Vector3{20.0f, 20.0f, 1.0f})};
+            no_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+            plane_mesh.draw();
+        }
 
-            {
-                Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
-                                     Math::x_rotation_matrix(Math::radians(cube_x_rotation)) *
-                                     Math::scaling_matrix(Vector3{2.0f, 2.0f, 1.0f})};
-                program.set_world_matrix(world_matrix);
-                cube_mesh.draw();
-            }
+        {
+            Gfx::Shader::Use use{no_lighting_shader};
 
-            {
-                Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                     Math::z_rotation_matrix(Math::radians(90.0f))};
-                program.set_world_matrix(world_matrix);
-                cylinder_mesh.draw();
-            }
+            Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
+                                 Math::x_rotation_matrix(Math::radians(cube_x_rotation)) *
+                                 Math::scaling_matrix(Vector3{2.0f, 2.0f, 1.0f})};
+            no_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+            cube_mesh.draw();
+        }
+
+        {
+            Gfx::Shader::Use use{diffuse_lighting_shader};
+
+            Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
+                                 Math::z_rotation_matrix(Math::radians(90.0f))};
+            diffuse_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+
+            diffuse_lighting_shader.set_direction_to_light((cam_matrix * direction_to_light).xyz());
+            diffuse_lighting_shader.set_light_intensity(light_intensity);
+
+            cylinder_mesh.draw();
         }
 
         glfwSwapBuffers(window);

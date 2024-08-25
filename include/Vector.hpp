@@ -65,6 +65,8 @@ struct Vector4
     float operator[](size_t index) const;
     float &operator[](size_t index);
 
+    Vector3 xyz() const;
+
     float length() const;
 
     Vector4 &normalize();

@@ -56,21 +56,28 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
     std::size_t side_vertex_count{side_count * 2};
     std::size_t vertex_count{side_vertex_count + 2};
     std::size_t index_count{side_vertex_count + 2 + (side_count + 2) * 2};
-    auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count)};
+    auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count * 2)};
     auto index_buffer{std::make_unique<GLushort[]>(index_count)};
+
+    std::size_t normals_offset{vertex_count};
 
     vertex_buffer[0] = Vector3{0.0f, 0.5f, 0.0f};
     vertex_buffer[1] = Vector3{0.0f, -0.5f, 0.0f};
+
+    vertex_buffer[normals_offset] = Vector3{0.0f, 1.0f, 0.0f};
+    vertex_buffer[normals_offset + 1] = Vector3{0.0f, -1.0f, 0.0f};
 
     float angle_increment{std::numbers::pi_v<float> * 2.0f / side_count};
     for (std::size_t side_index{}; side_index < side_count; side_index++)
     {
         float angle{side_index * -angle_increment};
-        float z{std::cos(angle) * 0.5f};
-        float x{std::sin(angle) * 0.5f};
+        Vector3 normal{std::sin(angle), 0.0f, std::cos(angle)};
 
-        vertex_buffer[2 + side_index * 2] = Vector3{x, 0.5f, z};
-        vertex_buffer[2 + side_index * 2 + 1] = Vector3{x, -0.5f, z};
+        vertex_buffer[2 + side_index * 2] = normal * 0.5f + Vector3{0.0f, 0.5f, 0.0f};
+        vertex_buffer[2 + side_index * 2 + 1] = normal * 0.5f + Vector3{0.0f, -0.5f, 0.0f};
+
+        vertex_buffer[normals_offset + 2 + side_index * 2] = normal;
+        vertex_buffer[normals_offset + 2 + side_index * 2 + 1] = normal;
 
         index_buffer[side_index * 2] = static_cast<GLushort>(2 + side_index * 2);
         index_buffer[side_index * 2 + 1] = static_cast<GLushort>(2 + side_index * 2 + 1);
@@ -95,7 +102,7 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
 
     glGenBuffers(1, &_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(Vector3), vertex_buffer.get(),
+    glBufferData(GL_ARRAY_BUFFER, vertex_count * 2 * sizeof(Vector3), vertex_buffer.get(),
                  GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -109,8 +116,14 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
     glBindVertexArray(_vertex_array_object);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0,
+                          reinterpret_cast<const GLvoid *>(normals_offset * sizeof(Vector3)));
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer_object);
 
     glBindVertexArray(0);

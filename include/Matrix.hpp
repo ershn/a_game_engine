@@ -30,6 +30,8 @@ class Matrix4
 
     Matrix4 &operator*=(float scalar);
 
+    Vector4 operator*(const Vector4 &rhs) const;
+
     Matrix4 operator+(const Matrix4 &rhs) const;
 
     Matrix4 &operator+=(const Matrix4 &rhs);
