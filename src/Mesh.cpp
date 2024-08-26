@@ -54,51 +54,75 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
     using Math::Vector3;
 
     std::size_t side_vertex_count{side_count * 2};
-    std::size_t vertex_count{side_vertex_count + 2};
-    std::size_t index_count{side_vertex_count + 2 + (side_count + 2) * 2};
+    std::size_t cap_vertex_count{side_count + 1};
+    std::size_t vertex_count{side_vertex_count + cap_vertex_count * 2};
+    std::size_t normal_offset{vertex_count};
+    std::size_t index_count{side_vertex_count + 2 + (cap_vertex_count + 1) * 2};
     auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count * 2)};
     auto index_buffer{std::make_unique<GLushort[]>(index_count)};
 
-    std::size_t normals_offset{vertex_count};
-
-    vertex_buffer[0] = Vector3{0.0f, 0.5f, 0.0f};
-    vertex_buffer[1] = Vector3{0.0f, -0.5f, 0.0f};
-
-    vertex_buffer[normals_offset] = Vector3{0.0f, 1.0f, 0.0f};
-    vertex_buffer[normals_offset + 1] = Vector3{0.0f, -1.0f, 0.0f};
-
     float angle_increment{std::numbers::pi_v<float> * 2.0f / side_count};
+    for (std::size_t side_index{}; side_index < side_count; side_index++)
+    {
+        std::size_t top_vertex_index{side_index * 2};
+        std::size_t bottom_vertex_index{top_vertex_index + 1};
+
+        float angle{side_index * -angle_increment};
+        Vector3 normal{std::sin(angle), 0.0f, std::cos(angle)};
+
+        vertex_buffer[top_vertex_index] = normal * 0.5f + Vector3{0.0f, 0.5f, 0.0f};
+        vertex_buffer[bottom_vertex_index] = normal * 0.5f + Vector3{0.0f, -0.5f, 0.0f};
+
+        vertex_buffer[normal_offset + top_vertex_index] = normal;
+        vertex_buffer[normal_offset + bottom_vertex_index] = normal;
+
+        index_buffer[top_vertex_index] = static_cast<GLushort>(top_vertex_index);
+        index_buffer[bottom_vertex_index] = static_cast<GLushort>(bottom_vertex_index);
+    }
+    index_buffer[side_vertex_count] = 0;
+    index_buffer[side_vertex_count + 1] = 1;
+
+    std::size_t top_cap_vertex_offset{side_vertex_count};
+    std::size_t top_cap_normal_offset{normal_offset + side_vertex_count};
+    std::size_t top_cap_index_offset{side_vertex_count + 2};
+
+    vertex_buffer[top_cap_vertex_offset] = Vector3{0.0f, 0.5f, 0.0f};
+    vertex_buffer[top_cap_normal_offset] = Vector3{0.0f, 1.0f, 0.0f};
+    index_buffer[top_cap_index_offset] = top_cap_vertex_offset;
+
     for (std::size_t side_index{}; side_index < side_count; side_index++)
     {
         float angle{side_index * -angle_increment};
         Vector3 normal{std::sin(angle), 0.0f, std::cos(angle)};
 
-        vertex_buffer[2 + side_index * 2] = normal * 0.5f + Vector3{0.0f, 0.5f, 0.0f};
-        vertex_buffer[2 + side_index * 2 + 1] = normal * 0.5f + Vector3{0.0f, -0.5f, 0.0f};
-
-        vertex_buffer[normals_offset + 2 + side_index * 2] = normal;
-        vertex_buffer[normals_offset + 2 + side_index * 2 + 1] = normal;
-
-        index_buffer[side_index * 2] = static_cast<GLushort>(2 + side_index * 2);
-        index_buffer[side_index * 2 + 1] = static_cast<GLushort>(2 + side_index * 2 + 1);
+        vertex_buffer[top_cap_vertex_offset + 1 + side_index] =
+            normal * 0.5f + Vector3{0.0f, 0.5f, 0.0f};
+        vertex_buffer[top_cap_normal_offset + 1 + side_index] = Vector3{0.0f, 1.0f, 0.0f};
+        index_buffer[top_cap_index_offset + 1 + side_index] =
+            static_cast<GLushort>(top_cap_vertex_offset + 1 + side_index);
     }
-    index_buffer[side_count * 2] = 2;
-    index_buffer[side_count * 2 + 1] = 3;
+    index_buffer[top_cap_index_offset + 1 + side_count] = top_cap_vertex_offset + 1;
 
-    std::size_t top_fan_index_offset{side_count * 2 + 2};
-    std::size_t bottom_fan_index_offset{top_fan_index_offset + side_count + 2};
-    index_buffer[top_fan_index_offset] = 0;
-    index_buffer[bottom_fan_index_offset] = 1;
+    std::size_t bottom_cap_vertex_offset{top_cap_vertex_offset + 1 + side_count};
+    std::size_t bottom_cap_normal_offset{top_cap_normal_offset + 1 + side_count};
+    std::size_t bottom_cap_index_offset{top_cap_index_offset + side_count + 2};
+
+    vertex_buffer[bottom_cap_vertex_offset] = Vector3{0.0f, -0.5f, 0.0f};
+    vertex_buffer[bottom_cap_normal_offset] = Vector3{0.0f, -1.0f, 0.0f};
+    index_buffer[bottom_cap_index_offset] = bottom_cap_vertex_offset;
+
     for (std::size_t side_index{}; side_index < side_count; side_index++)
     {
-        index_buffer[top_fan_index_offset + 1 + side_index] =
-            static_cast<GLushort>(2 + side_index * 2);
-        index_buffer[bottom_fan_index_offset + 1 + side_index] =
-            static_cast<GLushort>(3 + (side_count - 1 - side_index) * 2);
+        float angle{side_index * angle_increment};
+        Vector3 normal{std::sin(angle), 0.0f, std::cos(angle)};
+
+        vertex_buffer[bottom_cap_vertex_offset + 1 + side_index] =
+            normal * 0.5f + Vector3{0.0f, -0.5f, 0.0f};
+        vertex_buffer[bottom_cap_normal_offset + 1 + side_index] = Vector3{0.0f, -1.0f, 0.0f};
+        index_buffer[bottom_cap_index_offset + 1 + side_index] =
+            static_cast<GLushort>(bottom_cap_vertex_offset + 1 + side_index);
     }
-    index_buffer[top_fan_index_offset + 1 + side_count] = 2;
-    index_buffer[bottom_fan_index_offset + 1 + side_count] =
-        static_cast<GLushort>(3 + (side_count - 1) * 2);
+    index_buffer[bottom_cap_index_offset + 1 + side_count] = bottom_cap_vertex_offset + 1;
 
     glGenBuffers(1, &_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
@@ -116,14 +140,11 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
     glBindVertexArray(_vertex_array_object);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
-
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 0,
-                          reinterpret_cast<const GLvoid *>(normals_offset * sizeof(Vector3)));
-
+                          reinterpret_cast<const GLvoid *>(normal_offset * sizeof(Vector3)));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer_object);
 
     glBindVertexArray(0);
