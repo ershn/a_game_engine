@@ -88,20 +88,20 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
 
     vertex_buffer[top_cap_vertex_offset] = Vector3{0.0f, 0.5f, 0.0f};
     vertex_buffer[top_cap_normal_offset] = Vector3{0.0f, 1.0f, 0.0f};
-    index_buffer[top_cap_index_offset] = top_cap_vertex_offset;
+    index_buffer[top_cap_index_offset] = static_cast<GLushort>(top_cap_vertex_offset);
 
     for (std::size_t side_index{}; side_index < side_count; side_index++)
     {
         float angle{side_index * -angle_increment};
-        Vector3 normal{std::sin(angle), 0.0f, std::cos(angle)};
+        Vector3 position{std::sin(angle) * 0.5f, 0.5f, std::cos(angle) * 0.5f};
 
-        vertex_buffer[top_cap_vertex_offset + 1 + side_index] =
-            normal * 0.5f + Vector3{0.0f, 0.5f, 0.0f};
+        vertex_buffer[top_cap_vertex_offset + 1 + side_index] = position;
         vertex_buffer[top_cap_normal_offset + 1 + side_index] = Vector3{0.0f, 1.0f, 0.0f};
         index_buffer[top_cap_index_offset + 1 + side_index] =
             static_cast<GLushort>(top_cap_vertex_offset + 1 + side_index);
     }
-    index_buffer[top_cap_index_offset + 1 + side_count] = top_cap_vertex_offset + 1;
+    index_buffer[top_cap_index_offset + 1 + side_count] =
+        static_cast<GLushort>(top_cap_vertex_offset + 1);
 
     std::size_t bottom_cap_vertex_offset{top_cap_vertex_offset + 1 + side_count};
     std::size_t bottom_cap_normal_offset{top_cap_normal_offset + 1 + side_count};
@@ -109,20 +109,20 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
 
     vertex_buffer[bottom_cap_vertex_offset] = Vector3{0.0f, -0.5f, 0.0f};
     vertex_buffer[bottom_cap_normal_offset] = Vector3{0.0f, -1.0f, 0.0f};
-    index_buffer[bottom_cap_index_offset] = bottom_cap_vertex_offset;
+    index_buffer[bottom_cap_index_offset] = static_cast<GLushort>(bottom_cap_vertex_offset);
 
     for (std::size_t side_index{}; side_index < side_count; side_index++)
     {
         float angle{side_index * angle_increment};
-        Vector3 normal{std::sin(angle), 0.0f, std::cos(angle)};
+        Vector3 position{std::sin(angle) * 0.5f, -0.5f, std::cos(angle) * 0.5f};
 
-        vertex_buffer[bottom_cap_vertex_offset + 1 + side_index] =
-            normal * 0.5f + Vector3{0.0f, -0.5f, 0.0f};
+        vertex_buffer[bottom_cap_vertex_offset + 1 + side_index] = position;
         vertex_buffer[bottom_cap_normal_offset + 1 + side_index] = Vector3{0.0f, -1.0f, 0.0f};
         index_buffer[bottom_cap_index_offset + 1 + side_index] =
             static_cast<GLushort>(bottom_cap_vertex_offset + 1 + side_index);
     }
-    index_buffer[bottom_cap_index_offset + 1 + side_count] = bottom_cap_vertex_offset + 1;
+    index_buffer[bottom_cap_index_offset + 1 + side_count] =
+        static_cast<GLushort>(bottom_cap_vertex_offset + 1);
 
     glGenBuffers(1, &_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);

@@ -31,6 +31,7 @@ class Shader
     void set_uniform(GLint location, float value);
     void set_uniform(GLint location, const Math::Vector3 &vector);
     void set_uniform(GLint location, const Math::Vector4 &vector);
+    void set_uniform(GLint location, const Math::Matrix3 &matrix);
     void set_uniform(GLint location, const Math::Matrix4 &matrix);
 
     GLuint get_uniform_block_index(const std::string &name) const;

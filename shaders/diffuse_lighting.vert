@@ -7,6 +7,7 @@ layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec3 aNormal;
 
 uniform mat4 uModelToCameraMatrix;
+uniform mat3 uNormalModelToCameraMatrix;
 
 layout(std140) uniform SharedMatrices
 {
@@ -21,7 +22,7 @@ smooth out vec4 color;
 void main()
 {
     gl_Position = uCameraToClipMatrix * (uModelToCameraMatrix * aPosition);
-    vec3 normal = normalize(uModelToCameraMatrix * vec4(aNormal, 0.0f)).xyz;
+    vec3 normal = normalize(uNormalModelToCameraMatrix * aNormal);
 
     float incidenceAngleCos = dot(normal, uDirectionToLight);
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0f, 1.0f);

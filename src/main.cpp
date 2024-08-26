@@ -266,6 +266,8 @@ void run()
             Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
                                  Math::z_rotation_matrix(Math::radians(90.0f))};
             diffuse_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+            diffuse_lighting_shader.set_normal_camera_matrix(
+                (cam_matrix * world_matrix).to_matrix3());
 
             diffuse_lighting_shader.set_direction_to_light((cam_matrix * direction_to_light).xyz());
             diffuse_lighting_shader.set_light_intensity(light_intensity);

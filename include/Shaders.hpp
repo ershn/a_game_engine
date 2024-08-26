@@ -22,6 +22,7 @@ class BasicShader : public Shader
 class DiffuseLightingShader : public Shader
 {
     GLint _model_to_camera_matrix{};
+    GLint _normal_model_to_camera_matrix{};
     GLuint _shared_matrices_block_index{};
 
     GLint _direction_to_light{};
@@ -31,6 +32,7 @@ class DiffuseLightingShader : public Shader
     DiffuseLightingShader(const std::string &vs_path, const std::string &fs_path);
 
     void set_camera_matrix(const Math::Matrix4 &matrix);
+    void set_normal_camera_matrix(const Math::Matrix3 &matrix);
     void bind_shared_matrices_block(GLuint block_binding);
 
     void set_direction_to_light(const Math::Vector3 &direction_to_light);

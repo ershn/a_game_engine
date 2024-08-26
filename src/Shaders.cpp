@@ -22,6 +22,7 @@ void BasicShader::bind_shared_matrices_block(GLuint block_binding)
 DiffuseLightingShader::DiffuseLightingShader(const std::string &vs_path, const std::string &fs_path)
     : Shader{vs_path, fs_path}
     , _model_to_camera_matrix{get_uniform_location("uModelToCameraMatrix")}
+    , _normal_model_to_camera_matrix{get_uniform_location("uNormalModelToCameraMatrix")}
     , _shared_matrices_block_index{get_uniform_block_index("SharedMatrices")}
     , _direction_to_light{get_uniform_location("uDirectionToLight")}
     , _light_intensity{get_uniform_location("uLightIntensity")}
@@ -31,6 +32,11 @@ DiffuseLightingShader::DiffuseLightingShader(const std::string &vs_path, const s
 void DiffuseLightingShader::set_camera_matrix(const Math::Matrix4 &matrix)
 {
     set_uniform(_model_to_camera_matrix, matrix);
+}
+
+void DiffuseLightingShader::set_normal_camera_matrix(const Math::Matrix3 &matrix)
+{
+    set_uniform(_normal_model_to_camera_matrix, matrix);
 }
 
 void DiffuseLightingShader::bind_shared_matrices_block(GLuint block_binding)

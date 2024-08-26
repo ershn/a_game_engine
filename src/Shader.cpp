@@ -50,6 +50,11 @@ void Shader::set_uniform(GLint location, const Math::Vector4 &vector)
     glUniform4fv(location, 1, static_cast<const GLfloat *>(vector));
 }
 
+void Shader::set_uniform(GLint location, const Math::Matrix3 &matrix)
+{
+    glUniformMatrix3fv(location, 1, false, static_cast<const GLfloat *>(matrix));
+}
+
 void Shader::set_uniform(GLint location, const Math::Matrix4 &matrix)
 {
     glUniformMatrix4fv(location, 1, false, static_cast<const GLfloat *>(matrix));
