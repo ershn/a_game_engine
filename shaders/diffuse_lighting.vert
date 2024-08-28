@@ -26,5 +26,5 @@ void main()
 
     float incidenceAngleCos = dot(normal, uDirectionToLight);
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0f, 1.0f);
-    color = vec4(1.0f, 1.0f, 1.0f, 1.0f) * uLightIntensity * incidenceAngleCos;
+    color = vec4(1.0f, 0.2f, 0.2f, 1.0f) * uLightIntensity * incidenceAngleCos;
 }

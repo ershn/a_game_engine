@@ -184,7 +184,7 @@ void run()
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
     const Gfx::CylinderMesh cylinder_mesh{30};
 
-    Vector4 direction_to_light{1.0f, 1.0f, 1.0f, 0.0f};
+    Vector4 direction_to_light{0.866f, 0.5f, 0.0f, 0.0f};
     direction_to_light.normalize();
     Vector4 light_intensity{1.0f, 1.0f, 1.0f, 1.0f};
 
@@ -264,10 +264,11 @@ void run()
             Gfx::Shader::Use use{diffuse_lighting_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                 Math::z_rotation_matrix(Math::radians(90.0f))};
+                                 Math::z_rotation_matrix(Math::radians(20.0f)) *
+                                 Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.2f})};
             diffuse_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
             diffuse_lighting_shader.set_normal_camera_matrix(
-                (cam_matrix * world_matrix).to_matrix3());
+                (cam_matrix * world_matrix).to_matrix3().inverted().transposed());
 
             diffuse_lighting_shader.set_direction_to_light((cam_matrix * direction_to_light).xyz());
             diffuse_lighting_shader.set_light_intensity(light_intensity);

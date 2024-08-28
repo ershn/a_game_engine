@@ -49,6 +49,10 @@ class Matrix3
 
     Matrix3 transposed() const;
 
+    Matrix3 &invert();
+
+    Matrix3 inverted() const;
+
     std::string to_string() const;
 };
 

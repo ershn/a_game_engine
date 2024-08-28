@@ -119,21 +119,48 @@ Matrix3 &Matrix3::operator*=(const Matrix3 &rhs)
 
 Matrix3 &Matrix3::transpose()
 {
-    Matrix3 copy{*this};
-    _columns[0].y = copy[1].x;
-    _columns[0].z = copy[2].x;
-    _columns[1].x = copy[0].y;
-    _columns[1].z = copy[2].y;
-    _columns[2].x = copy[0].z;
-    _columns[2].y = copy[1].z;
+    *this = transposed();
     return *this;
 }
 
 Matrix3 Matrix3::transposed() const
 {
-    Matrix3 result{*this};
-    result.transpose();
-    return result;
+    Matrix3 transpose{};
+    transpose[0].x = _columns[0].x;
+    transpose[0].y = _columns[1].x;
+    transpose[0].z = _columns[2].x;
+    transpose[1].x = _columns[0].y;
+    transpose[1].y = _columns[1].y;
+    transpose[1].z = _columns[2].y;
+    transpose[2].x = _columns[0].z;
+    transpose[2].y = _columns[1].z;
+    transpose[2].z = _columns[2].z;
+    return transpose;
+}
+
+Matrix3 &Matrix3::invert()
+{
+    *this = inverted();
+    return *this;
+}
+
+Matrix3 Matrix3::inverted() const
+{
+    Matrix3 adjugate{};
+    adjugate[0].x = _columns[1].y * _columns[2].z - _columns[2].y * _columns[1].z;
+    adjugate[0].y = -(_columns[0].y * _columns[2].z - _columns[2].y * _columns[0].z);
+    adjugate[0].z = _columns[0].y * _columns[1].z - _columns[1].y * _columns[0].z;
+    adjugate[1].x = -(_columns[1].x * _columns[2].z - _columns[2].x * _columns[1].z);
+    adjugate[1].y = _columns[0].x * _columns[2].z - _columns[2].x * _columns[0].z;
+    adjugate[1].z = -(_columns[0].x * _columns[1].z - _columns[1].x * _columns[0].z);
+    adjugate[2].x = _columns[1].x * _columns[2].y - _columns[2].x * _columns[1].y;
+    adjugate[2].y = -(_columns[0].x * _columns[2].y - _columns[2].x * _columns[0].y);
+    adjugate[2].z = _columns[0].x * _columns[1].y - _columns[1].x * _columns[0].y;
+
+    float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y +
+                      _columns[2].x * adjugate[0].z};
+    adjugate *= 1.0f / determinant;
+    return adjugate;
 }
 
 std::string Matrix3::to_string() const
@@ -281,27 +308,30 @@ Matrix4 &Matrix4::operator*=(const Matrix4 &rhs)
 
 Matrix4 &Matrix4::transpose()
 {
-    Matrix4 copy{*this};
-    _columns[0].y = copy[1].x;
-    _columns[0].z = copy[2].x;
-    _columns[0].w = copy[3].x;
-    _columns[1].x = copy[0].y;
-    _columns[1].z = copy[2].y;
-    _columns[1].w = copy[3].y;
-    _columns[2].x = copy[0].z;
-    _columns[2].y = copy[1].z;
-    _columns[2].w = copy[3].z;
-    _columns[3].x = copy[0].w;
-    _columns[3].y = copy[1].w;
-    _columns[3].z = copy[2].w;
+    *this = transposed();
     return *this;
 }
 
 Matrix4 Matrix4::transposed() const
 {
-    Matrix4 result{*this};
-    result.transpose();
-    return result;
+    Matrix4 transpose{};
+    transpose[0].x = _columns[0].x;
+    transpose[0].y = _columns[1].x;
+    transpose[0].z = _columns[2].x;
+    transpose[0].w = _columns[3].x;
+    transpose[1].x = _columns[0].y;
+    transpose[1].y = _columns[1].y;
+    transpose[1].z = _columns[2].y;
+    transpose[1].w = _columns[3].y;
+    transpose[2].x = _columns[0].z;
+    transpose[2].y = _columns[1].z;
+    transpose[2].z = _columns[2].z;
+    transpose[2].w = _columns[3].z;
+    transpose[3].x = _columns[0].w;
+    transpose[3].y = _columns[1].w;
+    transpose[3].z = _columns[2].w;
+    transpose[3].w = _columns[3].w;
+    return transpose;
 }
 
 std::string Matrix4::to_string() const
