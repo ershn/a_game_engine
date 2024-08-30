@@ -26,6 +26,7 @@ DiffuseLightingShader::DiffuseLightingShader(const std::string &vs_path, const s
     , _shared_matrices_block_index{get_uniform_block_index("SharedMatrices")}
     , _direction_to_light{get_uniform_location("uDirectionToLight")}
     , _light_intensity{get_uniform_location("uLightIntensity")}
+    , _ambient_light_intensity{get_uniform_location("uAmbientLightIntensity")}
 {
 }
 
@@ -52,5 +53,10 @@ void DiffuseLightingShader::set_direction_to_light(const Math::Vector3 &directio
 void DiffuseLightingShader::set_light_intensity(const Math::Vector4 &light_intensity)
 {
     set_uniform(_light_intensity, light_intensity);
+}
+
+void DiffuseLightingShader::set_ambient_light_intensity(const Math::Vector4 &light_intensity)
+{
+    set_uniform(_ambient_light_intensity, light_intensity);
 }
 } // namespace Age::Gfx

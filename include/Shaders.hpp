@@ -27,6 +27,7 @@ class DiffuseLightingShader : public Shader
 
     GLint _direction_to_light{};
     GLint _light_intensity{};
+    GLint _ambient_light_intensity{};
 
   public:
     DiffuseLightingShader(const std::string &vs_path, const std::string &fs_path);
@@ -37,5 +38,6 @@ class DiffuseLightingShader : public Shader
 
     void set_direction_to_light(const Math::Vector3 &direction_to_light);
     void set_light_intensity(const Math::Vector4 &light_intensity);
+    void set_ambient_light_intensity(const Math::Vector4 &light_intensity);
 };
 } // namespace Age::Gfx

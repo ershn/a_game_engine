@@ -186,7 +186,8 @@ void run()
 
     Vector4 direction_to_light{0.866f, 0.5f, 0.0f, 0.0f};
     direction_to_light.normalize();
-    Vector4 light_intensity{1.0f, 1.0f, 1.0f, 1.0f};
+    Vector4 light_intensity{0.8f, 0.8f, 0.8f, 1.0f};
+    Vector4 ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f};
 
     float camera_yaw{Math::radians(180.0f)};
     float camera_pitch{Math::radians(90.0f)};
@@ -265,13 +266,14 @@ void run()
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
                                  Math::z_rotation_matrix(Math::radians(20.0f)) *
-                                 Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.2f})};
+                                 Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.8f})};
             diffuse_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
             diffuse_lighting_shader.set_normal_camera_matrix(
                 (cam_matrix * world_matrix).to_matrix3().inverted().transposed());
 
             diffuse_lighting_shader.set_direction_to_light((cam_matrix * direction_to_light).xyz());
             diffuse_lighting_shader.set_light_intensity(light_intensity);
+            diffuse_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
 
             cylinder_mesh.draw();
         }
