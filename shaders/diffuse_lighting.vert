@@ -14,7 +14,7 @@ layout(std140) uniform SharedMatrices
     mat4 uCameraToClipMatrix;
 };
 
-uniform vec3 uDirectionToLight;
+uniform vec3 uLightPosition;
 uniform vec4 uLightIntensity;
 uniform vec4 uAmbientLightIntensity;
 
@@ -22,12 +22,14 @@ smooth out vec4 color;
 
 void main()
 {
-    vec4 diffuseColor = vec4(1.0f, 0.2f, 0.2f, 1.0f);
+    vec4 diffuseColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    gl_Position = uCameraToClipMatrix * (uModelToCameraMatrix * aPosition);
+    vec4 cameraPosition = uModelToCameraMatrix * aPosition;
+    gl_Position = uCameraToClipMatrix * cameraPosition;
     vec3 normal = normalize(uNormalModelToCameraMatrix * aNormal);
 
-    float incidenceAngleCos = dot(normal, uDirectionToLight);
+    vec3 lightDirection = normalize(uLightPosition - vec3(cameraPosition));
+    float incidenceAngleCos = dot(normal, lightDirection);
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0f, 1.0f);
     color =
         diffuseColor * uLightIntensity * incidenceAngleCos + diffuseColor * uAmbientLightIntensity;

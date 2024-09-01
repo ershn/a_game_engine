@@ -189,8 +189,10 @@ void run()
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
     const Gfx::CylinderMesh cylinder_mesh{30};
 
-    Vector4 direction_to_light{0.866f, 0.5f, 0.0f, 0.0f};
-    direction_to_light.normalize();
+    Vector4 directional_light{0.866f, 0.5f, 0.0f, 0.0f};
+    directional_light.normalize();
+    Vector4 point_light{0.0f, 0.0f, 0.0f, 1.0f};
+
     Vector4 light_intensity{0.8f, 0.8f, 0.8f, 1.0f};
     Vector4 ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f};
 
@@ -200,10 +202,8 @@ void run()
     Vector3 world_up{0.0f, 1.0f, 0.0f};
     Vector3 camera_forward{0.0f, 0.0f, -1.0f};
     Vector3 camera_right{1.0f, 0.0f, 0.0f};
-    Vector3 camera_pos{10.0f, 10.0f, 10.0f};
+    Vector3 camera_pos{0.0f, 2.0f, 2.0f};
     const float camera_speed{10.0f};
-
-    float cube_x_rotation{};
 
     float last_frame_time{};
     while (!glfwWindowShouldClose(window))
@@ -245,7 +245,9 @@ void run()
         glClearDepth(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        cube_x_rotation += delta_time * 40.0f;
+        Matrix4 point_light_world_matrix{Math::y_rotation_matrix(current_time) *
+                                         Math::translation_matrix(Vector3{0.0f, 1.6f, 1.2f})};
+
         {
             Gfx::Shader::Use use{no_lighting_shader};
 
@@ -260,7 +262,7 @@ void run()
             Gfx::Shader::Use use{no_lighting_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
-                                 Math::x_rotation_matrix(Math::radians(cube_x_rotation)) *
+                                 Math::x_rotation_matrix(current_time) *
                                  Math::scaling_matrix(Vector3{2.0f, 2.0f, 1.0f})};
             no_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
             cube_mesh.draw();
@@ -270,13 +272,14 @@ void run()
             Gfx::Shader::Use use{diffuse_lighting_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                 Math::z_rotation_matrix(Math::radians(20.0f)) *
+                                 //  Math::z_rotation_matrix(Math::radians(20.0f)) *
                                  Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.8f})};
             diffuse_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
             diffuse_lighting_shader.set_normal_camera_matrix(
                 (cam_matrix * world_matrix).to_matrix3().inverted().transposed());
 
-            diffuse_lighting_shader.set_direction_to_light((cam_matrix * direction_to_light).xyz());
+            diffuse_lighting_shader.set_light_position(
+                (cam_matrix * (point_light_world_matrix * point_light)).xyz());
             diffuse_lighting_shader.set_light_intensity(light_intensity);
             diffuse_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
 
