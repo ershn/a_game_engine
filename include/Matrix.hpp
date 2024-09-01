@@ -6,6 +6,11 @@
 
 namespace Age::Math
 {
+float determinant(const Vector2 &col1, const Vector2 &col2);
+float determinant(const Vector3 &col1, const Vector3 &col2, const Vector3 &col3);
+float determinant(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3,
+                  const Vector4 &col4);
+
 class Matrix3
 {
     Vector3 _columns[3];
@@ -48,6 +53,8 @@ class Matrix3
     Matrix3 &transpose();
 
     Matrix3 transposed() const;
+
+    float determinant() const;
 
     Matrix3 &invert();
 
@@ -100,6 +107,12 @@ class Matrix4
     Matrix4 &transpose();
 
     Matrix4 transposed() const;
+
+    float determinant() const;
+
+    Matrix4 &invert();
+
+    Matrix4 inverted() const;
 
     std::string to_string() const;
 };

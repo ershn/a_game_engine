@@ -4,6 +4,137 @@
 
 namespace Age::Math
 {
+Vector2::Vector2()
+    : x{}
+    , y{}
+{
+}
+
+Vector2::Vector2(float value)
+    : x{value}
+    , y{value}
+{
+}
+
+Vector2::Vector2(float x, float y)
+    : x{x}
+    , y{y}
+{
+}
+
+Vector2::operator const float *() const
+{
+    return &x;
+}
+
+float Vector2::operator[](size_t index) const
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    default:
+        throw std::out_of_range("Index must be in [0, 1]");
+    }
+}
+
+float &Vector2::operator[](size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    default:
+        throw std::out_of_range("Index must be in [0, 1]");
+    }
+}
+
+float Vector2::length() const
+{
+    return std::sqrt(x * x + y * y);
+}
+
+Vector2 &Vector2::normalize()
+{
+    float length{this->length()};
+    if (length == 0.0f)
+        throw std::domain_error("Cannot normalize a vector of length 0");
+
+    float ratio{1.0f / length};
+    *this *= ratio;
+    return *this;
+}
+
+Vector2 Vector2::normalized() const
+{
+    Vector2 result{*this};
+    result.normalize();
+    return result;
+}
+
+Vector2 Vector2::operator-() const
+{
+    return {-x, -y};
+}
+
+Vector2 Vector2::operator*(float scalar) const
+{
+    Vector2 result{*this};
+    result *= scalar;
+    return result;
+}
+
+Vector2 &Vector2::operator*=(float scalar)
+{
+    x *= scalar;
+    y *= scalar;
+    return *this;
+}
+
+Vector2 Vector2::operator+(const Vector2 &rhs) const
+{
+    Vector2 result{*this};
+    result += rhs;
+    return result;
+}
+
+Vector2 &Vector2::operator+=(const Vector2 &rhs)
+{
+    x += rhs.x;
+    y += rhs.y;
+    return *this;
+}
+
+Vector2 Vector2::operator-(const Vector2 &rhs) const
+{
+    Vector2 result{*this};
+    result -= rhs;
+    return result;
+}
+
+Vector2 &Vector2::operator-=(const Vector2 &rhs)
+{
+    x -= rhs.x;
+    y -= rhs.y;
+    return *this;
+}
+
+float Vector2::dot(const Vector2 &rhs) const
+{
+    return x * rhs.x + y * rhs.y;
+}
+
+std::string Vector2::to_string() const
+{
+    std::stringstream ss;
+    ss << '(' << x << ", " << y << ')';
+    return ss.str();
+}
+
 Vector3::Vector3()
     : x{}
     , y{}
@@ -21,6 +152,13 @@ Vector3::Vector3(float value)
 Vector3::Vector3(float x, float y, float z)
     : x{x}
     , y{y}
+    , z{z}
+{
+}
+
+Vector3::Vector3(const Vector2 &vec, float z)
+    : x{vec.x}
+    , y{vec.y}
     , z{z}
 {
 }
@@ -58,6 +196,21 @@ float &Vector3::operator[](size_t index)
     default:
         throw std::out_of_range("Index must be in [0, 2]");
     }
+}
+
+Vector2 Vector3::xy() const
+{
+    return Vector2{x, y};
+}
+
+Vector2 Vector3::xz() const
+{
+    return Vector2{x, z};
+}
+
+Vector2 Vector3::yz() const
+{
+    return Vector2{y, z};
 }
 
 float Vector3::length() const
@@ -221,9 +374,54 @@ float &Vector4::operator[](size_t index)
     }
 }
 
+Vector2 Vector4::xy() const
+{
+    return Vector2{x, y};
+}
+
+Vector2 Vector4::xz() const
+{
+    return Vector2{x, z};
+}
+
+Vector2 Vector4::xw() const
+{
+    return Vector2{x, w};
+}
+
+Vector2 Vector4::yz() const
+{
+    return Vector2{y, z};
+}
+
+Vector2 Vector4::yw() const
+{
+    return Vector2{y, w};
+}
+
+Vector2 Vector4::zw() const
+{
+    return Vector2{z, w};
+}
+
 Vector3 Vector4::xyz() const
 {
     return Vector3{x, y, z};
+}
+
+Vector3 Vector4::xyw() const
+{
+    return Vector3{x, y, w};
+}
+
+Vector3 Vector4::xzw() const
+{
+    return Vector3{x, z, w};
+}
+
+Vector3 Vector4::yzw() const
+{
+    return Vector3{y, z, w};
 }
 
 float Vector4::length() const
