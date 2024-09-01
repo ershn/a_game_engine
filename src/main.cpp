@@ -39,6 +39,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 int g_horizontal_axis_input{};
 int g_vertical_axis_input{};
 int g_forward_axis_input{};
+bool g_toggle_state_1{};
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
@@ -71,6 +72,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         break;
     case GLFW_KEY_Q:
         g_vertical_axis_input -= press_change;
+        break;
+    case GLFW_KEY_SPACE:
+        if (action == GLFW_PRESS)
+            g_toggle_state_1 = !g_toggle_state_1;
         break;
     }
 }
