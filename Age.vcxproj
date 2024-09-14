@@ -158,6 +158,13 @@
     <ClInclude Include="include\UniformBuffers.hpp" />
     <ClInclude Include="include\Vector.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\basic.frag" />
+    <None Include="shaders\basic.vert" />
+    <None Include="shaders\diffuse_lighting.vert" />
+    <None Include="shaders\fragment_lighting.frag" />
+    <None Include="shaders\fragment_lighting.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

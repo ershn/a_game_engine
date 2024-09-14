@@ -1,5 +1,7 @@
 ---
 Language: Cpp
 BasedOnStyle: Microsoft
+LineEnding: LF
+InsertNewlineAtEOF: true
 ColumnLimit: 100
 BreakConstructorInitializers: BeforeComma

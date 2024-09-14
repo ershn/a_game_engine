@@ -156,6 +156,9 @@ void run()
     Gfx::DiffuseLightingShader diffuse_lighting_shader{"shaders/diffuse_lighting.vert",
                                                        "shaders/basic.frag"};
     diffuse_lighting_shader.bind_shared_matrices_block(0);
+    Gfx::FragmentLightingShader fragment_lighting_shader{"shaders/fragment_lighting.vert",
+                                                         "shaders/fragment_lighting.frag"};
+    fragment_lighting_shader.bind_shared_matrices_block(0);
 
     Gfx::SharedMatricesUniformBuffer shared_matrices{};
     shared_matrices.bind(0);
@@ -191,7 +194,7 @@ void run()
 
     Vector4 directional_light{0.866f, 0.5f, 0.0f, 0.0f};
     directional_light.normalize();
-    Vector4 point_light{0.0f, 0.0f, 0.0f, 1.0f};
+    Vector4 point_light{3.0f, 3.0f, 0.0f, 1.0f};
 
     Vector4 light_intensity{0.8f, 0.8f, 0.8f, 1.0f};
     Vector4 ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f};
@@ -269,19 +272,17 @@ void run()
         }
 
         {
-            Gfx::Shader::Use use{diffuse_lighting_shader};
+            Gfx::Shader::Use use{fragment_lighting_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                 //  Math::z_rotation_matrix(Math::radians(20.0f)) *
+                                 // Math::z_rotation_matrix(Math::radians(20.0f)) *
                                  Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.8f})};
-            diffuse_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
-            diffuse_lighting_shader.set_normal_camera_matrix(
-                (cam_matrix * world_matrix).to_matrix3().inverted().transposed());
+            fragment_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
 
-            diffuse_lighting_shader.set_light_position(
-                (cam_matrix * (point_light_world_matrix * point_light)).xyz());
-            diffuse_lighting_shader.set_light_intensity(light_intensity);
-            diffuse_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
+            fragment_lighting_shader.set_model_light_position(
+                (world_matrix.inverted() * point_light).xyz());
+            fragment_lighting_shader.set_light_intensity(light_intensity);
+            fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
 
             cylinder_mesh.draw();
         }

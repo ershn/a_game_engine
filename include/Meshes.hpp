@@ -6,4 +6,4 @@ namespace Age::Gfx
 {
 const Mesh &load_plane_mesh();
 const Mesh &load_cube_mesh();
-}
+} // namespace Age::Gfx
