@@ -22,6 +22,12 @@ Vector2::Vector2(float x, float y)
 {
 }
 
+Vector2::Vector2(const Vector3 &vec)
+    : x{vec.x}
+    , y{vec.y}
+{
+}
+
 Vector2::operator const float *() const
 {
     return &x;
@@ -160,6 +166,13 @@ Vector3::Vector3(const Vector2 &vec, float z)
     : x{vec.x}
     , y{vec.y}
     , z{z}
+{
+}
+
+Vector3::Vector3(const Vector4 &vec)
+    : x{vec.x}
+    , y{vec.y}
+    , z{vec.z}
 {
 }
 

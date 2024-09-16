@@ -1,6 +1,7 @@
 #version 330
 
 smooth in vec3 iModelPosition;
+smooth in vec4 iModelColor;
 smooth in vec3 iModelNormal;
 
 uniform vec3 uModelLightPosition;
@@ -11,9 +12,9 @@ out vec4 oColor;
 
 void main()
 {
-    vec3 lightPosition = normalize(uModelLightPosition - iModelPosition);
-    float incidenceAngleCos = dot(lightPosition, normalize(iModelNormal));
+    vec3 lightDirection = normalize(uModelLightPosition - iModelPosition);
+    float incidenceAngleCos = dot(lightDirection, normalize(iModelNormal));
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0, 1.0);
 
-    oColor = vec4(1.0) * uLightIntensity * incidenceAngleCos + vec4(1.0) * uAmbientLightIntensity;
+    oColor = iModelColor * uLightIntensity * incidenceAngleCos + iModelColor * uAmbientLightIntensity;
 }

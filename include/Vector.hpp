@@ -4,6 +4,9 @@
 
 namespace Age::Math
 {
+struct Vector3;
+struct Vector4;
+
 struct Vector2
 {
     float x;
@@ -13,6 +16,7 @@ struct Vector2
     Vector2(float value);
     Vector2(float x, float y);
     Vector2(const Vector2 &vec) = default;
+    explicit Vector2(const Vector3 &vec);
 
     explicit operator const float *() const;
 
@@ -55,6 +59,7 @@ struct Vector3
     Vector3(float x, float y, float z);
     Vector3(const Vector2 &vec, float z);
     Vector3(const Vector3 &vec) = default;
+    explicit Vector3(const Vector4 &vec);
 
     explicit operator const float *() const;
 

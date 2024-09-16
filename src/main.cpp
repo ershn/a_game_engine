@@ -151,14 +151,25 @@ void run()
     std::cout << "Loaded OpenGL " << GLAD_VERSION_MAJOR(version) << "."
               << GLAD_VERSION_MINOR(version) << std::endl;
 
-    Gfx::BasicShader no_lighting_shader{"shaders/basic.vert", "shaders/basic.frag"};
+    Gfx::NoLightingShader no_lighting_shader{"shaders/no_lighting.vert",
+                                             "shaders/no_lighting.frag"};
     no_lighting_shader.bind_shared_matrices_block(0);
+
+    Gfx::NoLightingColorShader no_lighting_color_shader{"shaders/no_lighting_color.vert",
+                                                        "shaders/no_lighting.frag"};
+    no_lighting_color_shader.bind_shared_matrices_block(0);
+
     Gfx::DiffuseLightingShader diffuse_lighting_shader{"shaders/diffuse_lighting.vert",
-                                                       "shaders/basic.frag"};
+                                                       "shaders/no_lighting.frag"};
     diffuse_lighting_shader.bind_shared_matrices_block(0);
+
     Gfx::FragmentLightingShader fragment_lighting_shader{"shaders/fragment_lighting.vert",
                                                          "shaders/fragment_lighting.frag"};
     fragment_lighting_shader.bind_shared_matrices_block(0);
+
+    Gfx::FragmentLightingColorShader fragment_lighting_color_shader{
+        "shaders/fragment_lighting_color.vert", "shaders/fragment_lighting.frag"};
+    fragment_lighting_color_shader.bind_shared_matrices_block(0);
 
     Gfx::SharedMatricesUniformBuffer shared_matrices{};
     shared_matrices.bind(0);
@@ -190,11 +201,11 @@ void run()
 
     const Gfx::Mesh &plane_mesh{Gfx::load_plane_mesh()};
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
-    const Gfx::CylinderMesh cylinder_mesh{30};
+    const Gfx::CylinderMesh cylinder_mesh{Vector3{1.0f, 1.0f, 1.0f}, 30};
 
     Vector4 directional_light{0.866f, 0.5f, 0.0f, 0.0f};
     directional_light.normalize();
-    Vector4 point_light{3.0f, 3.0f, 0.0f, 1.0f};
+    Vector4 point_light{3.0f, 0.1f, 0.0f, 1.0f};
 
     Vector4 light_intensity{0.8f, 0.8f, 0.8f, 1.0f};
     Vector4 ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f};
@@ -248,26 +259,47 @@ void run()
         glClearDepth(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Matrix4 point_light_world_matrix{Math::y_rotation_matrix(current_time) *
-                                         Math::translation_matrix(Vector3{0.0f, 1.6f, 1.2f})};
+        {
+            Gfx::Shader::Use use{no_lighting_color_shader};
+
+            Matrix4 world_matrix{Math::translation_matrix(point_light.xyz()) *
+                                 Math::scaling_matrix(Vector3{0.3f})};
+            no_lighting_color_shader.set_camera_matrix(cam_matrix * world_matrix);
+
+            no_lighting_color_shader.set_color(Vector4{1.0f});
+
+            cube_mesh.draw();
+        }
 
         {
-            Gfx::Shader::Use use{no_lighting_shader};
+            Gfx::Shader::Use use{fragment_lighting_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
                                  Math::x_rotation_matrix(Math::radians(-90.0f)) *
-                                 Math::scaling_matrix(Vector3{20.0f, 20.0f, 1.0f})};
-            no_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+                                 Math::scaling_matrix(Vector3{100.0f, 100.0f, 1.0f})};
+            fragment_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+
+            fragment_lighting_shader.set_model_light_position(
+                (world_matrix.inverted() * point_light).xyz());
+            fragment_lighting_shader.set_light_intensity(light_intensity);
+            fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
+
             plane_mesh.draw();
         }
 
         {
-            Gfx::Shader::Use use{no_lighting_shader};
+            Gfx::Shader::Use use{fragment_lighting_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
                                  Math::x_rotation_matrix(current_time) *
-                                 Math::scaling_matrix(Vector3{2.0f, 2.0f, 1.0f})};
-            no_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+                                 Math::scaling_matrix(Vector3{3.0f, 3.0f, 2.0f})};
+            fragment_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+
+            fragment_lighting_shader.set_model_light_position(
+                (world_matrix.inverted() * point_light).xyz());
+            fragment_lighting_shader.set_light_intensity(light_intensity);
+            fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
+
             cube_mesh.draw();
         }
 

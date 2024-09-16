@@ -2,21 +2,30 @@
 
 namespace Age::Gfx
 {
+using Math::Vector3;
+
 namespace
 {
 // clang-format off
-const float plane_vertex_positions[] = {
-    -1.0f,  1.0f, 0.0f,
-     1.0f,  1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f,
-     1.0f, -1.0f, 0.0f
+const Vector3 plane_vertex_positions[] = {
+    {-0.5f,  0.5f, 0.0f},
+    { 0.5f,  0.5f, 0.0f},
+    {-0.5f, -0.5f, 0.0f},
+    { 0.5f, -0.5f, 0.0f}
 };
 
-const float plane_vertex_colors[] = {
-    0.859f, 0.533f, 0.416f,
-    0.859f, 0.533f, 0.416f,
-    0.859f, 0.533f, 0.416f,
-    0.859f, 0.533f, 0.416f,
+const Vector3 plane_vertex_colors[] = {
+    {0.859f, 0.533f, 0.416f},
+    {0.859f, 0.533f, 0.416f},
+    {0.859f, 0.533f, 0.416f},
+    {0.859f, 0.533f, 0.416f},
+};
+
+const Vector3 plane_vertex_normals[] = {
+    {0.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f},
 };
 
 const GLushort plane_vertex_indices[] = {
@@ -24,41 +33,120 @@ const GLushort plane_vertex_indices[] = {
     1, 3, 2
 };
 
-const float cube_vertex_positions[] = {
-    -1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f,
-    -1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f
+const Vector3 cube_vertex_positions[] = {
+    {-0.5f,  0.5f,  0.5f},
+    { 0.5f,  0.5f,  0.5f},
+    {-0.5f, -0.5f,  0.5f},
+    { 0.5f, -0.5f,  0.5f},
+
+    {-0.5f,  0.5f, -0.5f},
+    { 0.5f,  0.5f, -0.5f},
+    {-0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+
+    {-0.5f,  0.5f,  0.5f},
+    { 0.5f,  0.5f,  0.5f},
+    {-0.5f,  0.5f, -0.5f},
+    { 0.5f,  0.5f, -0.5f},
+
+    {-0.5f, -0.5f,  0.5f},
+    { 0.5f, -0.5f,  0.5f},
+    {-0.5f, -0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+
+    { 0.5f,  0.5f,  0.5f},
+    { 0.5f, -0.5f,  0.5f},
+    { 0.5f,  0.5f, -0.5f},
+    { 0.5f, -0.5f, -0.5f},
+
+    {-0.5f,  0.5f,  0.5f},
+    {-0.5f, -0.5f,  0.5f},
+    {-0.5f,  0.5f, -0.5f},
+    {-0.5f, -0.5f, -0.5f},
 };
 
-const float cube_vertex_colors[] = {
-    0.518f, 0.71f, 0.671f,
-    0.518f, 0.71f, 0.671f,
-    0.518f, 0.71f, 0.671f,
-    0.518f, 0.71f, 0.671f,
-    0.463f, 0.961f, 0.859f,
-    0.463f, 0.961f, 0.859f,
-    0.463f, 0.961f, 0.859f,
-    0.463f, 0.961f, 0.859f,
+const Vector3 cube_vertex_colors[] = {
+    {0.000f, 0.980f, 0.529f},
+    {0.000f, 0.980f, 0.529f},
+    {0.000f, 0.980f, 0.529f},
+    {0.000f, 0.980f, 0.529f},
+
+    {0.721f, 0.262f, 0.196f},
+    {0.721f, 0.262f, 0.196f},
+    {0.721f, 0.262f, 0.196f},
+    {0.721f, 0.262f, 0.196f},
+
+    {0.968f, 0.141f, 0.019f},
+    {0.968f, 0.141f, 0.019f},
+    {0.968f, 0.141f, 0.019f},
+    {0.968f, 0.141f, 0.019f},
+
+    {0.223f, 0.635f, 0.443f},
+    {0.223f, 0.635f, 0.443f},
+    {0.223f, 0.635f, 0.443f},
+    {0.223f, 0.635f, 0.443f},
+
+    {0.470f, 0.274f, 0.243f},
+    {0.470f, 0.274f, 0.243f},
+    {0.470f, 0.274f, 0.243f},
+    {0.470f, 0.274f, 0.243f},
+
+    {0.239f, 0.309f, 0.278f},
+    {0.239f, 0.309f, 0.278f},
+    {0.239f, 0.309f, 0.278f},
+    {0.239f, 0.309f, 0.278f},
+};
+
+const Vector3 cube_vertex_normals[] = {
+    { 0.0f,  0.0f,  1.0f},
+    { 0.0f,  0.0f,  1.0f},
+    { 0.0f,  0.0f,  1.0f},
+    { 0.0f,  0.0f,  1.0f},
+
+    { 0.0f,  0.0f, -1.0f},
+    { 0.0f,  0.0f, -1.0f},
+    { 0.0f,  0.0f, -1.0f},
+    { 0.0f,  0.0f, -1.0f},
+
+    { 0.0f,  1.0f,  0.0f},
+    { 0.0f,  1.0f,  0.0f},
+    { 0.0f,  1.0f,  0.0f},
+    { 0.0f,  1.0f,  0.0f},
+
+    { 0.0f, -1.0f,  0.0f},
+    { 0.0f, -1.0f,  0.0f},
+    { 0.0f, -1.0f,  0.0f},
+    { 0.0f, -1.0f,  0.0f},
+
+    { 1.0f,  0.0f,  0.0f},
+    { 1.0f,  0.0f,  0.0f},
+    { 1.0f,  0.0f,  0.0f},
+    { 1.0f,  0.0f,  0.0f},
+
+    {-1.0f,  0.0f,  0.0f},
+    {-1.0f,  0.0f,  0.0f},
+    {-1.0f,  0.0f,  0.0f},
+    {-1.0f,  0.0f,  0.0f},
 };
 
 const GLushort cube_vertex_indices[] = {
-    0, 1, 2,
-    1, 3, 2,
-    1, 5, 3,
-    5, 7, 3,
-    5, 4, 7,
-    4, 6, 7,
-    4, 0, 6,
-    0, 2, 6,
-    4, 5, 0,
-    5, 1, 0,
-    2, 3, 6,
-    3, 7, 6
+    0, 1, 3,
+    0, 3, 2,
+
+    7, 5, 4,
+    6, 7, 4,
+
+    9, 8, 10,
+    9, 10, 11,
+
+    14, 12, 13,
+    15, 14, 13,
+
+    16, 18, 17,
+    18, 19, 17,
+
+    21, 22, 20,
+    21, 23, 22,
 };
 // clang-format on
 } // namespace
@@ -71,8 +159,8 @@ const Mesh &load_plane_mesh()
     {
         plane_mesh =
             new Mesh{plane_vertex_positions, plane_vertex_colors,
-                     sizeof(plane_vertex_positions) / (sizeof(float) * 3), plane_vertex_indices,
-                     sizeof(plane_vertex_indices) / (sizeof(GLushort) * 3)};
+                     plane_vertex_normals,   sizeof(plane_vertex_positions) / sizeof(Vector3),
+                     plane_vertex_indices,   sizeof(plane_vertex_indices) / (sizeof(GLushort) * 3)};
     }
     return *plane_mesh;
 }
@@ -85,8 +173,8 @@ const Mesh &load_cube_mesh()
     {
         cube_mesh =
             new Mesh{cube_vertex_positions, cube_vertex_colors,
-                     sizeof(cube_vertex_positions) / (sizeof(float) * 3), cube_vertex_indices,
-                     sizeof(cube_vertex_indices) / (sizeof(GLushort) * 3)};
+                     cube_vertex_normals,   sizeof(cube_vertex_positions) / sizeof(Vector3),
+                     cube_vertex_indices,   sizeof(cube_vertex_indices) / (sizeof(GLushort) * 3)};
     }
     return *cube_mesh;
 }

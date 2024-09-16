@@ -2,21 +2,32 @@
 
 namespace Age::Gfx
 {
-BasicShader::BasicShader(const std::string &vs_path, const std::string &fs_path)
+NoLightingShader::NoLightingShader(const std::string &vs_path, const std::string &fs_path)
     : Shader{vs_path, fs_path}
     , _model_to_camera_matrix{get_uniform_location("uModelToCameraMatrix")}
     , _shared_matrices_block_index{get_uniform_block_index("SharedMatrices")}
 {
 }
 
-void BasicShader::set_camera_matrix(const Math::Matrix4 &matrix)
+void NoLightingShader::set_camera_matrix(const Math::Matrix4 &matrix)
 {
     set_uniform(_model_to_camera_matrix, matrix);
 }
 
-void BasicShader::bind_shared_matrices_block(GLuint block_binding)
+void NoLightingShader::bind_shared_matrices_block(GLuint block_binding)
 {
     bind_uniform_block(_shared_matrices_block_index, block_binding);
+}
+
+NoLightingColorShader::NoLightingColorShader(const std::string &vs_path, const std::string &fs_path)
+    : NoLightingShader{vs_path, fs_path}
+    , _color{get_uniform_location("uColor")}
+{
+}
+
+void NoLightingColorShader::set_color(const Math::Vector4 &color)
+{
+    set_uniform(_color, color);
 }
 
 DiffuseLightingShader::DiffuseLightingShader(const std::string &vs_path, const std::string &fs_path)
@@ -94,5 +105,17 @@ void FragmentLightingShader::set_light_intensity(const Math::Vector4 &light_inte
 void FragmentLightingShader::set_ambient_light_intensity(const Math::Vector4 &light_intensity)
 {
     set_uniform(_ambient_light_intensity, light_intensity);
+}
+
+FragmentLightingColorShader::FragmentLightingColorShader(const std::string &vs_path,
+                                                         const std::string &fs_path)
+    : FragmentLightingShader{vs_path, fs_path}
+    , _color{get_uniform_location("uColor")}
+{
+}
+
+void FragmentLightingColorShader::set_color(const Math::Vector4 &color)
+{
+    set_uniform(_color, color);
 }
 } // namespace Age::Gfx

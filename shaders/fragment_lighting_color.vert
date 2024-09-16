@@ -1,10 +1,10 @@
 #version 330
 
 layout(location = 0) in vec4 aPosition;
-layout(location = 1) in vec4 aColor;
 layout(location = 2) in vec3 aNormal;
 
 uniform mat4 uModelToCameraMatrix;
+uniform vec4 uColor;
 
 layout(std140) uniform SharedMatrices
 {
@@ -20,6 +20,6 @@ void main()
     gl_Position = uCameraToClipMatrix * (uModelToCameraMatrix * aPosition);
 
     iModelPosition = vec3(aPosition);
-    iModelColor = aColor;
+    iModelColor = uColor;
     iModelNormal = aNormal;
 }

@@ -3,21 +3,24 @@
 #include <numbers>
 
 #include "Mesh.hpp"
-#include "Vector.hpp"
 
 namespace Age::Gfx
 {
-Mesh::Mesh(const float *vertex_positions, const float *vertex_colors, std::size_t vertex_count,
+using Math::Vector3;
+
+Mesh::Mesh(const Vector3 *vertex_positions, const Vector3 *vertex_colors,
+           const Vector3 *vertex_normals, std::size_t vertex_count,
            const unsigned short *vertex_indices, std::size_t primitive_count)
     : _primitive_count{primitive_count}
 {
-    std::size_t attr_array_size{vertex_count * 3 * sizeof(float)};
+    std::size_t attr_array_size{vertex_count * sizeof(Vector3)};
 
     glGenBuffers(1, &_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, attr_array_size * 2, nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, attr_array_size * 3, nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, attr_array_size, vertex_positions);
     glBufferSubData(GL_ARRAY_BUFFER, attr_array_size, attr_array_size, vertex_colors);
+    glBufferSubData(GL_ARRAY_BUFFER, attr_array_size * 2, attr_array_size, vertex_normals);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     std::size_t index_array_size{primitive_count * 3 * sizeof(unsigned short)};
@@ -36,6 +39,9 @@ Mesh::Mesh(const float *vertex_positions, const float *vertex_colors, std::size_
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 0,
                           reinterpret_cast<const void *>(attr_array_size));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0,
+                          reinterpret_cast<const void *>(attr_array_size * 2));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer_object);
 
     glBindVertexArray(0);
@@ -48,17 +54,16 @@ void Mesh::draw() const
     glBindVertexArray(0);
 }
 
-CylinderMesh::CylinderMesh(std::size_t side_count)
+CylinderMesh::CylinderMesh(const Math::Vector3 &color, std::size_t side_count)
     : _side_count{side_count}
 {
-    using Math::Vector3;
-
     std::size_t side_vertex_count{side_count * 2};
     std::size_t cap_vertex_count{side_count + 1};
     std::size_t vertex_count{side_vertex_count + cap_vertex_count * 2};
-    std::size_t normal_offset{vertex_count};
+    std::size_t color_offset{vertex_count};
+    std::size_t normal_offset{vertex_count * 2};
     std::size_t index_count{side_vertex_count + 2 + (cap_vertex_count + 1) * 2};
-    auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count * 2)};
+    auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count * 3)};
     auto index_buffer{std::make_unique<GLushort[]>(index_count)};
 
     float angle_increment{std::numbers::pi_v<float> * 2.0f / side_count};
@@ -73,6 +78,9 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
         vertex_buffer[top_vertex_index] = normal * 0.5f + Vector3{0.0f, 0.5f, 0.0f};
         vertex_buffer[bottom_vertex_index] = normal * 0.5f + Vector3{0.0f, -0.5f, 0.0f};
 
+        vertex_buffer[color_offset + top_vertex_index] = color;
+        vertex_buffer[color_offset + bottom_vertex_index] = color;
+
         vertex_buffer[normal_offset + top_vertex_index] = normal;
         vertex_buffer[normal_offset + bottom_vertex_index] = normal;
 
@@ -83,10 +91,12 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
     index_buffer[side_vertex_count + 1] = 1;
 
     std::size_t top_cap_vertex_offset{side_vertex_count};
+    std::size_t top_cap_color_offset{color_offset + side_vertex_count};
     std::size_t top_cap_normal_offset{normal_offset + side_vertex_count};
     std::size_t top_cap_index_offset{side_vertex_count + 2};
 
     vertex_buffer[top_cap_vertex_offset] = Vector3{0.0f, 0.5f, 0.0f};
+    vertex_buffer[top_cap_color_offset] = color;
     vertex_buffer[top_cap_normal_offset] = Vector3{0.0f, 1.0f, 0.0f};
     index_buffer[top_cap_index_offset] = static_cast<GLushort>(top_cap_vertex_offset);
 
@@ -96,6 +106,7 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
         Vector3 position{std::sin(angle) * 0.5f, 0.5f, std::cos(angle) * 0.5f};
 
         vertex_buffer[top_cap_vertex_offset + 1 + side_index] = position;
+        vertex_buffer[top_cap_color_offset + 1 + side_index] = color;
         vertex_buffer[top_cap_normal_offset + 1 + side_index] = Vector3{0.0f, 1.0f, 0.0f};
         index_buffer[top_cap_index_offset + 1 + side_index] =
             static_cast<GLushort>(top_cap_vertex_offset + 1 + side_index);
@@ -104,10 +115,12 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
         static_cast<GLushort>(top_cap_vertex_offset + 1);
 
     std::size_t bottom_cap_vertex_offset{top_cap_vertex_offset + 1 + side_count};
+    std::size_t bottom_cap_color_offset{top_cap_color_offset + 1 + side_count};
     std::size_t bottom_cap_normal_offset{top_cap_normal_offset + 1 + side_count};
     std::size_t bottom_cap_index_offset{top_cap_index_offset + side_count + 2};
 
     vertex_buffer[bottom_cap_vertex_offset] = Vector3{0.0f, -0.5f, 0.0f};
+    vertex_buffer[bottom_cap_color_offset] = color;
     vertex_buffer[bottom_cap_normal_offset] = Vector3{0.0f, -1.0f, 0.0f};
     index_buffer[bottom_cap_index_offset] = static_cast<GLushort>(bottom_cap_vertex_offset);
 
@@ -117,6 +130,7 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
         Vector3 position{std::sin(angle) * 0.5f, -0.5f, std::cos(angle) * 0.5f};
 
         vertex_buffer[bottom_cap_vertex_offset + 1 + side_index] = position;
+        vertex_buffer[bottom_cap_color_offset + 1 + side_index] = color;
         vertex_buffer[bottom_cap_normal_offset + 1 + side_index] = Vector3{0.0f, -1.0f, 0.0f};
         index_buffer[bottom_cap_index_offset + 1 + side_index] =
             static_cast<GLushort>(bottom_cap_vertex_offset + 1 + side_index);
@@ -126,7 +140,7 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
 
     glGenBuffers(1, &_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, _vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, vertex_count * 2 * sizeof(Vector3), vertex_buffer.get(),
+    glBufferData(GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(Vector3), vertex_buffer.get(),
                  GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -144,6 +158,9 @@ CylinderMesh::CylinderMesh(std::size_t side_count)
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 0,
+                          reinterpret_cast<const GLvoid *>(color_offset * sizeof(Vector3)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0,
                           reinterpret_cast<const GLvoid *>(normal_offset * sizeof(Vector3)));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer_object);
 
