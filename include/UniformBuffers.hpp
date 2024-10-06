@@ -12,4 +12,13 @@ class SharedMatricesUniformBuffer : public UniformBuffer
 
     void set_clip_matrix(const Math::Matrix4 &matrix);
 };
+
+class FragmentPositionDataUniformBuffer : public UniformBuffer
+{
+  public:
+    FragmentPositionDataUniformBuffer();
+
+    void set_inverse_clip_matrix(const Math::Matrix4 &matrix);
+    void set_viewport_dimensions(int width, int height);
+};
 } // namespace Age::Gfx

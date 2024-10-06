@@ -54,21 +54,31 @@ class DiffuseLightingShader : public Shader
 class FragmentLightingShader : public Shader
 {
     GLint _model_to_camera_matrix{};
+    GLint _model_to_camera_normal_matrix{};
     GLuint _shared_matrices_block_index{};
+    GLuint _fragment_position_data_block_index{};
 
-    GLint _model_light_position{};
+    GLint _camera_light_position{};
     GLint _light_intensity{};
+    GLint _light_attenuation{};
     GLint _ambient_light_intensity{};
+    GLint _specular_color{};
+    GLint _surface_shininess{};
 
   public:
     FragmentLightingShader(const std::string &vs_path, const std::string &fs_path);
 
     void set_camera_matrix(const Math::Matrix4 &matrix);
+    void set_camera_normal_matrix(const Math::Matrix3 &matrix);
     void bind_shared_matrices_block(GLuint block_binding);
+    void bind_fragment_position_data_block(GLuint block_binding);
 
-    void set_model_light_position(const Math::Vector3 &light_position);
+    void set_camera_light_position(const Math::Vector3 &light_position);
     void set_light_intensity(const Math::Vector4 &light_intensity);
+    void set_light_attenuation(float light_attenuation);
     void set_ambient_light_intensity(const Math::Vector4 &light_intensity);
+    void set_specular_color(const Math::Vector4 &specular_color);
+    void set_surface_shininess(float surface_shininess);
 };
 
 class FragmentLightingColorShader : public FragmentLightingShader

@@ -59,86 +59,10 @@ float &Vector2::operator[](size_t index)
     }
 }
 
-float Vector2::length() const
+std::ostream &operator<<(std::ostream &out, const Vector2 &vector)
 {
-    return std::sqrt(x * x + y * y);
-}
-
-Vector2 &Vector2::normalize()
-{
-    float length{this->length()};
-    if (length == 0.0f)
-        throw std::domain_error("Cannot normalize a vector of length 0");
-
-    float ratio{1.0f / length};
-    *this *= ratio;
-    return *this;
-}
-
-Vector2 Vector2::normalized() const
-{
-    Vector2 result{*this};
-    result.normalize();
-    return result;
-}
-
-Vector2 Vector2::operator-() const
-{
-    return {-x, -y};
-}
-
-Vector2 Vector2::operator*(float scalar) const
-{
-    Vector2 result{*this};
-    result *= scalar;
-    return result;
-}
-
-Vector2 &Vector2::operator*=(float scalar)
-{
-    x *= scalar;
-    y *= scalar;
-    return *this;
-}
-
-Vector2 Vector2::operator+(const Vector2 &rhs) const
-{
-    Vector2 result{*this};
-    result += rhs;
-    return result;
-}
-
-Vector2 &Vector2::operator+=(const Vector2 &rhs)
-{
-    x += rhs.x;
-    y += rhs.y;
-    return *this;
-}
-
-Vector2 Vector2::operator-(const Vector2 &rhs) const
-{
-    Vector2 result{*this};
-    result -= rhs;
-    return result;
-}
-
-Vector2 &Vector2::operator-=(const Vector2 &rhs)
-{
-    x -= rhs.x;
-    y -= rhs.y;
-    return *this;
-}
-
-float Vector2::dot(const Vector2 &rhs) const
-{
-    return x * rhs.x + y * rhs.y;
-}
-
-std::string Vector2::to_string() const
-{
-    std::stringstream ss;
-    ss << '(' << x << ", " << y << ')';
-    return ss.str();
+    out << '(' << vector.x << ", " << vector.y << ')';
+    return out;
 }
 
 Vector3::Vector3()
@@ -211,109 +135,10 @@ float &Vector3::operator[](size_t index)
     }
 }
 
-Vector2 Vector3::xy() const
+std::ostream &operator<<(std::ostream &out, const Vector3 &vector)
 {
-    return Vector2{x, y};
-}
-
-Vector2 Vector3::xz() const
-{
-    return Vector2{x, z};
-}
-
-Vector2 Vector3::yz() const
-{
-    return Vector2{y, z};
-}
-
-float Vector3::length() const
-{
-    return std::sqrt(x * x + y * y + z * z);
-}
-
-Vector3 &Vector3::normalize()
-{
-    float length{this->length()};
-    if (length == 0.0f)
-        throw std::domain_error("Cannot normalize a vector of length 0");
-
-    float ratio{1.0f / length};
-    *this *= ratio;
-    return *this;
-}
-
-Vector3 Vector3::normalized() const
-{
-    Vector3 result{*this};
-    result.normalize();
-    return result;
-}
-
-Vector3 Vector3::operator-() const
-{
-    return {-x, -y, -z};
-}
-
-Vector3 Vector3::operator*(float scalar) const
-{
-    Vector3 result{*this};
-    result *= scalar;
-    return result;
-}
-
-Vector3 &Vector3::operator*=(float scalar)
-{
-    x *= scalar;
-    y *= scalar;
-    z *= scalar;
-    return *this;
-}
-
-Vector3 Vector3::operator+(const Vector3 &rhs) const
-{
-    Vector3 result{*this};
-    result += rhs;
-    return result;
-}
-
-Vector3 &Vector3::operator+=(const Vector3 &rhs)
-{
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
-    return *this;
-}
-
-Vector3 Vector3::operator-(const Vector3 &rhs) const
-{
-    Vector3 result{*this};
-    result -= rhs;
-    return result;
-}
-
-Vector3 &Vector3::operator-=(const Vector3 &rhs)
-{
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
-    return *this;
-}
-
-float Vector3::dot(const Vector3 &rhs) const
-{
-    return x * rhs.x + y * rhs.y + z * rhs.z;
-}
-
-Vector3 Vector3::cross(const Vector3 &rhs) const
-{
-    return {y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x};
-}
-
-std::string Vector3::to_string() const
-{
-    std::stringstream ss;
-    ss << '(' << x << ", " << y << ", " << z << ')';
-    return ss.str();
+    out << '(' << vector.x << ", " << vector.y << ", " << vector.z << ')';
+    return out;
 }
 
 Vector4::Vector4()
@@ -387,141 +212,192 @@ float &Vector4::operator[](size_t index)
     }
 }
 
-Vector2 Vector4::xy() const
+std::ostream &operator<<(std::ostream &out, const Vector4 &vector)
 {
-    return Vector2{x, y};
+    out << '(' << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ')';
+    return out;
 }
 
-Vector2 Vector4::xz() const
+Vector2 operator-(const Vector2 &vector)
 {
-    return Vector2{x, z};
+    return Vector2{-vector.x, -vector.y};
 }
 
-Vector2 Vector4::xw() const
+Vector3 operator-(const Vector3 &vector)
 {
-    return Vector2{x, w};
+    return Vector3{-vector.x, -vector.y, -vector.z};
 }
 
-Vector2 Vector4::yz() const
+Vector4 operator-(const Vector4 &vector)
 {
-    return Vector2{y, z};
+    return Vector4{-vector.x, -vector.y, -vector.z, -vector.w};
 }
 
-Vector2 Vector4::yw() const
+Vector2 operator+(const Vector2 &lhs, const Vector2 &rhs)
 {
-    return Vector2{y, w};
+    return Vector2{lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
-Vector2 Vector4::zw() const
+Vector3 operator+(const Vector3 &lhs, const Vector3 &rhs)
 {
-    return Vector2{z, w};
+    return Vector3{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
 }
 
-Vector3 Vector4::xyz() const
+Vector4 operator+(const Vector4 &lhs, const Vector4 &rhs)
 {
-    return Vector3{x, y, z};
+    return Vector4{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w};
 }
 
-Vector3 Vector4::xyw() const
+Vector2 operator-(const Vector2 &lhs, const Vector2 &rhs)
 {
-    return Vector3{x, y, w};
+    return Vector2{lhs.x - rhs.x, lhs.y - rhs.y};
 }
 
-Vector3 Vector4::xzw() const
+Vector3 operator-(const Vector3 &lhs, const Vector3 &rhs)
 {
-    return Vector3{x, z, w};
+    return Vector3{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
 }
 
-Vector3 Vector4::yzw() const
+Vector4 operator-(const Vector4 &lhs, const Vector4 &rhs)
 {
-    return Vector3{y, z, w};
+    return Vector4{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w};
 }
 
-float Vector4::length() const
+Vector2 operator*(const Vector2 &vector, float scalar)
 {
-    return std::sqrt(x * x + y * y + z * z + w * w);
+    return Vector2{vector.x * scalar, vector.y * scalar};
 }
 
-Vector4 &Vector4::normalize()
+Vector2 operator*(float scalar, const Vector2 &vector)
 {
-    float length{this->length()};
-    if (length == 0.0f)
-        throw std::domain_error("Cannot normalize a vector of length 0");
-
-    float ratio{1.0f / length};
-    *this *= ratio;
-    return *this;
+    return Vector2{vector.x * scalar, vector.y * scalar};
 }
 
-Vector4 Vector4::normalized() const
+Vector3 operator*(const Vector3 &vector, float scalar)
 {
-    Vector4 result{*this};
-    result.normalize();
-    return result;
+    return Vector3{vector.x * scalar, vector.y * scalar, vector.z * scalar};
 }
 
-Vector4 Vector4::operator-() const
+Vector3 operator*(float scalar, const Vector3 &vector)
 {
-    return {-x, -y, -z, -w};
+    return Vector3{vector.x * scalar, vector.y * scalar, vector.z * scalar};
 }
 
-Vector4 Vector4::operator*(float scalar) const
+Vector4 operator*(const Vector4 &vector, float scalar)
 {
-    Vector4 result{*this};
-    result *= scalar;
-    return result;
+    return Vector4{vector.x * scalar, vector.y * scalar, vector.z * scalar, vector.w * scalar};
 }
 
-Vector4 &Vector4::operator*=(float scalar)
+Vector4 operator*(float scalar, const Vector4 &vector)
 {
-    x *= scalar;
-    y *= scalar;
-    z *= scalar;
-    w *= scalar;
-    return *this;
+    return Vector4{vector.x * scalar, vector.y * scalar, vector.z * scalar, vector.w * scalar};
 }
 
-Vector4 Vector4::operator+(const Vector4 &rhs) const
+Vector2 operator/(const Vector2 &vector, float scalar)
 {
-    Vector4 result{*this};
-    result += rhs;
-    return result;
+    return Vector2{vector.x / scalar, vector.y / scalar};
 }
 
-Vector4 &Vector4::operator+=(const Vector4 &rhs)
+Vector3 operator/(const Vector3 &vector, float scalar)
 {
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
-    w += rhs.w;
-    return *this;
+    return Vector3{vector.x / scalar, vector.y / scalar, vector.z / scalar};
 }
 
-Vector4 Vector4::operator-(const Vector4 &rhs) const
+Vector4 operator/(const Vector4 &vector, float scalar)
 {
-    Vector4 result{*this};
-    result -= rhs;
-    return result;
+    return Vector4{vector.x / scalar, vector.y / scalar, vector.z / scalar, vector.w / scalar};
 }
 
-Vector4 &Vector4::operator-=(const Vector4 &rhs)
+Vector2 &operator+=(Vector2 &lhs, const Vector2 &rhs)
 {
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
-    w -= rhs.w;
-    return *this;
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    return lhs;
 }
 
-float Vector4::dot(const Vector4 &rhs) const
+Vector3 &operator+=(Vector3 &lhs, const Vector3 &rhs)
 {
-    return x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w;
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    return lhs;
 }
 
-std::string Vector4::to_string() const
+Vector4 &operator+=(Vector4 &lhs, const Vector4 &rhs)
 {
-    std::stringstream ss;
-    ss << '(' << x << ", " << y << ", " << z << ", " << w << ')';
-    return ss.str();
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    lhs.w += rhs.w;
+    return lhs;
+}
+
+Vector2 &operator-=(Vector2 &lhs, const Vector2 &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    return lhs;
+}
+
+Vector3 &operator-=(Vector3 &lhs, const Vector3 &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    return lhs;
+}
+
+Vector4 &operator-=(Vector4 &lhs, const Vector4 &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    lhs.w -= rhs.w;
+    return lhs;
+}
+
+Vector2 &operator*=(Vector2 &lhs, float scalar)
+{
+    lhs.x *= scalar;
+    lhs.y *= scalar;
+    return lhs;
+}
+
+Vector3 &operator*=(Vector3 &lhs, float scalar)
+{
+    lhs.x *= scalar;
+    lhs.y *= scalar;
+    lhs.z *= scalar;
+    return lhs;
+}
+
+Vector4 &operator*=(Vector4 &lhs, float scalar)
+{
+    lhs.x *= scalar;
+    lhs.y *= scalar;
+    lhs.z *= scalar;
+    lhs.w *= scalar;
+    return lhs;
+}
+
+float dot(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y;
+}
+
+float dot(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+}
+
+float dot(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;
+}
+
+Vector3 cross(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return Vector3{lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
+                   lhs.x * rhs.y - lhs.y * rhs.x};
 }
 } // namespace Age::Math

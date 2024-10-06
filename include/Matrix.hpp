@@ -1,11 +1,13 @@
 #pragma once
 
-#include <string>
+#include <iostream>
 
 #include "Vector.hpp"
 
 namespace Age::Math
 {
+class Matrix4;
+
 float determinant(const Vector2 &col1, const Vector2 &col2);
 float determinant(const Vector3 &col1, const Vector3 &col2, const Vector3 &col3);
 float determinant(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3,
@@ -20,6 +22,7 @@ class Matrix3
     Matrix3(float scalar);
     Matrix3(const Vector3 &col1, const Vector3 &col2, const Vector3 &col3);
     Matrix3(const Matrix3 &matrix) = default;
+    explicit Matrix3(const Matrix4 &matrix);
 
     Matrix3 &operator=(const Matrix3 &rhs) = default;
 
@@ -60,8 +63,10 @@ class Matrix3
 
     Matrix3 inverted() const;
 
-    std::string to_string() const;
+    friend std::ostream &operator<<(std::ostream &out, const Matrix3 &matrix);
 };
+
+std::ostream &operator<<(std::ostream &out, const Matrix3 &matrix);
 
 class Matrix4
 {
@@ -79,8 +84,6 @@ class Matrix4
 
     const Vector4 &operator[](size_t index) const;
     Vector4 &operator[](size_t index);
-
-    Matrix3 to_matrix3() const;
 
     Vector4 row(size_t index) const;
 
@@ -114,6 +117,8 @@ class Matrix4
 
     Matrix4 inverted() const;
 
-    std::string to_string() const;
+    friend std::ostream &operator<<(std::ostream &out, const Matrix4 &matrix);
 };
+
+std::ostream &operator<<(std::ostream &out, const Matrix4 &matrix);
 } // namespace Age::Math

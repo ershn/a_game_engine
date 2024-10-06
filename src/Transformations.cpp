@@ -101,9 +101,9 @@ Matrix4 camera_matrix(Vector3 camera_pos, Vector3 target_pos, Vector3 world_up)
 {
     Matrix4 matrix{1.0f};
 
-    Vector3 forward{(camera_pos - target_pos).normalize()};
-    Vector3 right{world_up.cross(forward).normalize()};
-    Vector3 up{forward.cross(right)};
+    Vector3 forward{normalize(camera_pos - target_pos)};
+    Vector3 right{normalize(cross(world_up, forward))};
+    Vector3 up{cross(forward, right)};
 
     matrix[0].x = right.x;
     matrix[0].y = right.y;

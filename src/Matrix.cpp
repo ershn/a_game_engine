@@ -11,17 +11,17 @@ float determinant(const Vector2 &col1, const Vector2 &col2)
 
 float determinant(const Vector3 &col1, const Vector3 &col2, const Vector3 &col3)
 {
-    return col1.x * determinant(col2.yz(), col3.yz()) - col2.x * determinant(col1.yz(), col3.yz()) +
-           col3.x * determinant(col1.yz(), col2.yz());
+    return col1.x * determinant(yz(col2), yz(col3)) - col2.x * determinant(yz(col1), yz(col3)) +
+           col3.x * determinant(yz(col1), yz(col2));
 }
 
 float determinant(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3,
                   const Vector4 &col4)
 {
-    return col1.x * determinant(col2.yzw(), col3.yzw(), col4.yzw()) -
-           col2.x * determinant(col1.yzw(), col3.yzw(), col4.yzw()) +
-           col3.x * determinant(col1.yzw(), col2.yzw(), col4.yzw()) -
-           col4.x * determinant(col1.yzw(), col2.yzw(), col3.yzw());
+    return col1.x * determinant(yzw(col2), yzw(col3), yzw(col4)) -
+           col2.x * determinant(yzw(col1), yzw(col3), yzw(col4)) +
+           col3.x * determinant(yzw(col1), yzw(col2), yzw(col4)) -
+           col4.x * determinant(yzw(col1), yzw(col2), yzw(col3));
 }
 
 Matrix3::Matrix3()
@@ -36,6 +36,11 @@ Matrix3::Matrix3(float scalar)
 
 Matrix3::Matrix3(const Vector3 &col1, const Vector3 &col2, const Vector3 &col3)
     : _columns{col1, col2, col3}
+{
+}
+
+Matrix3::Matrix3(const Matrix4 &matrix)
+    : _columns{xyz(matrix[0]), xyz(matrix[1]), xyz(matrix[2])}
 {
 }
 
@@ -86,9 +91,9 @@ Matrix3 &Matrix3::operator*=(float scalar)
 Vector3 Matrix3::operator*(const Vector3 &rhs) const
 {
     Vector3 result{};
-    result[0] = row(0).dot(rhs);
-    result[1] = row(1).dot(rhs);
-    result[2] = row(2).dot(rhs);
+    result[0] = dot(row(0), rhs);
+    result[1] = dot(row(1), rhs);
+    result[2] = dot(row(2), rhs);
     return result;
 }
 
@@ -127,7 +132,7 @@ Matrix3 Matrix3::operator*(const Matrix3 &rhs) const
     Matrix3 result{};
     for (std::size_t i{}; i < 3; i++)
         for (std::size_t j{}; j < 3; j++)
-            result[j][i] = row(i).dot(rhs[j]);
+            result[j][i] = dot(row(i), rhs[j]);
     return result;
 }
 
@@ -172,15 +177,15 @@ Matrix3 &Matrix3::invert()
 Matrix3 Matrix3::inverted() const
 {
     Matrix3 adjugate{};
-    adjugate[0].x = Math::determinant(_columns[1].yz(), _columns[2].yz());
-    adjugate[0].y = -Math::determinant(_columns[0].yz(), _columns[2].yz());
-    adjugate[0].z = Math::determinant(_columns[0].yz(), _columns[1].yz());
-    adjugate[1].x = -Math::determinant(_columns[1].xz(), _columns[2].xz());
-    adjugate[1].y = Math::determinant(_columns[0].xz(), _columns[2].xz());
-    adjugate[1].z = -Math::determinant(_columns[0].xz(), _columns[1].xz());
-    adjugate[2].x = Math::determinant(_columns[1].xy(), _columns[2].xy());
-    adjugate[2].y = -Math::determinant(_columns[0].xy(), _columns[2].xy());
-    adjugate[2].z = Math::determinant(_columns[0].xy(), _columns[1].xy());
+    adjugate[0].x = Math::determinant(yz(_columns[1]), yz(_columns[2]));
+    adjugate[0].y = -Math::determinant(yz(_columns[0]), yz(_columns[2]));
+    adjugate[0].z = Math::determinant(yz(_columns[0]), yz(_columns[1]));
+    adjugate[1].x = -Math::determinant(xz(_columns[1]), xz(_columns[2]));
+    adjugate[1].y = Math::determinant(xz(_columns[0]), xz(_columns[2]));
+    adjugate[1].z = -Math::determinant(xz(_columns[0]), xz(_columns[1]));
+    adjugate[2].x = Math::determinant(xy(_columns[1]), xy(_columns[2]));
+    adjugate[2].y = -Math::determinant(xy(_columns[0]), xy(_columns[2]));
+    adjugate[2].z = Math::determinant(xy(_columns[0]), xy(_columns[1]));
 
     float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y +
                       _columns[2].x * adjugate[0].z};
@@ -188,21 +193,20 @@ Matrix3 Matrix3::inverted() const
     return adjugate;
 }
 
-std::string Matrix3::to_string() const
+std::ostream &operator<<(std::ostream &out, const Matrix3 &matrix)
 {
-    std::stringstream ss{};
     for (std::size_t i{}; i < 3; i++)
     {
-        ss << '|';
+        out << '|';
         for (std::size_t j{}; j < 3; j++)
         {
             if (j > 0)
-                ss << ", ";
-            ss << _columns[j][i];
+                out << ", ";
+            out << matrix._columns[j][i];
         }
-        ss << "|\n";
+        out << "|\n";
     }
-    return ss.str();
+    return out;
 }
 
 Matrix4::Matrix4()
@@ -236,11 +240,6 @@ const Vector4 &Matrix4::operator[](std::size_t index) const
 Vector4 &Matrix4::operator[](std::size_t index)
 {
     return _columns[index];
-}
-
-Matrix3 Matrix4::to_matrix3() const
-{
-    return Matrix3{_columns[0].xyz(), _columns[1].xyz(), _columns[2].xyz()};
 }
 
 Vector4 Matrix4::row(std::size_t index) const
@@ -277,10 +276,10 @@ Matrix4 &Matrix4::operator*=(float scalar)
 Vector4 Matrix4::operator*(const Vector4 &rhs) const
 {
     Vector4 result{};
-    result[0] = row(0).dot(rhs);
-    result[1] = row(1).dot(rhs);
-    result[2] = row(2).dot(rhs);
-    result[3] = row(3).dot(rhs);
+    result[0] = dot(row(0), rhs);
+    result[1] = dot(row(1), rhs);
+    result[2] = dot(row(2), rhs);
+    result[3] = dot(row(3), rhs);
     return result;
 }
 
@@ -321,7 +320,7 @@ Matrix4 Matrix4::operator*(const Matrix4 &rhs) const
     Matrix4 result{};
     for (std::size_t i{}; i < 4; i++)
         for (std::size_t j{}; j < 4; j++)
-            result[j][i] = row(i).dot(rhs[j]);
+            result[j][i] = dot(row(i), rhs[j]);
     return result;
 }
 
@@ -373,22 +372,22 @@ Matrix4 &Matrix4::invert()
 Matrix4 Matrix4::inverted() const
 {
     Matrix4 adjugate{};
-    adjugate[0].x = Math::determinant(_columns[1].yzw(), _columns[2].yzw(), _columns[3].yzw());
-    adjugate[0].y = -Math::determinant(_columns[0].yzw(), _columns[2].yzw(), _columns[3].yzw());
-    adjugate[0].z = Math::determinant(_columns[0].yzw(), _columns[1].yzw(), _columns[3].yzw());
-    adjugate[0].w = -Math::determinant(_columns[0].yzw(), _columns[1].yzw(), _columns[2].yzw());
-    adjugate[1].x = -Math::determinant(_columns[1].xzw(), _columns[2].xzw(), _columns[3].xzw());
-    adjugate[1].y = Math::determinant(_columns[0].xzw(), _columns[2].xzw(), _columns[3].xzw());
-    adjugate[1].z = -Math::determinant(_columns[0].xzw(), _columns[1].xzw(), _columns[3].xzw());
-    adjugate[1].w = Math::determinant(_columns[0].xzw(), _columns[1].xzw(), _columns[2].xzw());
-    adjugate[2].x = Math::determinant(_columns[1].xyw(), _columns[2].xyw(), _columns[3].xyw());
-    adjugate[2].y = -Math::determinant(_columns[0].xyw(), _columns[2].xyw(), _columns[3].xyw());
-    adjugate[2].z = Math::determinant(_columns[0].xyw(), _columns[1].xyw(), _columns[3].xyw());
-    adjugate[2].w = -Math::determinant(_columns[0].xyw(), _columns[1].xyw(), _columns[2].xyw());
-    adjugate[3].x = -Math::determinant(_columns[1].xyz(), _columns[2].xyz(), _columns[3].xyz());
-    adjugate[3].y = Math::determinant(_columns[0].xyz(), _columns[2].xyz(), _columns[3].xyz());
-    adjugate[3].z = -Math::determinant(_columns[0].xyz(), _columns[1].xyz(), _columns[3].xyz());
-    adjugate[3].w = Math::determinant(_columns[0].xyz(), _columns[1].xyz(), _columns[2].xyz());
+    adjugate[0].x = Math::determinant(yzw(_columns[1]), yzw(_columns[2]), yzw(_columns[3]));
+    adjugate[0].y = -Math::determinant(yzw(_columns[0]), yzw(_columns[2]), yzw(_columns[3]));
+    adjugate[0].z = Math::determinant(yzw(_columns[0]), yzw(_columns[1]), yzw(_columns[3]));
+    adjugate[0].w = -Math::determinant(yzw(_columns[0]), yzw(_columns[1]), yzw(_columns[2]));
+    adjugate[1].x = -Math::determinant(xzw(_columns[1]), xzw(_columns[2]), xzw(_columns[3]));
+    adjugate[1].y = Math::determinant(xzw(_columns[0]), xzw(_columns[2]), xzw(_columns[3]));
+    adjugate[1].z = -Math::determinant(xzw(_columns[0]), xzw(_columns[1]), xzw(_columns[3]));
+    adjugate[1].w = Math::determinant(xzw(_columns[0]), xzw(_columns[1]), xzw(_columns[2]));
+    adjugate[2].x = Math::determinant(xyw(_columns[1]), xyw(_columns[2]), xyw(_columns[3]));
+    adjugate[2].y = -Math::determinant(xyw(_columns[0]), xyw(_columns[2]), xyw(_columns[3]));
+    adjugate[2].z = Math::determinant(xyw(_columns[0]), xyw(_columns[1]), xyw(_columns[3]));
+    adjugate[2].w = -Math::determinant(xyw(_columns[0]), xyw(_columns[1]), xyw(_columns[2]));
+    adjugate[3].x = -Math::determinant(xyz(_columns[1]), xyz(_columns[2]), xyz(_columns[3]));
+    adjugate[3].y = Math::determinant(xyz(_columns[0]), xyz(_columns[2]), xyz(_columns[3]));
+    adjugate[3].z = -Math::determinant(xyz(_columns[0]), xyz(_columns[1]), xyz(_columns[3]));
+    adjugate[3].w = Math::determinant(xyz(_columns[0]), xyz(_columns[1]), xyz(_columns[2]));
 
     float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y +
                       _columns[2].x * adjugate[0].z + _columns[3].x * adjugate[0].w};
@@ -396,20 +395,19 @@ Matrix4 Matrix4::inverted() const
     return adjugate;
 }
 
-std::string Matrix4::to_string() const
+std::ostream &operator<<(std::ostream &out, const Matrix4 &matrix)
 {
-    std::stringstream ss{};
     for (std::size_t i{}; i < 4; i++)
     {
-        ss << '|';
+        out << '|';
         for (std::size_t j{}; j < 4; j++)
         {
             if (j > 0)
-                ss << ", ";
-            ss << _columns[j][i];
+                out << ", ";
+            out << matrix._columns[j][i];
         }
-        ss << "|\n";
+        out << "|\n";
     }
-    return ss.str();
+    return out;
 }
 } // namespace Age::Math

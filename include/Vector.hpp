@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include <cmath>
+#include <iostream>
 
 namespace Age::Math
 {
@@ -22,31 +23,9 @@ struct Vector2
 
     float operator[](size_t index) const;
     float &operator[](size_t index);
-
-    float length() const;
-
-    Vector2 &normalize();
-
-    Vector2 normalized() const;
-
-    Vector2 operator-() const;
-
-    Vector2 operator*(float scalar) const;
-
-    Vector2 &operator*=(float scalar);
-
-    Vector2 operator+(const Vector2 &rhs) const;
-
-    Vector2 &operator+=(const Vector2 &rhs);
-
-    Vector2 operator-(const Vector2 &rhs) const;
-
-    Vector2 &operator-=(const Vector2 &rhs);
-
-    float dot(const Vector2 &rhs) const;
-
-    std::string to_string() const;
 };
+
+std::ostream &operator<<(std::ostream &out, const Vector2 &vector);
 
 struct Vector3
 {
@@ -65,37 +44,9 @@ struct Vector3
 
     float operator[](size_t index) const;
     float &operator[](size_t index);
-
-    Vector2 xy() const;
-    Vector2 xz() const;
-    Vector2 yz() const;
-
-    float length() const;
-
-    Vector3 &normalize();
-
-    Vector3 normalized() const;
-
-    Vector3 operator-() const;
-
-    Vector3 operator*(float scalar) const;
-
-    Vector3 &operator*=(float scalar);
-
-    Vector3 operator+(const Vector3 &rhs) const;
-
-    Vector3 &operator+=(const Vector3 &rhs);
-
-    Vector3 operator-(const Vector3 &rhs) const;
-
-    Vector3 &operator-=(const Vector3 &rhs);
-
-    float dot(const Vector3 &rhs) const;
-
-    Vector3 cross(const Vector3 &rhs) const;
-
-    std::string to_string() const;
 };
+
+std::ostream &operator<<(std::ostream &out, const Vector3 &vector);
 
 struct Vector4
 {
@@ -114,41 +65,116 @@ struct Vector4
 
     float operator[](size_t index) const;
     float &operator[](size_t index);
-
-    Vector2 xy() const;
-    Vector2 xz() const;
-    Vector2 xw() const;
-    Vector2 yz() const;
-    Vector2 yw() const;
-    Vector2 zw() const;
-
-    Vector3 xyz() const;
-    Vector3 xyw() const;
-    Vector3 xzw() const;
-    Vector3 yzw() const;
-
-    float length() const;
-
-    Vector4 &normalize();
-
-    Vector4 normalized() const;
-
-    Vector4 operator-() const;
-
-    Vector4 operator*(float scalar) const;
-
-    Vector4 &operator*=(float scalar);
-
-    Vector4 operator+(const Vector4 &rhs) const;
-
-    Vector4 &operator+=(const Vector4 &rhs);
-
-    Vector4 operator-(const Vector4 &rhs) const;
-
-    Vector4 &operator-=(const Vector4 &rhs);
-
-    float dot(const Vector4 &rhs) const;
-
-    std::string to_string() const;
 };
+
+std::ostream &operator<<(std::ostream &out, const Vector4 &vector);
+
+Vector2 operator-(const Vector2 &vector);
+Vector3 operator-(const Vector3 &vector);
+Vector4 operator-(const Vector4 &vector);
+
+Vector2 operator+(const Vector2 &lhs, const Vector2 &rhs);
+Vector3 operator+(const Vector3 &lhs, const Vector3 &rhs);
+Vector4 operator+(const Vector4 &lhs, const Vector4 &rhs);
+
+Vector2 operator-(const Vector2 &lhs, const Vector2 &rhs);
+Vector3 operator-(const Vector3 &lhs, const Vector3 &rhs);
+Vector4 operator-(const Vector4 &lhs, const Vector4 &rhs);
+
+Vector2 operator*(const Vector2 &vector, float scalar);
+Vector2 operator*(float scalar, const Vector2 &vector);
+Vector3 operator*(const Vector3 &vector, float scalar);
+Vector3 operator*(float scalar, const Vector3 &vector);
+Vector4 operator*(const Vector4 &vector, float scalar);
+Vector4 operator*(float scalar, const Vector4 &vector);
+
+Vector2 operator/(const Vector2 &vector, float scalar);
+Vector3 operator/(const Vector3 &vector, float scalar);
+Vector4 operator/(const Vector4 &vector, float scalar);
+
+Vector2 &operator+=(Vector2 &lhs, const Vector2 &rhs);
+Vector3 &operator+=(Vector3 &lhs, const Vector3 &rhs);
+Vector4 &operator+=(Vector4 &lhs, const Vector4 &rhs);
+
+Vector2 &operator-=(Vector2 &lhs, const Vector2 &rhs);
+Vector3 &operator-=(Vector3 &lhs, const Vector3 &rhs);
+Vector4 &operator-=(Vector4 &lhs, const Vector4 &rhs);
+
+Vector2 &operator*=(Vector2 &vector, float scalar);
+Vector3 &operator*=(Vector3 &vector, float scalar);
+Vector4 &operator*=(Vector4 &vector, float scalar);
+
+float dot(const Vector2 &lhs, const Vector2 &rhs);
+float dot(const Vector3 &lhs, const Vector3 &rhs);
+float dot(const Vector4 &lhs, const Vector4 &rhs);
+
+Vector3 cross(const Vector3 &lhs, const Vector3 &rhs);
+
+template <typename T> float length(const T &vector)
+{
+    return std::sqrt(dot(vector, vector));
+}
+
+template <typename T> T normalize(const T &vector)
+{
+    return vector / length(vector);
+}
+
+template <typename T> float scalar_projection(const T &vector, const T &target)
+{
+    return dot(vector, target) / length(target);
+}
+
+template <typename T> T vector_projection(const T &vector, const T &target)
+{
+    return dot(vector, target) / dot(target, target) * target;
+}
+
+template <typename T> T reflect(const T &ray, const T &normal)
+{
+    return ray - vector_projection(ray, normal) * 2.0f;
+}
+
+#define VECTOR2_SWIZZLE(a, b)                                                                      \
+    template <typename T> Vector2 a##b(const T &vector)                                            \
+    {                                                                                              \
+        return Vector2{vector.a, vector.b};                                                        \
+    }
+
+#define VECTOR3_SWIZZLE(a, b, c)                                                                   \
+    template <typename T> Vector3 a##b##c(const T &vector)                                         \
+    {                                                                                              \
+        return Vector3{vector.a, vector.b, vector.c};                                              \
+    }
+
+#define VECTOR4_SWIZZLE(a, b, c, d)                                                                \
+    template <typename T> Vector4 a##b##c##d(const T &vector)                                      \
+    {                                                                                              \
+        return Vector4{vector.a, vector.b, vector.c, vector.d};                                    \
+    }
+
+#define APPLY_XYZW_ARG1(FUNCTION, ...)                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
+#define APPLY_XYZW_ARG2(FUNCTION, ...)                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
+#define APPLY_XYZW_ARG3(FUNCTION, ...)                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
+#define APPLY_XYZW_ARG4(FUNCTION, ...)                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
+
+APPLY_XYZW_ARG1(APPLY_XYZW_ARG2, VECTOR2_SWIZZLE)
+APPLY_XYZW_ARG1(APPLY_XYZW_ARG2, APPLY_XYZW_ARG3, VECTOR3_SWIZZLE)
+APPLY_XYZW_ARG1(APPLY_XYZW_ARG2, APPLY_XYZW_ARG3, APPLY_XYZW_ARG4, VECTOR4_SWIZZLE)
 } // namespace Age::Math

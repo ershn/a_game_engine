@@ -14,6 +14,7 @@
 #include "UniformBuffers.hpp"
 
 using namespace Age;
+using Math::Matrix3;
 using Math::Matrix4;
 using Math::Vector3;
 using Math::Vector4;
@@ -26,14 +27,15 @@ const float min_camera_pitch{Math::radians(0.1f)};
 const float max_camera_pitch{Math::radians(179.9f)};
 const float vertical_fov{Math::radians(50.0f)};
 
-Matrix4 g_perspective_matrix{};
+int g_viewport_width{};
+int g_viewport_height{};
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    g_viewport_width = width;
+    g_viewport_height = height;
 
-    float aspect_ratio = static_cast<float>(width) / height;
-    Math::update_fov(g_perspective_matrix, aspect_ratio, vertical_fov);
+    glViewport(0, 0, width, height);
 }
 
 int g_horizontal_axis_input{};
@@ -166,20 +168,24 @@ void run()
     Gfx::FragmentLightingShader fragment_lighting_shader{"shaders/fragment_lighting.vert",
                                                          "shaders/fragment_lighting.frag"};
     fragment_lighting_shader.bind_shared_matrices_block(0);
+    fragment_lighting_shader.bind_fragment_position_data_block(1);
 
-    Gfx::FragmentLightingColorShader fragment_lighting_color_shader{
-        "shaders/fragment_lighting_color.vert", "shaders/fragment_lighting.frag"};
-    fragment_lighting_color_shader.bind_shared_matrices_block(0);
+    // Gfx::FragmentLightingColorShader fragment_lighting_color_shader{
+    //     "shaders/fragment_lighting_color.vert", "shaders/fragment_lighting.frag"};
+    // fragment_lighting_color_shader.bind_shared_matrices_block(0);
+    // fragment_lighting_color_shader.bind_fragment_position_data_block(1);
 
-    Gfx::SharedMatricesUniformBuffer shared_matrices{};
-    shared_matrices.bind(0);
+    Gfx::SharedMatricesUniformBuffer shared_matrices_buffer{};
+    shared_matrices_buffer.bind(0);
 
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
+    Gfx::FragmentPositionDataUniformBuffer fragment_position_data_buffer{};
+    fragment_position_data_buffer.bind(1);
 
-    float aspect_ratio = static_cast<float>(width) / height;
-    g_perspective_matrix = Math::perspective_matrix(z_near, z_far, aspect_ratio, vertical_fov);
+    glfwGetFramebufferSize(window, &g_viewport_width, &g_viewport_height);
+    glViewport(0, 0, g_viewport_width, g_viewport_height);
+
+    float aspect_ratio{static_cast<float>(g_viewport_width) / g_viewport_height};
+    Matrix4 perspective_matrix{Math::perspective_matrix(z_near, z_far, aspect_ratio, vertical_fov)};
 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CW);
@@ -203,11 +209,12 @@ void run()
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
     const Gfx::CylinderMesh cylinder_mesh{Vector3{1.0f, 1.0f, 1.0f}, 30};
 
-    Vector4 directional_light{0.866f, 0.5f, 0.0f, 0.0f};
-    directional_light.normalize();
-    Vector4 point_light{3.0f, 0.1f, 0.0f, 1.0f};
+    Vector4 directional_light{Math::normalize(Vector4{0.866f, 0.5f, 0.0f, 0.0f})};
+
+    Vector4 point_light_world_position{3.0f, 1.0f, 0.0f, 1.0f};
 
     Vector4 light_intensity{0.8f, 0.8f, 0.8f, 1.0f};
+    float light_attenuation{0.2f};
     Vector4 ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f};
 
     float camera_yaw{Math::radians(180.0f)};
@@ -222,6 +229,13 @@ void run()
     float last_frame_time{};
     while (!glfwWindowShouldClose(window))
     {
+        float aspect_ratio{static_cast<float>(g_viewport_width) / g_viewport_height};
+        Math::update_fov(perspective_matrix, aspect_ratio, vertical_fov);
+
+        shared_matrices_buffer.set_clip_matrix(perspective_matrix);
+        fragment_position_data_buffer.set_viewport_dimensions(g_viewport_width, g_viewport_height);
+        fragment_position_data_buffer.set_inverse_clip_matrix(perspective_matrix.inverted());
+
         float current_time{static_cast<float>(glfwGetTime())};
         float delta_time{current_time - last_frame_time};
         last_frame_time = current_time;
@@ -241,7 +255,7 @@ void run()
             camera_forward.y = std::cos(camera_pitch);
             camera_forward.z = std::cos(camera_yaw) * sin_pitch;
 
-            camera_right = camera_forward.cross(world_up).normalize();
+            camera_right = Math::normalize(Math::cross(camera_forward, world_up));
         }
 
         if (g_horizontal_axis_input != 0)
@@ -253,8 +267,6 @@ void run()
 
         Matrix4 cam_matrix{camera_matrix(camera_pos, camera_pos + camera_forward, world_up)};
 
-        shared_matrices.set_clip_matrix(g_perspective_matrix);
-
         glClearColor(0.294f, 0.22f, 0.192f, 1.0f);
         glClearDepth(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -262,7 +274,7 @@ void run()
         {
             Gfx::Shader::Use use{no_lighting_color_shader};
 
-            Matrix4 world_matrix{Math::translation_matrix(point_light.xyz()) *
+            Matrix4 world_matrix{Math::translation_matrix(Math::xyz(point_light_world_position)) *
                                  Math::scaling_matrix(Vector3{0.3f})};
             no_lighting_color_shader.set_camera_matrix(cam_matrix * world_matrix);
 
@@ -274,49 +286,52 @@ void run()
         {
             Gfx::Shader::Use use{fragment_lighting_shader};
 
-            Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
-                                 Math::x_rotation_matrix(Math::radians(-90.0f)) *
-                                 Math::scaling_matrix(Vector3{100.0f, 100.0f, 1.0f})};
-            fragment_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
-
-            fragment_lighting_shader.set_model_light_position(
-                (world_matrix.inverted() * point_light).xyz());
+            fragment_lighting_shader.set_camera_light_position(
+                Math::xyz(cam_matrix * point_light_world_position));
             fragment_lighting_shader.set_light_intensity(light_intensity);
+            fragment_lighting_shader.set_light_attenuation(light_attenuation);
             fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
+            fragment_lighting_shader.set_specular_color(Vector4{0.25, 0.25, 0.25, 1.0});
+            fragment_lighting_shader.set_surface_shininess(5.0f);
 
-            plane_mesh.draw();
-        }
+            {
+                Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
+                                     Math::x_rotation_matrix(Math::radians(-90.0f)) *
+                                     Math::scaling_matrix(Vector3{100.0f, 100.0f, 1.0f})};
 
-        {
-            Gfx::Shader::Use use{fragment_lighting_shader};
+                Matrix4 camera_matrix{cam_matrix * world_matrix};
+                fragment_lighting_shader.set_camera_matrix(camera_matrix);
+                fragment_lighting_shader.set_camera_normal_matrix(
+                    Matrix3{camera_matrix}.invert().transpose());
 
-            Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
-                                 Math::x_rotation_matrix(current_time) *
-                                 Math::scaling_matrix(Vector3{3.0f, 3.0f, 2.0f})};
-            fragment_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+                plane_mesh.draw();
+            }
 
-            fragment_lighting_shader.set_model_light_position(
-                (world_matrix.inverted() * point_light).xyz());
-            fragment_lighting_shader.set_light_intensity(light_intensity);
-            fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
+            {
+                Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
+                                     Math::x_rotation_matrix(current_time) *
+                                     Math::scaling_matrix(Vector3{3.0f, 3.0f, 2.0f})};
 
-            cube_mesh.draw();
-        }
+                Matrix4 camera_matrix{cam_matrix * world_matrix};
+                fragment_lighting_shader.set_camera_matrix(camera_matrix);
+                fragment_lighting_shader.set_camera_normal_matrix(
+                    Matrix3{camera_matrix}.invert().transpose());
 
-        {
-            Gfx::Shader::Use use{fragment_lighting_shader};
+                cube_mesh.draw();
+            }
 
-            Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                 // Math::z_rotation_matrix(Math::radians(20.0f)) *
-                                 Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.8f})};
-            fragment_lighting_shader.set_camera_matrix(cam_matrix * world_matrix);
+            {
+                Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
+                                     // Math::z_rotation_matrix(Math::radians(20.0f)) *
+                                     Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.8f})};
 
-            fragment_lighting_shader.set_model_light_position(
-                (world_matrix.inverted() * point_light).xyz());
-            fragment_lighting_shader.set_light_intensity(light_intensity);
-            fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
+                Matrix4 camera_matrix{cam_matrix * world_matrix};
+                fragment_lighting_shader.set_camera_matrix(camera_matrix);
+                fragment_lighting_shader.set_camera_normal_matrix(
+                    Matrix3{camera_matrix}.invert().transpose());
 
-            cylinder_mesh.draw();
+                cylinder_mesh.draw();
+            }
         }
 
         glfwSwapBuffers(window);
