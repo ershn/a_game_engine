@@ -135,12 +135,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\FlyCamera.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Meshes.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Shaders.cpp" />
+    <ClCompile Include="src\SphericalCamera.cpp" />
     <ClCompile Include="src\third_parties\gl.c" />
     <ClCompile Include="src\Transformations.cpp" />
     <ClCompile Include="src\UniformBuffer.cpp" />
@@ -148,12 +150,14 @@
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\FlyCamera.hpp" />
     <ClInclude Include="include\Math.hpp" />
     <ClInclude Include="include\Matrix.hpp" />
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\Meshes.hpp" />
     <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="include\Shaders.hpp" />
+    <ClInclude Include="include\SphericalCamera.hpp" />
     <ClInclude Include="include\Transformations.hpp" />
     <ClInclude Include="include\UniformBuffer.hpp" />
     <ClInclude Include="include\UniformBuffers.hpp" />

@@ -5,17 +5,20 @@
 #include <algorithm>
 #include <iostream>
 
+#include "FlyCamera.hpp"
 #include "Math.hpp"
 #include "Matrix.hpp"
 #include "Mesh.hpp"
 #include "Meshes.hpp"
 #include "Shaders.hpp"
+#include "SphericalCamera.hpp"
 #include "Transformations.hpp"
 #include "UniformBuffers.hpp"
 
 using namespace Age;
 using Math::Matrix3;
 using Math::Matrix4;
+using Math::Vector2;
 using Math::Vector3;
 using Math::Vector4;
 
@@ -23,8 +26,6 @@ const float mouse_sensitivity{0.005f};
 
 const float z_near{0.1f};
 const float z_far{100.0f};
-const float min_camera_pitch{Math::radians(0.1f)};
-const float max_camera_pitch{Math::radians(179.9f)};
 const float vertical_fov{Math::radians(50.0f)};
 
 int g_viewport_width{};
@@ -41,7 +42,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 int g_horizontal_axis_input{};
 int g_vertical_axis_input{};
 int g_forward_axis_input{};
-bool g_toggle_state_1{};
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
@@ -75,36 +75,43 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     case GLFW_KEY_Q:
         g_vertical_axis_input -= press_change;
         break;
-    case GLFW_KEY_SPACE:
-        if (action == GLFW_PRESS)
-            g_toggle_state_1 = !g_toggle_state_1;
-        break;
     }
 }
 
 static bool g_mouse_moved{};
-static double g_mouse_delta_x{};
-static double g_mouse_delta_y{};
-
-static bool g_prev_mouse_set{};
-static double g_prev_mouse_x{};
-static double g_prev_mouse_y{};
+static double g_mouse_position_delta_x{};
+static double g_mouse_position_delta_y{};
 
 void mouse_position_callback(GLFWwindow *window, double x_position, double y_position)
 {
-    if (!g_prev_mouse_set)
+    static bool s_prev_mouse_set{};
+    static double s_prev_mouse_x{};
+    static double s_prev_mouse_y{};
+
+    if (!s_prev_mouse_set)
     {
-        g_prev_mouse_set = true;
-        g_prev_mouse_x = x_position;
-        g_prev_mouse_y = y_position;
+        s_prev_mouse_set = true;
+        s_prev_mouse_x = x_position;
+        s_prev_mouse_y = y_position;
         return;
     }
 
     g_mouse_moved = true;
-    g_mouse_delta_x = x_position - g_prev_mouse_x;
-    g_mouse_delta_y = y_position - g_prev_mouse_y;
-    g_prev_mouse_x = x_position;
-    g_prev_mouse_y = y_position;
+    g_mouse_position_delta_x = x_position - s_prev_mouse_x;
+    g_mouse_position_delta_y = y_position - s_prev_mouse_y;
+    s_prev_mouse_x = x_position;
+    s_prev_mouse_y = y_position;
+}
+
+static bool g_mouse_scrolled{};
+static double g_mouse_scroll_delta_x{};
+static double g_mouse_scroll_delta_y{};
+
+void mouse_scroll_callback(GLFWwindow *window, double x_offset, double y_offset)
+{
+    g_mouse_scrolled = true;
+    g_mouse_scroll_delta_x = x_offset;
+    g_mouse_scroll_delta_y = y_offset;
 }
 
 void error_callback(int error, const char *description)
@@ -204,6 +211,7 @@ void run()
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_position_callback);
+    glfwSetScrollCallback(window, mouse_scroll_callback);
 
     const Gfx::Mesh &plane_mesh{Gfx::load_plane_mesh()};
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
@@ -217,14 +225,13 @@ void run()
     float light_attenuation{0.2f};
     Vector4 ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f};
 
-    float camera_yaw{Math::radians(180.0f)};
-    float camera_pitch{Math::radians(90.0f)};
-
     Vector3 world_up{0.0f, 1.0f, 0.0f};
-    Vector3 camera_forward{0.0f, 0.0f, -1.0f};
-    Vector3 camera_right{1.0f, 0.0f, 0.0f};
-    Vector3 camera_pos{0.0f, 2.0f, 2.0f};
-    const float camera_speed{10.0f};
+    // Gfx::FlyCamera fly_camera{{0.0f, 2.0f, 2.0f}, {Math::radians(90.0f), 0.0f}, world_up};
+    // const float camera_speed{10.0f};
+    Gfx::SphericalCamera spherical_camera{
+        {0.0f, 2.0f, 0.0f}, {Math::radians(60.0f), 0.0f}, 5.0f, world_up};
+
+    Matrix3 cylinder_rotation{1.0f};
 
     float last_frame_time{};
     while (!glfwWindowShouldClose(window))
@@ -244,28 +251,23 @@ void run()
         {
             g_mouse_moved = false;
 
-            float x_angle{static_cast<float>(g_mouse_delta_x) * mouse_sensitivity};
-            float y_angle{static_cast<float>(g_mouse_delta_y) * mouse_sensitivity};
+            Vector2 camera_angles{static_cast<float>(-g_mouse_position_delta_y),
+                                  static_cast<float>(g_mouse_position_delta_x)};
+            spherical_camera.add_angles(camera_angles * mouse_sensitivity);
+        }
+        if (g_mouse_scrolled)
+        {
+            g_mouse_scrolled = false;
 
-            camera_yaw -= x_angle;
-            camera_pitch = std::clamp(camera_pitch + y_angle, min_camera_pitch, max_camera_pitch);
-
-            float sin_pitch{std::sin(camera_pitch)};
-            camera_forward.x = std::sin(camera_yaw) * sin_pitch;
-            camera_forward.y = std::cos(camera_pitch);
-            camera_forward.z = std::cos(camera_yaw) * sin_pitch;
-
-            camera_right = Math::normalize(Math::cross(camera_forward, world_up));
+            spherical_camera.add_distance(static_cast<float>(g_mouse_scroll_delta_y) * -0.5f);
         }
 
-        if (g_horizontal_axis_input != 0)
-            camera_pos += camera_right * (g_horizontal_axis_input * camera_speed * delta_time);
-        if (g_vertical_axis_input != 0)
-            camera_pos += world_up * (g_vertical_axis_input * camera_speed * delta_time);
-        if (g_forward_axis_input != 0)
-            camera_pos += camera_forward * (g_forward_axis_input * camera_speed * delta_time);
+        // Vector3 axial_movement{static_cast<float>(g_horizontal_axis_input),
+        //                        static_cast<float>(g_vertical_axis_input),
+        //                        static_cast<float>(-g_forward_axis_input)};
+        // fly_camera.add_axial_movement(axial_movement * camera_speed * delta_time);
 
-        Matrix4 cam_matrix{camera_matrix(camera_pos, camera_pos + camera_forward, world_up)};
+        Matrix4 cam_matrix{spherical_camera.calc_camera_matrix()};
 
         glClearColor(0.294f, 0.22f, 0.192f, 1.0f);
         glClearDepth(1.0f);
@@ -275,7 +277,7 @@ void run()
             Gfx::Shader::Use use{no_lighting_color_shader};
 
             Matrix4 world_matrix{Math::translation_matrix(Math::xyz(point_light_world_position)) *
-                                 Math::scaling_matrix(Vector3{0.3f})};
+                                 Matrix4{Math::scaling_matrix(Vector3{0.3f})}};
             no_lighting_color_shader.set_camera_matrix(cam_matrix * world_matrix);
 
             no_lighting_color_shader.set_color(Vector4{1.0f});
@@ -296,8 +298,8 @@ void run()
 
             {
                 Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
-                                     Math::x_rotation_matrix(Math::radians(-90.0f)) *
-                                     Math::scaling_matrix(Vector3{100.0f, 100.0f, 1.0f})};
+                                     Matrix4{Math::x_rotation_matrix(Math::radians(-90.0f))} *
+                                     Matrix4{Math::scaling_matrix(Vector3{100.0f, 100.0f, 1.0f})}};
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);
@@ -309,8 +311,8 @@ void run()
 
             {
                 Matrix4 world_matrix{Math::translation_matrix(Vector3{5.0f, 2.0f, -10.0f}) *
-                                     Math::x_rotation_matrix(current_time) *
-                                     Math::scaling_matrix(Vector3{3.0f, 3.0f, 2.0f})};
+                                     Matrix4{Math::x_rotation_matrix(current_time)} *
+                                     Matrix4{Math::scaling_matrix(Vector3{3.0f, 3.0f, 2.0f})}};
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);
@@ -321,9 +323,24 @@ void run()
             }
 
             {
+                int rotation_direction{};
+                if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+                    rotation_direction++;
+                if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+                    rotation_direction--;
+
+                if (rotation_direction != 0)
+                {
+                    float angle{Math::radians(rotation_direction * 45.0f * delta_time)};
+
+                    Matrix3 rotation_matrix{Matrix3{cam_matrix.inverted()} *
+                                            Math::x_rotation_matrix(angle) * Matrix3{cam_matrix}};
+                    cylinder_rotation = rotation_matrix * cylinder_rotation;
+                }
+
                 Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                     // Math::z_rotation_matrix(Math::radians(20.0f)) *
-                                     Math::scaling_matrix(Math::Vector3{1.0f, 1.0f, 0.8f})};
+                                     Matrix4{cylinder_rotation} *
+                                     Matrix4{Math::scaling_matrix(Vector3{1.0f, 1.0f, 0.8f})}};
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);

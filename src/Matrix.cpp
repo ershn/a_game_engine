@@ -227,6 +227,12 @@ Matrix4::Matrix4(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3, 
 {
 }
 
+Matrix4::Matrix4(const Matrix3 &matrix, const Vector3 &translation)
+    : _columns{Vector4{matrix[0], 0.0f}, Vector4{matrix[1], 0.0f}, Vector4{matrix[2], 0.0f},
+               Vector4{translation, 1.0f}}
+{
+}
+
 Matrix4::operator const float *() const
 {
     return static_cast<const float *>(_columns[0]);

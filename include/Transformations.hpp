@@ -5,11 +5,11 @@
 
 namespace Age::Math
 {
-Matrix4 scaling_matrix(Vector3 scaling);
+Matrix3 scaling_matrix(Vector3 scaling);
 
-Matrix4 x_rotation_matrix(float angle);
-Matrix4 y_rotation_matrix(float angle);
-Matrix4 z_rotation_matrix(float angle);
+Matrix3 x_rotation_matrix(float angle);
+Matrix3 y_rotation_matrix(float angle);
+Matrix3 z_rotation_matrix(float angle);
 
 Matrix4 translation_matrix(Vector3 pos);
 

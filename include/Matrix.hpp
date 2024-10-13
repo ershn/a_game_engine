@@ -77,6 +77,7 @@ class Matrix4
     Matrix4(float scalar);
     Matrix4(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3, const Vector4 &col4);
     Matrix4(const Matrix4 &matrix) = default;
+    explicit Matrix4(const Matrix3 &matrix, const Vector3 &translation = Vector3{});
 
     Matrix4 &operator=(const Matrix4 &rhs) = default;
 

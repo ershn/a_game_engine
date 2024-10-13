@@ -4,9 +4,9 @@
 
 namespace Age::Math
 {
-Matrix4 scaling_matrix(Vector3 scaling)
+Matrix3 scaling_matrix(Vector3 scaling)
 {
-    Matrix4 matrix{1.0f};
+    Matrix3 matrix{1.0f};
     matrix[0].x = scaling.x;
     matrix[1].y = scaling.y;
     matrix[2].z = scaling.z;
@@ -18,9 +18,9 @@ Matrix4 scaling_matrix(Vector3 scaling)
 // ^z
 // |
 // +-->y
-Matrix4 x_rotation_matrix(float angle)
+Matrix3 x_rotation_matrix(float angle)
 {
-    Matrix4 matrix{1.0f};
+    Matrix3 matrix{1.0f};
     float cosine = std::cos(angle);
     float sinus = std::sin(angle);
     matrix[1].y = cosine;
@@ -35,9 +35,9 @@ Matrix4 x_rotation_matrix(float angle)
 // ^x
 // |
 // +-->z
-Matrix4 y_rotation_matrix(float angle)
+Matrix3 y_rotation_matrix(float angle)
 {
-    Matrix4 matrix{1.0f};
+    Matrix3 matrix{1.0f};
     float cosine = std::cos(angle);
     float sinus = std::sin(angle);
     matrix[0].x = cosine;
@@ -52,9 +52,9 @@ Matrix4 y_rotation_matrix(float angle)
 // ^y
 // |
 // +-->x
-Matrix4 z_rotation_matrix(float angle)
+Matrix3 z_rotation_matrix(float angle)
 {
-    Matrix4 matrix{1.0f};
+    Matrix3 matrix{1.0f};
     float cosine = std::cos(angle);
     float sinus = std::sin(angle);
     matrix[0].x = cosine;
