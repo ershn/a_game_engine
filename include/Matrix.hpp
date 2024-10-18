@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "Quaternion.hpp"
 #include "Vector.hpp"
 
 namespace Age::Math

@@ -21,19 +21,19 @@ layout(std140) uniform FragmentPositionData
 out vec4 oColor;
 
 // unused
-vec3 camera_position_from_fragment_coord()
+vec3 cameraPositionFromFragmentCoord()
 {
-    vec4 ndc_position;
-    ndc_position.xy = 2.0 * gl_FragCoord.xy / uViewportDimensions - 1.0;
-    ndc_position.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / (gl_DepthRange.far - gl_DepthRange.near);
-    ndc_position.w = 1.0;
+    vec4 ndcPosition;
+    ndcPosition.xy = 2.0 * gl_FragCoord.xy / uViewportDimensions - 1.0;
+    ndcPosition.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / (gl_DepthRange.far - gl_DepthRange.near);
+    ndcPosition.w = 1.0;
 
-    vec4 clip_position = ndc_position / gl_FragCoord.w;
+    vec4 clipPosition = ndcPosition / gl_FragCoord.w;
 
-    return (uClipToCameraMatrix * clip_position).xyz;
+    return (uClipToCameraMatrix * clipPosition).xyz;
 }
 
-vec4 attenuated_light_intensity(in vec3 cameraPosition, out vec3 directionToLight)
+vec4 attenuatedLightIntensity(in vec3 cameraPosition, out vec3 directionToLight)
 {
     vec3 differenceToLight = uCameraLightPosition - cameraPosition;
     float distanceToLightSquare = dot(differenceToLight, differenceToLight);
@@ -47,19 +47,19 @@ void main()
     vec3 cameraNormal = normalize(iCameraNormal);
 
     vec3 directionToLight;
-    vec4 attenuatedLightIntensity = attenuated_light_intensity(cameraPosition, directionToLight);
+    vec4 attenuatedLight = attenuatedLightIntensity(cameraPosition, directionToLight);
 
     float incidenceAngleCos = dot(directionToLight, cameraNormal);
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0, 1.0);
 
     vec3 viewDirection = normalize(-cameraPosition);
-    vec3 lightReflectionDirection = reflect(-directionToLight, cameraNormal);
-    float phongTerm = dot(viewDirection, lightReflectionDirection);
-    phongTerm = clamp(phongTerm, 0.0, 1.0);
-    phongTerm = incidenceAngleCos != 0.0 ? phongTerm : 0.0;
-    phongTerm = pow(phongTerm, uSurfaceShininess);
+    vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
+    float blinnTerm = dot(halfAngleDirection, cameraNormal);
+    blinnTerm = clamp(blinnTerm, 0.0, 1.0);
+    blinnTerm = incidenceAngleCos != 0.0 ? blinnTerm : 0.0;
+    blinnTerm = pow(blinnTerm, uSurfaceShininess);
 
-    oColor = (iColor * 0.75) * attenuatedLightIntensity * incidenceAngleCos
-      + uSpecularColor * attenuatedLightIntensity * phongTerm
+    oColor = (iColor * 0.75) * attenuatedLight * incidenceAngleCos
+      + uSpecularColor * attenuatedLight * blinnTerm
       + iColor * uAmbientLightIntensity;
 }

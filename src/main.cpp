@@ -4,12 +4,14 @@
 
 #include <algorithm>
 #include <iostream>
+#include <limits>
 
 #include "FlyCamera.hpp"
 #include "Math.hpp"
 #include "Matrix.hpp"
 #include "Mesh.hpp"
 #include "Meshes.hpp"
+#include "Quaternion.hpp"
 #include "Shaders.hpp"
 #include "SphericalCamera.hpp"
 #include "Transformations.hpp"
@@ -18,6 +20,7 @@
 using namespace Age;
 using Math::Matrix3;
 using Math::Matrix4;
+using Math::Quaternion;
 using Math::Vector2;
 using Math::Vector3;
 using Math::Vector4;
@@ -231,7 +234,9 @@ void run()
     Gfx::SphericalCamera spherical_camera{
         {0.0f, 2.0f, 0.0f}, {Math::radians(60.0f), 0.0f}, 5.0f, world_up};
 
-    Matrix3 cylinder_rotation{1.0f};
+    Quaternion cylinder_world_rotation{
+        Math::axis_angle_quaternion(Vector3{0.0f, 0.0f, 1.0f}, Math::radians(-20.0f))};
+    float cylinder_shininess{3.0f};
 
     float last_frame_time{};
     while (!glfwWindowShouldClose(window))
@@ -268,6 +273,13 @@ void run()
         // fly_camera.add_axial_movement(axial_movement * camera_speed * delta_time);
 
         Matrix4 cam_matrix{spherical_camera.calc_camera_matrix()};
+
+        if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+            cylinder_shininess = std::clamp(cylinder_shininess + 10.0f * delta_time, 0.1f,
+                                            std::numeric_limits<float>::max());
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+            cylinder_shininess = std::clamp(cylinder_shininess - 10.0f * delta_time, 0.1f,
+                                            std::numeric_limits<float>::max());
 
         glClearColor(0.294f, 0.22f, 0.192f, 1.0f);
         glClearDepth(1.0f);
@@ -332,20 +344,20 @@ void run()
                 if (rotation_direction != 0)
                 {
                     float angle{Math::radians(rotation_direction * 45.0f * delta_time)};
-
-                    Matrix3 rotation_matrix{Matrix3{cam_matrix.inverted()} *
-                                            Math::x_rotation_matrix(angle) * Matrix3{cam_matrix}};
-                    cylinder_rotation = rotation_matrix * cylinder_rotation;
+                    Quaternion rotation{Math::axis_angle_quaternion({1.0f, 0.0f, 0.0f}, angle)};
+                    cylinder_world_rotation = Math::normalize(rotation * cylinder_world_rotation);
                 }
 
                 Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 2.0f, 0.0f}) *
-                                     Matrix4{cylinder_rotation} *
+                                     Matrix4{Math::rotation_matrix(cylinder_world_rotation)} *
                                      Matrix4{Math::scaling_matrix(Vector3{1.0f, 1.0f, 0.8f})}};
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);
                 fragment_lighting_shader.set_camera_normal_matrix(
                     Matrix3{camera_matrix}.invert().transpose());
+
+                fragment_lighting_shader.set_surface_shininess(cylinder_shininess);
 
                 cylinder_mesh.draw();
             }

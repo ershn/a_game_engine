@@ -1,12 +1,16 @@
 #pragma once
 
 #include "Matrix.hpp"
+#include "Quaternion.hpp"
 #include "Vector.hpp"
 
 namespace Age::Math
 {
+Quaternion axis_angle_quaternion(const Vector3 &axis, float angle);
+
 Matrix3 scaling_matrix(Vector3 scaling);
 
+Matrix3 rotation_matrix(const Quaternion &quat);
 Matrix3 x_rotation_matrix(float angle);
 Matrix3 y_rotation_matrix(float angle);
 Matrix3 z_rotation_matrix(float angle);

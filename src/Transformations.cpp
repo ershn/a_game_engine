@@ -4,12 +4,37 @@
 
 namespace Age::Math
 {
+Quaternion axis_angle_quaternion(const Vector3 &axis, float angle)
+{
+    Vector3 unit_axis{normalize(axis)};
+    float half_angle{angle / 2.0f};
+    float sin_half_angle{std::sin(half_angle)};
+
+    return Quaternion{std::cos(half_angle), sin_half_angle * unit_axis.x,
+                      sin_half_angle * unit_axis.y, sin_half_angle * unit_axis.z};
+}
+
 Matrix3 scaling_matrix(Vector3 scaling)
 {
     Matrix3 matrix{1.0f};
     matrix[0].x = scaling.x;
     matrix[1].y = scaling.y;
     matrix[2].z = scaling.z;
+    return matrix;
+}
+
+Matrix3 rotation_matrix(const Quaternion &quat)
+{
+    Matrix3 matrix{};
+    matrix[0].x = 1.0f - 2.0f * quat.y * quat.y - 2.0f * quat.z * quat.z;
+    matrix[0].y = 2.0f * quat.x * quat.y + 2.0f * quat.w * quat.z;
+    matrix[0].z = 2.0f * quat.x * quat.z - 2.0f * quat.w * quat.y;
+    matrix[1].x = 2.0f * quat.x * quat.y - 2.0f * quat.w * quat.z;
+    matrix[1].y = 1.0f - 2.0f * quat.x * quat.x - 2.0f * quat.z * quat.z;
+    matrix[1].z = 2.0f * quat.y * quat.z + 2.0f * quat.w * quat.x;
+    matrix[2].x = 2.0f * quat.x * quat.z + 2.0f * quat.w * quat.y;
+    matrix[2].y = 2.0f * quat.y * quat.z - 2.0f * quat.w * quat.x;
+    matrix[2].z = 1.0f - 2.0f * quat.x * quat.x - 2.0f * quat.y * quat.y;
     return matrix;
 }
 
