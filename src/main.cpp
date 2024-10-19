@@ -218,7 +218,7 @@ void run()
 
     const Gfx::Mesh &plane_mesh{Gfx::load_plane_mesh()};
     const Gfx::Mesh &cube_mesh{Gfx::load_cube_mesh()};
-    const Gfx::CylinderMesh cylinder_mesh{Vector3{1.0f, 1.0f, 1.0f}, 30};
+    const Gfx::CylinderMesh cylinder_mesh{Vector3{1.0f, 0.0f, 0.0f}, 30};
 
     Vector4 directional_light{Math::normalize(Vector4{0.866f, 0.5f, 0.0f, 0.0f})};
 
@@ -236,7 +236,7 @@ void run()
 
     Quaternion cylinder_world_rotation{
         Math::axis_angle_quaternion(Vector3{0.0f, 0.0f, 1.0f}, Math::radians(-20.0f))};
-    float cylinder_shininess{3.0f};
+    float cylinder_shininess{0.5f};
 
     float last_frame_time{};
     while (!glfwWindowShouldClose(window))
@@ -275,11 +275,9 @@ void run()
         Matrix4 cam_matrix{spherical_camera.calc_camera_matrix()};
 
         if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-            cylinder_shininess = std::clamp(cylinder_shininess + 10.0f * delta_time, 0.1f,
-                                            std::numeric_limits<float>::max());
+            cylinder_shininess = std::clamp(cylinder_shininess + delta_time, 0.01f, 1.0f);
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-            cylinder_shininess = std::clamp(cylinder_shininess - 10.0f * delta_time, 0.1f,
-                                            std::numeric_limits<float>::max());
+            cylinder_shininess = std::clamp(cylinder_shininess - delta_time, 0.01f, 1.0f);
 
         glClearColor(0.294f, 0.22f, 0.192f, 1.0f);
         glClearDepth(1.0f);
@@ -305,8 +303,8 @@ void run()
             fragment_lighting_shader.set_light_intensity(light_intensity);
             fragment_lighting_shader.set_light_attenuation(light_attenuation);
             fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
-            fragment_lighting_shader.set_specular_color(Vector4{0.25, 0.25, 0.25, 1.0});
-            fragment_lighting_shader.set_surface_shininess(5.0f);
+            fragment_lighting_shader.set_specular_color(Vector4{1.0f, 1.0f, 1.0f, 1.0f});
+            fragment_lighting_shader.set_surface_shininess(0.8f);
 
             {
                 Matrix4 world_matrix{Math::translation_matrix(Vector3{0.0f, 0.0f, 0.0f}) *
@@ -337,9 +335,9 @@ void run()
             {
                 int rotation_direction{};
                 if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-                    rotation_direction++;
+                    rotation_direction += 1;
                 if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-                    rotation_direction--;
+                    rotation_direction -= 1;
 
                 if (rotation_direction != 0)
                 {
@@ -357,6 +355,8 @@ void run()
                 fragment_lighting_shader.set_camera_normal_matrix(
                     Matrix3{camera_matrix}.invert().transpose());
 
+                if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+                    fragment_lighting_shader.set_specular_color(Vector4{1.0f, 0.0f, 0.0f, 1.0f});
                 fragment_lighting_shader.set_surface_shininess(cylinder_shininess);
 
                 cylinder_mesh.draw();

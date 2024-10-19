@@ -53,13 +53,16 @@ void main()
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0, 1.0);
 
     vec3 viewDirection = normalize(-cameraPosition);
-    vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
-    float blinnTerm = dot(halfAngleDirection, cameraNormal);
-    blinnTerm = clamp(blinnTerm, 0.0, 1.0);
-    blinnTerm = incidenceAngleCos != 0.0 ? blinnTerm : 0.0;
-    blinnTerm = pow(blinnTerm, uSurfaceShininess);
 
-    oColor = (iColor * 0.75) * attenuatedLight * incidenceAngleCos
-      + uSpecularColor * attenuatedLight * blinnTerm
+    vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
+    float halfAngle = acos(dot(cameraNormal, halfAngleDirection));
+
+    float gaussianExponent = halfAngle / uSurfaceShininess;
+    gaussianExponent = -(gaussianExponent * gaussianExponent);
+    float gaussianTerm = exp(gaussianExponent);
+    gaussianTerm = incidenceAngleCos != 0.0 ? gaussianTerm : 0.0;
+
+    oColor = iColor * attenuatedLight * 0.75 * incidenceAngleCos
+      + uSpecularColor * attenuatedLight * 0.25 * gaussianTerm
       + iColor * uAmbientLightIntensity;
 }
