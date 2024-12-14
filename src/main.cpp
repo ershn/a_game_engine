@@ -6,12 +6,15 @@
 #include <iostream>
 #include <limits>
 
+#include "Components.hpp"
+#include "ECS.hpp"
 #include "FlyCamera.hpp"
 #include "Math.hpp"
 #include "Matrix.hpp"
 #include "Mesh.hpp"
 #include "Meshes.hpp"
 #include "Quaternion.hpp"
+#include "Rendering.hpp"
 #include "Shaders.hpp"
 #include "SphericalCamera.hpp"
 #include "Transformations.hpp"
@@ -145,6 +148,8 @@ class GlfwInitializer final
 
 void run()
 {
+    ECS::init_ecs();
+
     GlfwInitializer glfw_initializer{error_callback};
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -160,19 +165,15 @@ void run()
     if (version == 0)
         throw std::runtime_error("OpenGL loading failed");
 
-    std::cout << "Loaded OpenGL " << GLAD_VERSION_MAJOR(version) << "."
-              << GLAD_VERSION_MINOR(version) << std::endl;
+    std::cout << "Loaded OpenGL " << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << std::endl;
 
-    Gfx::NoLightingShader no_lighting_shader{"shaders/no_lighting.vert",
-                                             "shaders/no_lighting.frag"};
+    Gfx::NoLightingShader no_lighting_shader{"shaders/no_lighting.vert", "shaders/no_lighting.frag"};
     no_lighting_shader.bind_shared_matrices_block(0);
 
-    Gfx::NoLightingColorShader no_lighting_color_shader{"shaders/no_lighting_color.vert",
-                                                        "shaders/no_lighting.frag"};
+    Gfx::NoLightingColorShader no_lighting_color_shader{"shaders/no_lighting_color.vert", "shaders/no_lighting.frag"};
     no_lighting_color_shader.bind_shared_matrices_block(0);
 
-    Gfx::DiffuseLightingShader diffuse_lighting_shader{"shaders/diffuse_lighting.vert",
-                                                       "shaders/no_lighting.frag"};
+    Gfx::DiffuseLightingShader diffuse_lighting_shader{"shaders/diffuse_lighting.vert", "shaders/no_lighting.frag"};
     diffuse_lighting_shader.bind_shared_matrices_block(0);
 
     Gfx::FragmentLightingShader fragment_lighting_shader{"shaders/fragment_lighting.vert",
@@ -231,11 +232,9 @@ void run()
     Vector3 world_up{0.0f, 1.0f, 0.0f};
     // Gfx::FlyCamera fly_camera{{0.0f, 2.0f, 2.0f}, {Math::radians(90.0f), 0.0f}, world_up};
     // const float camera_speed{10.0f};
-    Gfx::SphericalCamera spherical_camera{
-        {0.0f, 2.0f, 0.0f}, {Math::radians(60.0f), 0.0f}, 5.0f, world_up};
+    Gfx::SphericalCamera spherical_camera{{0.0f, 2.0f, 0.0f}, {Math::radians(60.0f), 0.0f}, 5.0f, world_up};
 
-    Quaternion cylinder_world_rotation{
-        Math::axis_angle_quaternion(Vector3{0.0f, 0.0f, 1.0f}, Math::radians(-20.0f))};
+    Quaternion cylinder_world_rotation{Math::axis_angle_quaternion(Vector3{0.0f, 0.0f, 1.0f}, Math::radians(-20.0f))};
     float cylinder_shininess{0.5f};
 
     float last_frame_time{};
@@ -298,8 +297,7 @@ void run()
         {
             Gfx::Shader::Use use{fragment_lighting_shader};
 
-            fragment_lighting_shader.set_camera_light_position(
-                Math::xyz(cam_matrix * point_light_world_position));
+            fragment_lighting_shader.set_camera_light_position(Math::xyz(cam_matrix * point_light_world_position));
             fragment_lighting_shader.set_light_intensity(light_intensity);
             fragment_lighting_shader.set_light_attenuation(light_attenuation);
             fragment_lighting_shader.set_ambient_light_intensity(ambient_light_intensity);
@@ -313,8 +311,7 @@ void run()
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);
-                fragment_lighting_shader.set_camera_normal_matrix(
-                    Matrix3{camera_matrix}.invert().transpose());
+                fragment_lighting_shader.set_camera_normal_matrix(Matrix3{camera_matrix}.invert().transpose());
 
                 plane_mesh.draw();
             }
@@ -326,8 +323,7 @@ void run()
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);
-                fragment_lighting_shader.set_camera_normal_matrix(
-                    Matrix3{camera_matrix}.invert().transpose());
+                fragment_lighting_shader.set_camera_normal_matrix(Matrix3{camera_matrix}.invert().transpose());
 
                 cube_mesh.draw();
             }
@@ -352,8 +348,7 @@ void run()
 
                 Matrix4 camera_matrix{cam_matrix * world_matrix};
                 fragment_lighting_shader.set_camera_matrix(camera_matrix);
-                fragment_lighting_shader.set_camera_normal_matrix(
-                    Matrix3{camera_matrix}.invert().transpose());
+                fragment_lighting_shader.set_camera_normal_matrix(Matrix3{camera_matrix}.invert().transpose());
 
                 if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
                     fragment_lighting_shader.set_specular_color(Vector4{1.0f, 0.0f, 0.0f, 1.0f});

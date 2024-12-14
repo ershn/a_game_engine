@@ -111,6 +111,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\ershn\Documents\GameDev\OpenGL\Age\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,12 +136,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ECS.cpp" />
     <ClCompile Include="src\FlyCamera.cpp" />
+    <ClCompile Include="src\Hash.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Meshes.cpp" />
     <ClCompile Include="src\Quaternion.cpp" />
+    <ClCompile Include="src\Random.cpp" />
+    <ClCompile Include="src\Rendering.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Shaders.cpp" />
     <ClCompile Include="src\SphericalCamera.cpp" />
@@ -151,12 +156,19 @@
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Components.hpp" />
+    <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
+    <ClInclude Include="include\Hash.hpp" />
+    <ClInclude Include="include\IdGenerator.hpp" />
     <ClInclude Include="include\Math.hpp" />
     <ClInclude Include="include\Matrix.hpp" />
+    <ClInclude Include="include\Memory.hpp" />
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\Meshes.hpp" />
     <ClInclude Include="include\Quaternion.hpp" />
+    <ClInclude Include="include\Random.hpp" />
+    <ClInclude Include="include\Rendering.hpp" />
     <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="include\Shaders.hpp" />
     <ClInclude Include="include\SphericalCamera.hpp" />
