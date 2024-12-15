@@ -154,10 +154,39 @@ const GLushort cube_vertex_indices[] = {
 // clang-format on
 } // namespace
 
+inline namespace Old
+{
+const Mesh &load_plane_mesh()
+{
+    static const Mesh *plane_mesh{};
+
+    if (plane_mesh == nullptr)
+    {
+        plane_mesh = new Mesh{plane_vertex_positions, plane_vertex_colors,
+                              plane_vertex_normals,   sizeof(plane_vertex_positions) / sizeof(Vector3),
+                              plane_vertex_indices,   sizeof(plane_vertex_indices) / (sizeof(GLushort) * 3)};
+    }
+    return *plane_mesh;
+}
+
+const Mesh &load_cube_mesh()
+{
+    static const Mesh *cube_mesh{};
+
+    if (cube_mesh == nullptr)
+    {
+        cube_mesh = new Mesh{cube_vertex_positions, cube_vertex_colors,
+                             cube_vertex_normals,   sizeof(cube_vertex_positions) / sizeof(Vector3),
+                             cube_vertex_indices,   sizeof(cube_vertex_indices) / (sizeof(GLushort) * 3)};
+    }
+    return *cube_mesh;
+}
+} // namespace Old
+
 void create_elements_mesh(const Math::Vector3 *vertex_positions, const Math::Vector3 *vertex_colors,
                           const Math::Vector3 *vertex_normals, std::size_t vertex_count,
-                          const unsigned short *vertex_indexes, std::size_t vertex_index_count,
-                          MeshBuffer &mesh_buffer, MeshElements &mesh_elements)
+                          const unsigned short *vertex_indexes, std::size_t vertex_index_count, MeshBuffer &mesh_buffer,
+                          MeshElements &mesh_elements)
 {
     std::size_t attr_array_size{vertex_count * sizeof(Vector3)};
 
@@ -183,11 +212,9 @@ void create_elements_mesh(const Math::Vector3 *vertex_positions, const Math::Vec
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0,
-                          reinterpret_cast<const void *>(attr_array_size));
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<const void *>(attr_array_size));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0,
-                          reinterpret_cast<const void *>(attr_array_size * 2));
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<const void *>(attr_array_size * 2));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
 
     glBindVertexArray(0);
@@ -201,20 +228,17 @@ void create_plane_model(MeshBuffer &mesh_buffer, Model1MeshElements &model)
 {
     create_elements_mesh(plane_vertex_positions, plane_vertex_colors, plane_vertex_normals,
                          sizeof(plane_vertex_positions) / sizeof(Vector3), plane_vertex_indices,
-                         sizeof(plane_vertex_indices) / sizeof(GLushort), mesh_buffer,
-                         model.mesh_elements);
+                         sizeof(plane_vertex_indices) / sizeof(GLushort), mesh_buffer, model.mesh_elements);
 }
 
 void create_cube_model(MeshBuffer &mesh_buffer, Model1MeshElements &model)
 {
     create_elements_mesh(cube_vertex_positions, cube_vertex_colors, cube_vertex_normals,
                          sizeof(cube_vertex_positions) / sizeof(Vector3), cube_vertex_indices,
-                         sizeof(cube_vertex_indices) / sizeof(GLushort), mesh_buffer,
-                         model.mesh_elements);
+                         sizeof(cube_vertex_indices) / sizeof(GLushort), mesh_buffer, model.mesh_elements);
 }
 
-void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer,
-                           Model3MeshElements &model)
+void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, Model3MeshElements &model)
 {
     const Vector3 color{1.0f, 1.0f, 1.0f};
 
@@ -272,8 +296,7 @@ void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer,
         index_buffer[top_cap_index_offset + 1 + side_index] =
             static_cast<GLushort>(top_cap_vertex_offset + 1 + side_index);
     }
-    index_buffer[top_cap_index_offset + 1 + side_count] =
-        static_cast<GLushort>(top_cap_vertex_offset + 1);
+    index_buffer[top_cap_index_offset + 1 + side_count] = static_cast<GLushort>(top_cap_vertex_offset + 1);
 
     std::size_t bottom_cap_vertex_offset{top_cap_vertex_offset + 1 + side_count};
     std::size_t bottom_cap_color_offset{top_cap_color_offset + 1 + side_count};
@@ -296,19 +319,16 @@ void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer,
         index_buffer[bottom_cap_index_offset + 1 + side_index] =
             static_cast<GLushort>(bottom_cap_vertex_offset + 1 + side_index);
     }
-    index_buffer[bottom_cap_index_offset + 1 + side_count] =
-        static_cast<GLushort>(bottom_cap_vertex_offset + 1);
+    index_buffer[bottom_cap_index_offset + 1 + side_count] = static_cast<GLushort>(bottom_cap_vertex_offset + 1);
 
     glGenBuffers(1, &mesh_buffer.vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, mesh_buffer.vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(Vector3), vertex_buffer.get(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(Vector3), vertex_buffer.get(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &mesh_buffer.index_buffer_object);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(GLushort), index_buffer.get(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(GLushort), index_buffer.get(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glGenVertexArrays(1, &mesh_buffer.vertex_array_object);
@@ -318,27 +338,22 @@ void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer,
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0,
-                          reinterpret_cast<const GLvoid *>(color_offset * sizeof(Vector3)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<const GLvoid *>(color_offset * sizeof(Vector3)));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0,
-                          reinterpret_cast<const GLvoid *>(normal_offset * sizeof(Vector3)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<const GLvoid *>(normal_offset * sizeof(Vector3)));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
 
     glBindVertexArray(0);
 
-    model.mesh_elements[0] =
-        MeshElements{.rendering_mode = GL_TRIANGLE_STRIP,
-                     .element_count = static_cast<GLsizei>((side_count + 1) * 2),
-                     .buffer_offset = 0};
-    model.mesh_elements[1] =
-        MeshElements{.rendering_mode = GL_TRIANGLE_FAN,
-                     .element_count = static_cast<GLsizei>(side_count + 2),
-                     .buffer_offset = ((side_count + 1) * 2) * sizeof(GLushort)};
-    model.mesh_elements[2] =
-        MeshElements{.rendering_mode = GL_TRIANGLE_FAN,
-                     .element_count = static_cast<GLsizei>(side_count + 2),
-                     .buffer_offset = ((side_count + 1) * 2 + side_count + 2) * sizeof(GLushort)};
+    model.mesh_elements[0] = MeshElements{.rendering_mode = GL_TRIANGLE_STRIP,
+                                          .element_count = static_cast<GLsizei>((side_count + 1) * 2),
+                                          .buffer_offset = 0};
+    model.mesh_elements[1] = MeshElements{.rendering_mode = GL_TRIANGLE_FAN,
+                                          .element_count = static_cast<GLsizei>(side_count + 2),
+                                          .buffer_offset = ((side_count + 1) * 2) * sizeof(GLushort)};
+    model.mesh_elements[2] = MeshElements{.rendering_mode = GL_TRIANGLE_FAN,
+                                          .element_count = static_cast<GLsizei>(side_count + 2),
+                                          .buffer_offset = ((side_count + 1) * 2 + side_count + 2) * sizeof(GLushort)};
 }
 
 void load_primitive_models()
@@ -347,35 +362,4 @@ void load_primitive_models()
     create_model(CUBE_MODEL_ID, create_cube_model);
     create_model(CYLINDER_MODEL_ID, std::bind_front(create_cylinder_model, 30));
 }
-
-inline namespace Old
-{
-const Mesh &load_plane_mesh()
-{
-    static const Mesh *plane_mesh{};
-
-    if (plane_mesh == nullptr)
-    {
-        plane_mesh =
-            new Mesh{plane_vertex_positions, plane_vertex_colors,
-                     plane_vertex_normals,   sizeof(plane_vertex_positions) / sizeof(Vector3),
-                     plane_vertex_indices,   sizeof(plane_vertex_indices) / (sizeof(GLushort) * 3)};
-    }
-    return *plane_mesh;
-}
-
-const Mesh &load_cube_mesh()
-{
-    static const Mesh *cube_mesh{};
-
-    if (cube_mesh == nullptr)
-    {
-        cube_mesh =
-            new Mesh{cube_vertex_positions, cube_vertex_colors,
-                     cube_vertex_normals,   sizeof(cube_vertex_positions) / sizeof(Vector3),
-                     cube_vertex_indices,   sizeof(cube_vertex_indices) / (sizeof(GLushort) * 3)};
-    }
-    return *cube_mesh;
-}
-} // namespace Old
 } // namespace Age::Gfx

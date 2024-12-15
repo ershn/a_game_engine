@@ -10,15 +10,17 @@
 
 namespace Age::Gfx
 {
-class IMeshOld
+inline namespace Old
+{
+class IMesh
 {
   public:
-    virtual ~IMeshOld() = default;
+    virtual ~IMesh() = default;
 
     virtual void draw() const = 0;
 };
 
-class Mesh : public IMeshOld
+class Mesh : public IMesh
 {
     GLuint _vertex_array_object{};
     GLuint _vertex_buffer_object{};
@@ -32,7 +34,7 @@ class Mesh : public IMeshOld
     void draw() const override;
 };
 
-class CylinderMesh : public IMeshOld
+class CylinderMesh : public IMesh
 {
     std::size_t _side_count{};
     GLuint _vertex_array_object{};
@@ -44,6 +46,7 @@ class CylinderMesh : public IMeshOld
 
     void draw() const override;
 };
+} // namespace Old
 
 using ModelId = std::uint16_t;
 

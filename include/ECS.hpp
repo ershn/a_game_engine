@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <functional>
 #include <span>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -44,6 +45,8 @@ extern std::vector<Archetype> g_archetypes;
 
 extern std::array<std::vector<ArchetypeId>, COMPONENT_TYPE_COUNT> g_component_archetype_ids;
 extern std::array<std::vector<ComponentOffset>, COMPONENT_TYPE_COUNT> g_component_archetype_offsets;
+
+extern std::vector<EntityLocation> g_entity_locations;
 
 void init_ecs();
 
@@ -100,6 +103,33 @@ Archetype create_archetype(ArchetypeId archetype_id, std::span<const ComponentTy
 EntityId add_entity_to_archetype(ArchetypeId archetype_id, Archetype &archetype,
                                  std::span<const ComponentType> component_types, std::span<const void *> component_ptrs,
                                  std::span<const std::size_t> component_sizes);
+
+template <typename... TComponents, std::size_t... IS>
+std::tuple<TComponents &...> get_entity_components_impl(EntityId entity_id, std::index_sequence<IS...>)
+{
+    const EntityLocation &entity_location{g_entity_locations[entity_id]};
+    Archetype &archetype{g_archetypes[entity_location.archetype_id]};
+    std::size_t chunk_index{entity_location.entity_index / archetype.entity_count_per_chunk};
+    std::size_t chunk_entity_index{entity_location.entity_index % archetype.entity_count_per_chunk};
+    char *chunk_ptr{static_cast<char *>(archetype.chunks[chunk_index])};
+
+    std::array<const std::vector<ArchetypeId> *, sizeof...(TComponents)> cmpt_archetype_ids{
+        &g_component_archetype_ids[static_cast<std::size_t>(TComponents::TYPE)]...};
+    std::array<std::ptrdiff_t, sizeof...(TComponents)> cmpt_array_offsets{
+        (std::find(cmpt_archetype_ids[IS]->cbegin(), cmpt_archetype_ids[IS]->cend(), entity_location.archetype_id) -
+         cmpt_archetype_ids[IS]->cbegin())...};
+    std::array<std::size_t, sizeof...(TComponents)> cmpt_offsets{
+        g_component_archetype_offsets[static_cast<std::size_t>(TComponents::TYPE)][cmpt_array_offsets[IS]]...};
+
+    return std::tie(
+        static_cast<TComponents *>(static_cast<void *>(chunk_ptr + cmpt_offsets[IS]))[chunk_entity_index]...);
+}
+
+template <typename... TComponents>
+std::tuple<TComponents &...> get_entity_components(EntityId entity_id)
+{
+    return get_entity_components_impl<TComponents...>(entity_id, std::index_sequence_for<TComponents...>{});
+}
 
 template <typename... TComponents, std::size_t... ISLess1, std::size_t... IS>
 void process_components_impl(std::function<void(TComponents &...)> system_function, std::index_sequence<ISLess1...>,

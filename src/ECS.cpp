@@ -30,7 +30,7 @@ std::array<std::vector<ArchetypeId>, COMPONENT_TYPE_COUNT> g_component_archetype
 std::array<std::vector<ComponentOffset>, COMPONENT_TYPE_COUNT> g_component_archetype_offsets{};
 
 static Util::IdGenerator<EntityId> s_entity_id_generator{0};
-static std::vector<EntityLocation> s_entity_locations{};
+std::vector<EntityLocation> g_entity_locations{};
 
 void init_ecs()
 {
@@ -43,7 +43,7 @@ void init_ecs()
         g_component_archetype_offsets[index].reserve(8);
     }
 
-    s_entity_locations.reserve(1ULL << 14);
+    g_entity_locations.reserve(1ULL << 14);
 }
 
 ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_types,
@@ -146,10 +146,10 @@ EntityId add_entity_to_archetype(ArchetypeId archetype_id, Archetype &archetype,
 
     ++archetype.entity_count;
 
-    if (entity_id == s_entity_locations.size())
-        s_entity_locations.emplace_back(archetype_id, entity_index);
+    if (entity_id == g_entity_locations.size())
+        g_entity_locations.emplace_back(archetype_id, entity_index);
     else
-        s_entity_locations[entity_id] = {archetype_id, entity_index};
+        g_entity_locations[entity_id] = {archetype_id, entity_index};
 
     return entity_id;
 }

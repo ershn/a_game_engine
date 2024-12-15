@@ -18,14 +18,4 @@ void hash_combine(std::size_t &seed, std::size_t hash)
 {
     seed = hash_mix(seed + hash + 0x9e3779b97f4a7c15ULL);
 }
-
-std::size_t hash_combine(std::span<std::size_t> hashes)
-{
-    std::size_t seed{};
-    for (auto hash : hashes)
-    {
-        hash_combine(seed, hash);
-    }
-    return seed;
-}
 } // namespace Age::Util

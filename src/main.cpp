@@ -150,6 +150,8 @@ void run()
 {
     ECS::init_ecs();
 
+    /////////////////////////////////////////////////
+
     GlfwInitializer glfw_initializer{error_callback};
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

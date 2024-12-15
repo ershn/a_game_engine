@@ -11,6 +11,8 @@ namespace Age::Gfx
 {
 using Math::Vector3;
 
+inline namespace Old
+{
 Mesh::Mesh(const Vector3 *vertex_positions, const Vector3 *vertex_colors, const Vector3 *vertex_normals,
            std::size_t vertex_count, const unsigned short *vertex_indices, std::size_t primitive_count)
     : _primitive_count{primitive_count}
@@ -171,6 +173,7 @@ void CylinderMesh::draw() const
                    reinterpret_cast<const GLvoid *>(((_side_count + 1) * 2 + _side_count + 2) * sizeof(GLushort)));
     glBindVertexArray(0);
 }
+} // namespace Old
 
 static MeshBuffer &get_free_mesh_buffer(std::uint16_t &index);
 static Model1MeshElements &get_free_model_1_mesh_elements(std::uint16_t &index, ModelType &model_type);
