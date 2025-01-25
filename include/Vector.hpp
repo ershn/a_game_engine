@@ -16,7 +16,6 @@ struct Vector2
     Vector2();
     Vector2(float value);
     Vector2(float x, float y);
-    Vector2(const Vector2 &vec) = default;
     explicit Vector2(const Vector3 &vec);
 
     explicit operator const float *() const;
@@ -37,7 +36,6 @@ struct Vector3
     Vector3(float value);
     Vector3(float x, float y, float z);
     Vector3(const Vector2 &vec, float z);
-    Vector3(const Vector3 &vec) = default;
     explicit Vector3(const Vector4 &vec);
 
     explicit operator const float *() const;
@@ -59,7 +57,6 @@ struct Vector4
     Vector4(float value);
     Vector4(float x, float y, float z, float w);
     Vector4(const Vector3 &vec, float w);
-    Vector4(const Vector4 &vec) = default;
 
     explicit operator const float *() const;
 
@@ -110,68 +107,76 @@ float dot(const Vector4 &lhs, const Vector4 &rhs);
 
 Vector3 cross(const Vector3 &lhs, const Vector3 &rhs);
 
-template <typename T> float length(const T &vector)
+template <typename T>
+float length(const T &vector)
 {
     return std::sqrt(dot(vector, vector));
 }
 
-template <typename T> T normalize(const T &vector)
+template <typename T>
+T normalize(const T &vector)
 {
     return vector / length(vector);
 }
 
-template <typename T> float scalar_projection(const T &vector, const T &target)
+template <typename T>
+float scalar_projection(const T &vector, const T &target)
 {
     return dot(vector, target) / length(target);
 }
 
-template <typename T> T vector_projection(const T &vector, const T &target)
+template <typename T>
+T vector_projection(const T &vector, const T &target)
 {
     return dot(vector, target) / dot(target, target) * target;
 }
 
-template <typename T> T reflect(const T &ray, const T &normal)
+template <typename T>
+T reflect(const T &ray, const T &normal)
 {
     return ray - vector_projection(ray, normal) * 2.0f;
 }
 
-#define VECTOR2_SWIZZLE(a, b)                                                                      \
-    template <typename T> Vector2 a##b(const T &vector)                                            \
-    {                                                                                              \
-        return Vector2{vector.a, vector.b};                                                        \
+#define VECTOR2_SWIZZLE(a, b)                                                                                          \
+    template <typename T>                                                                                              \
+    Vector2 a##b(const T &vector)                                                                                      \
+    {                                                                                                                  \
+        return Vector2{vector.a, vector.b};                                                                            \
     }
 
-#define VECTOR3_SWIZZLE(a, b, c)                                                                   \
-    template <typename T> Vector3 a##b##c(const T &vector)                                         \
-    {                                                                                              \
-        return Vector3{vector.a, vector.b, vector.c};                                              \
+#define VECTOR3_SWIZZLE(a, b, c)                                                                                       \
+    template <typename T>                                                                                              \
+    Vector3 a##b##c(const T &vector)                                                                                   \
+    {                                                                                                                  \
+        return Vector3{vector.a, vector.b, vector.c};                                                                  \
     }
 
-#define VECTOR4_SWIZZLE(a, b, c, d)                                                                \
-    template <typename T> Vector4 a##b##c##d(const T &vector)                                      \
-    {                                                                                              \
-        return Vector4{vector.a, vector.b, vector.c, vector.d};                                    \
+#define VECTOR4_SWIZZLE(a, b, c, d)                                                                                    \
+    template <typename T>                                                                                              \
+    Vector4 a##b##c##d(const T &vector)                                                                                \
+    {                                                                                                                  \
+        return Vector4{vector.a, vector.b, vector.c, vector.d};                                                        \
     }
 
-#define APPLY_XYZW_ARG1(FUNCTION, ...)                                                             \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+#define APPLY_XYZW_ARG1(FUNCTION, ...)                                                                                 \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                                             \
     FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
-#define APPLY_XYZW_ARG2(FUNCTION, ...)                                                             \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+#define APPLY_XYZW_ARG2(FUNCTION, ...)                                                                                 \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                                             \
     FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
-#define APPLY_XYZW_ARG3(FUNCTION, ...)                                                             \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+#define APPLY_XYZW_ARG3(FUNCTION, ...)                                                                                 \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                                             \
     FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
-#define APPLY_XYZW_ARG4(FUNCTION, ...)                                                             \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                         \
-    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                         \
+#define APPLY_XYZW_ARG4(FUNCTION, ...)                                                                                 \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) x)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) y)                                                                             \
+    FUNCTION(__VA_ARGS__ __VA_OPT__(, ) z)                                                                             \
     FUNCTION(__VA_ARGS__ __VA_OPT__(, ) w)
 
 APPLY_XYZW_ARG1(APPLY_XYZW_ARG2, VECTOR2_SWIZZLE)

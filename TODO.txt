@@ -1,0 +1,22 @@
+# Core
+- remove uses of exceptions
+- add a logging api
+- turn subsystems' global variables to stack objects ?
+
+# OpenGL
+- add missing wrapper functions and use them instead
+
+# Math
+- make the matrix methods free functions
+
+# ECS
+- entity processing: add a function to process only the first entity
+- entity processing: allow to specify component types as constraints without passing the values to the system function
+- allow to remove entities
+- allow to add and remove components from entities on the fly
+
+# Shader
+- add an error shader used in place of a shader that failed to compile
+
+# Performance improvement
+- pass ranges of components to system functions instead of individual components ?

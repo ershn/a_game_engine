@@ -11,12 +11,10 @@
 #include <vector>
 
 #include "Components.hpp"
-#include "Hash.hpp"
-#include "IdGenerator.hpp"
 
-namespace Age::ECS
+namespace Age::Core
 {
-constexpr std::uint16_t ARCHETYPE_CHUNK_SIZE{1U << 14};
+inline constexpr std::uint16_t ARCHETYPE_CHUNK_SIZE{1U << 14};
 
 using EntityId = std::uint64_t;
 using ArchetypeId = std::uint16_t;
@@ -43,12 +41,25 @@ struct ArchetypeRef
 
 extern std::vector<Archetype> g_archetypes;
 
-extern std::array<std::vector<ArchetypeId>, COMPONENT_TYPE_COUNT> g_component_archetype_ids;
-extern std::array<std::vector<ComponentOffset>, COMPONENT_TYPE_COUNT> g_component_archetype_offsets;
+extern std::vector<std::vector<ArchetypeId>> g_component_archetype_ids;
+extern std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets;
 
 extern std::vector<EntityLocation> g_entity_locations;
 
 void init_ecs();
+
+ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_types,
+                                     std::span<const std::size_t> component_sizes);
+
+Archetype create_archetype(ArchetypeId archetype_id,
+                           std::span<const ComponentType> component_types,
+                           std::span<const std::size_t> component_sizes);
+
+EntityId add_entity_to_archetype(ArchetypeId archetype_id,
+                                 Archetype &archetype,
+                                 std::span<const ComponentType> component_types,
+                                 std::span<const void *> component_ptrs,
+                                 std::span<const std::size_t> component_sizes);
 
 template <std::size_t N>
 struct SortedComponentAttrs
@@ -94,16 +105,6 @@ void remove_entity();
 void add_component_to_entity();
 void remove_component_from_entity();
 
-ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_types,
-                                     std::span<const std::size_t> component_sizes);
-
-Archetype create_archetype(ArchetypeId archetype_id, std::span<const ComponentType> component_types,
-                           std::span<const std::size_t> component_sizes);
-
-EntityId add_entity_to_archetype(ArchetypeId archetype_id, Archetype &archetype,
-                                 std::span<const ComponentType> component_types, std::span<const void *> component_ptrs,
-                                 std::span<const std::size_t> component_sizes);
-
 template <typename... TComponents, std::size_t... IS>
 std::tuple<TComponents &...> get_entity_components_impl(EntityId entity_id, std::index_sequence<IS...>)
 {
@@ -132,7 +133,8 @@ std::tuple<TComponents &...> get_entity_components(EntityId entity_id)
 }
 
 template <typename... TComponents, std::size_t... ISLess1, std::size_t... IS>
-void process_components_impl(std::function<void(TComponents &...)> system_function, std::index_sequence<ISLess1...>,
+void process_components_impl(std::function<void(TComponents &...)> system_function,
+                             std::index_sequence<ISLess1...>,
                              std::index_sequence<IS...>)
 {
     std::array<const std::vector<ArchetypeId> *, sizeof...(TComponents)> component_archetype_ids{
@@ -187,9 +189,18 @@ void process_components(std::function<void(TComponents &...)> system_function)
                                             std::index_sequence_for<TComponents...>{});
 }
 
+template <typename... TComponents>
+void process_components(void (*system_function)(TComponents &...))
+{
+    process_components_impl<TComponents...>(std::function{system_function},
+                                            std::make_index_sequence<sizeof...(TComponents) - 1>{},
+                                            std::index_sequence_for<TComponents...>{});
+}
+
 template <typename... TComponents, std::size_t... ISLess1, std::size_t... IS>
 void process_components_impl(std::function<void(EntityId, TComponents &...)> system_function,
-                             std::index_sequence<ISLess1...>, std::index_sequence<IS...>)
+                             std::index_sequence<ISLess1...>,
+                             std::index_sequence<IS...>)
 {
     std::array<const std::vector<ArchetypeId> *, sizeof...(TComponents)> component_archetype_ids{
         &g_component_archetype_ids[static_cast<std::size_t>(TComponents::TYPE)]...};
@@ -244,4 +255,12 @@ void process_components(std::function<void(EntityId, TComponents &...)> system_f
     process_components_impl<TComponents...>(system_function, std::make_index_sequence<sizeof...(TComponents) - 1>{},
                                             std::index_sequence_for<TComponents...>{});
 }
-} // namespace Age::ECS
+
+template <typename... TComponents>
+void process_components(void (*system_function)(EntityId, TComponents &...))
+{
+    process_components_impl<TComponents...>(std::function{system_function},
+                                            std::make_index_sequence<sizeof...(TComponents) - 1>{},
+                                            std::index_sequence_for<TComponents...>{});
+}
+} // namespace Age::Core

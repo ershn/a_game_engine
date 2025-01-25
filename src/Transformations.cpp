@@ -4,28 +4,22 @@
 
 namespace Age::Math
 {
-Quaternion axis_angle_quaternion(const Vector3 &axis, float angle)
+namespace
 {
-    Vector3 unit_axis{normalize(axis)};
-    float half_angle{angle / 2.0f};
-    float sin_half_angle{std::sin(half_angle)};
-
-    return Quaternion{std::cos(half_angle), sin_half_angle * unit_axis.x,
-                      sin_half_angle * unit_axis.y, sin_half_angle * unit_axis.z};
-}
-
-Matrix3 scaling_matrix(Vector3 scaling)
+template <typename TMatrix>
+TMatrix scaling_matrix(const Vector3 &scaling)
 {
-    Matrix3 matrix{1.0f};
+    TMatrix matrix{1.0f};
     matrix[0].x = scaling.x;
     matrix[1].y = scaling.y;
     matrix[2].z = scaling.z;
     return matrix;
 }
 
-Matrix3 rotation_matrix(const Quaternion &quat)
+template <typename TMatrix>
+TMatrix rotation_matrix(const Quaternion &quat)
 {
-    Matrix3 matrix{};
+    TMatrix matrix{1.0f};
     matrix[0].x = 1.0f - 2.0f * quat.y * quat.y - 2.0f * quat.z * quat.z;
     matrix[0].y = 2.0f * quat.x * quat.y + 2.0f * quat.w * quat.z;
     matrix[0].z = 2.0f * quat.x * quat.z - 2.0f * quat.w * quat.y;
@@ -36,6 +30,37 @@ Matrix3 rotation_matrix(const Quaternion &quat)
     matrix[2].y = 2.0f * quat.y * quat.z - 2.0f * quat.w * quat.x;
     matrix[2].z = 1.0f - 2.0f * quat.x * quat.x - 2.0f * quat.y * quat.y;
     return matrix;
+}
+} // namespace
+
+Quaternion axis_angle_quaternion(const Vector3 &axis, float angle)
+{
+    Vector3 unit_axis{normalize(axis)};
+    float half_angle{angle / 2.0f};
+    float sin_half_angle{std::sin(half_angle)};
+
+    return Quaternion{std::cos(half_angle), sin_half_angle * unit_axis.x, sin_half_angle * unit_axis.y,
+                      sin_half_angle * unit_axis.z};
+}
+
+Matrix3 scaling_matrix(const Vector3 &scaling)
+{
+    return scaling_matrix<Matrix3>(scaling);
+}
+
+Matrix4 affine_scaling_matrix(const Vector3 &scaling)
+{
+    return scaling_matrix<Matrix4>(scaling);
+}
+
+Matrix3 rotation_matrix(const Quaternion &quat)
+{
+    return rotation_matrix<Matrix3>(quat);
+}
+
+Matrix4 affine_rotation_matrix(const Quaternion &quat)
+{
+    return rotation_matrix<Matrix4>(quat);
 }
 
 // y to z positive angle
@@ -89,28 +114,28 @@ Matrix3 z_rotation_matrix(float angle)
     return matrix;
 }
 
-Matrix4 translation_matrix(Vector3 pos)
+Matrix4 translation_matrix(const Vector3 &pos)
 {
     Matrix4 matrix{1.0f};
     matrix[3] = Vector4{pos, 1.0f};
     return matrix;
 }
 
-void calc_zoom_values(float aspect_ratio, float vertical_fov, float &zoom_x, float &zoom_y)
+static Vector2 calc_zoom_values(float aspect_ratio, float vertical_fov)
 {
-    zoom_y = 1.0f / tan(vertical_fov / 2.0f);
-    zoom_x = zoom_y * (1.0f / aspect_ratio);
+    Vector2 zoom;
+    zoom.y = 1.0f / tan(vertical_fov / 2.0f);
+    zoom.x = zoom.y * (1.0f / aspect_ratio);
+    return zoom;
 }
 
 Matrix4 perspective_matrix(float z_near, float z_far, float aspect_ratio, float vertical_fov)
 {
-    float zoom_x;
-    float zoom_y;
-    calc_zoom_values(aspect_ratio, vertical_fov, zoom_x, zoom_y);
+    Vector2 zoom{calc_zoom_values(aspect_ratio, vertical_fov)};
 
     Matrix4 matrix{};
-    matrix[0].x = zoom_x;
-    matrix[1].y = zoom_y;
+    matrix[0].x = zoom.x;
+    matrix[1].y = zoom.y;
     matrix[2].z = (z_far + z_near) / (z_near - z_far);
     matrix[3].z = 2.0f * z_near * z_far / (z_near - z_far);
     matrix[2].w = -1.0f;
@@ -119,10 +144,13 @@ Matrix4 perspective_matrix(float z_near, float z_far, float aspect_ratio, float 
 
 void update_fov(Matrix4 &perspective_matrix, float aspect_ratio, float vertical_fov)
 {
-    calc_zoom_values(aspect_ratio, vertical_fov, perspective_matrix[0].x, perspective_matrix[1].y);
+    Vector2 zoom{calc_zoom_values(aspect_ratio, vertical_fov)};
+
+    perspective_matrix[0].x = zoom.x;
+    perspective_matrix[1].y = zoom.y;
 }
 
-Matrix4 camera_matrix(Vector3 camera_pos, Vector3 target_pos, Vector3 world_up)
+Matrix4 camera_matrix(const Vector3 &camera_pos, const Vector3 &target_pos, const Vector3 &world_up)
 {
     Matrix4 matrix{1.0f};
 

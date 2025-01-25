@@ -5,7 +5,7 @@ layout(location = 1) in vec4 aColor;
 
 uniform mat4 uModelToCameraMatrix;
 
-layout(std140) uniform SharedMatrices
+layout(std140) uniform ProjectionBlock
 {
     mat4 uCameraToClipMatrix;
 };

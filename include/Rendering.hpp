@@ -2,80 +2,85 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 
-#include "glad/gl.h"
-
-#include "Components.hpp"
 #include "ECS.hpp"
+#include "GLFW.hpp"
+#include "Material.hpp"
 #include "Matrix.hpp"
 #include "Mesh.hpp"
-#include "Quaternion.hpp"
-#include "Vector.hpp"
+#include "Shader.hpp"
+#include "Transform.hpp"
+#include "UniformBuffer.hpp"
 
 namespace Age::Gfx
 {
-struct ModelToCameraMatrixComponent
+struct ModelToCameraMatrix
 {
-    static constexpr ECS::ComponentType TYPE{ECS::ComponentType::MODEL_TO_CAMERA_MATRIX};
+    static constexpr auto TYPE{Core::ComponentType::MODEL_TO_CAMERA_MATRIX};
 
-    Math::Matrix4 modelToCameraMatrix{};
+    Math::Matrix4 matrix{};
 };
 
-void calc_model_to_camera_matrices(const ECS::TransformComponent &transform, ModelToCameraMatrixComponent &matrix);
-
-struct MaterialPropertiesComponent
+struct ModelToCameraNormalMatrix
 {
-    static constexpr ECS::ComponentType TYPE{ECS::ComponentType::MATERIAL_PROPERTIES};
+    static constexpr auto TYPE{Core::ComponentType::MODEL_TO_CAMERA_NORMAL_MATRIX};
 
-    Math::Vector3 diffuse_color{};
-    float shininess_factor{};
+    Math::Matrix3 matrix{};
 };
 
-struct ShaderComponent
+struct PointLight
 {
-    static constexpr ECS::ComponentType TYPE{ECS::ComponentType::SHADER};
+    static constexpr auto TYPE{Core::ComponentType::POINT_LIGHT};
 
-    GLuint shader_program{};
+    Math::Vector4 light_intensity{};
+    float light_attenuation{};
+    Math::Vector4 ambient_light_intensity{};
 };
 
-struct ModelComponent
+struct LightDataBufferRef
 {
-    static constexpr ECS::ComponentType TYPE{ECS::ComponentType::MODEL};
+    static constexpr auto TYPE{Core::ComponentType::LIGHT_DATA_BUFFER_REF};
 
-    ModelId model_id{};
+    UniformBufferId buffer_id{};
 };
 
 struct DrawCall
 {
-    const ECS::EntityId entity_id{};
-    const Math::Vector3 diffuse_color{};
-    const float shininess_factor{};
-    const GLuint shader_program{};
-    const GLuint vertex_array_object{};
-    const IModel *draw_command{};
-    const ModelType model_type{};
+    const Math::Matrix4 &model_to_camera_matrix;
+    const Math::Matrix3 *model_to_camera_normal_matrix;
+    MaterialId material_id{};
+    ModelId model_id{};
 };
 
-constexpr std::uint64_t SHADER_PROGRAM_ID_MASK{0xffff'ffff'0000'0000};
-constexpr std::uint64_t VERTEX_ARRAY_OBJECT_ID_MASK{0xffff'ffff};
+using DrawCallIndex = std::uint32_t;
+using DrawCallSortKey = std::uint32_t;
 
 struct DrawCallKey
 {
-    const DrawCall &draw_call;
-    const std::uint64_t sort_key{};
+    DrawCallIndex index{std::numeric_limits<DrawCallIndex>::max()};
+    DrawCallSortKey sort_key{std::numeric_limits<DrawCallSortKey>::max()};
 };
 
-struct RenderComponent
+struct Renderer
 {
-    static constexpr ECS::ComponentType TYPE{ECS::ComponentType::RENDER};
+    static constexpr auto TYPE{Core::ComponentType::RENDERER};
 
-    const DrawCallKey draw_call_key;
+    DrawCallKey draw_call_key{};
+    bool is_active{};
 };
 
-void add_entity_to_rendering(ECS::EntityId entity_id);
-void remove_entity_from_rendering(ECS::EntityId entity_id);
+void init_rendering_system(GLFWwindow *window);
 
-void queue_draw_calls(const RenderComponent *, DrawCallKey *, std::size_t count);
-void sort_draw_calls(DrawCallKey *, std::size_t count);
-void execute_draw_calls(const DrawCallKey *, std::size_t count);
+void init_renderer(Renderer &renderer,
+                   const Math::Matrix4 &model_to_camera_matrix,
+                   MaterialId material_id,
+                   ModelId model_id);
+void init_renderer(Renderer &renderer,
+                   const Math::Matrix4 &model_to_camera_matrix,
+                   const Math::Matrix3 &model_to_camera_normal_matrix,
+                   MaterialId material_id,
+                   ModelId model_id);
+
+void render();
 } // namespace Age::Gfx

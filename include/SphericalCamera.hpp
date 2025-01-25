@@ -1,33 +1,26 @@
 #pragma once
 
+#include "Camera.hpp"
+#include "Input.hpp"
 #include "Math.hpp"
-#include "Matrix.hpp"
+#include "SphericalCoord.hpp"
 #include "Vector.hpp"
 
 namespace Age::Gfx
 {
-class SphericalCamera
+struct SphericalCamera
 {
-    const float MIN_PITCH{Math::radians(0.1f)};
-    const float MAX_PITCH{Math::radians(179.9f)};
+    static constexpr auto TYPE{Core::ComponentType::SPHERICAL_CAMERA};
 
-    Math::Vector3 _origin{};
-    Math::Vector2 _angles{};
-    float _distance{};
-    Math::Vector3 _position{};
+    float min_pitch{Math::radians(0.1f)};
+    float max_pitch{Math::radians(179.9f)};
 
-    const Math::Vector3 _world_up{};
-
-  public:
-    SphericalCamera(const Math::Vector3 &origin, const Math::Vector2 &angles, float distance,
-                    const Math::Vector3 &world_up);
-
-    void add_angles(const Math::Vector2 &angles);
-    void add_distance(float distance);
-
-    Math::Matrix4 calc_camera_matrix() const;
-
-  private:
-    void update_position();
+    Math::Vector3 origin{};
+    Math::SphericalCoord spherical_coord{};
+    Math::Vector3 cartesian_coord{};
 };
+
+void update_spherical_camera_via_input(const Input::MouseInput &mouse_input, SphericalCamera &spherical_camera);
+
+void calc_spherical_camera_matrix(const SphericalCamera &spherical_camera, WorldToCameraMatrix &camera_matrix);
 } // namespace Age::Gfx

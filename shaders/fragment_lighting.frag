@@ -4,15 +4,19 @@ smooth in vec4 iCameraPosition;
 smooth in vec4 iColor;
 smooth in vec3 iCameraNormal;
 
-uniform vec3 uCameraLightPosition;
-uniform vec4 uLightIntensity;
-uniform float uLightAttenuation;
-uniform vec4 uAmbientLightIntensity;
 uniform vec4 uSpecularColor;
 uniform float uSurfaceShininess;
 
+layout(std140) uniform LightDataBlock
+{
+    vec4 uLightIntensity;
+    vec4 uAmbientLightIntensity;
+    vec3 uCameraLightPosition;
+    float uLightAttenuation;
+};
+
 // unused
-layout(std140) uniform FragmentPositionData
+layout(std140) uniform FragmentPositionDataBlock
 {
     mat4 uClipToCameraMatrix;
     ivec2 uViewportDimensions;

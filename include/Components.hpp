@@ -2,32 +2,32 @@
 
 #include <cstdint>
 
-#include "Quaternion.hpp"
-#include "Vector.hpp"
-
-namespace Age::ECS
+namespace Age::Core
 {
 enum class ComponentType : std::uint16_t
 {
     TRANSFORM,
     MODEL_TO_CAMERA_MATRIX,
-    MATERIAL_PROPERTIES,
-    SHADER,
+    MODEL_TO_CAMERA_NORMAL_MATRIX,
+
+    MATERIAL,
+
     MODEL,
-    RENDER,
 
-    // Last value
-    COUNT
+    WORLD_TO_CAMERA_MATRIX,
+    CAMERA_TO_CLIP_MATRIX,
+    CAMERA,
+    PROJECTION_BUFFER,
+
+    POINT_LIGHT,
+    LIGHT_DATA_BUFFER_REF,
+
+    RENDERER,
+
+    SPHERICAL_CAMERA,
+
+    MOUSE_INPUT,
+
+    LAST_VALUE
 };
-
-constexpr std::size_t COMPONENT_TYPE_COUNT{static_cast<std::size_t>(ComponentType::COUNT)};
-
-struct TransformComponent
-{
-    static constexpr ComponentType TYPE{ComponentType::TRANSFORM};
-
-    Math::Vector3 position{};
-    Math::Quaternion orientation{};
-    Math::Vector3 scale{};
-};
-} // namespace Age::ECS
+} // namespace Age::Core

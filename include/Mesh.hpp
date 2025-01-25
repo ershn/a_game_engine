@@ -3,66 +3,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <span>
+#include <vector>
 
-#include "glad/gl.h"
-
-#include "Vector.hpp"
+#include "ECS.hpp"
+#include "OpenGL.hpp"
 
 namespace Age::Gfx
 {
-inline namespace Old
-{
-class IMesh
-{
-  public:
-    virtual ~IMesh() = default;
-
-    virtual void draw() const = 0;
-};
-
-class Mesh : public IMesh
-{
-    GLuint _vertex_array_object{};
-    GLuint _vertex_buffer_object{};
-    GLuint _index_buffer_object{};
-    std::size_t _primitive_count{};
-
-  public:
-    Mesh(const Math::Vector3 *vertex_positions, const Math::Vector3 *vertex_colors, const Math::Vector3 *vertex_normals,
-         std::size_t vertex_count, const unsigned short *vertex_indices, std::size_t primitive_count);
-
-    void draw() const override;
-};
-
-class CylinderMesh : public IMesh
-{
-    std::size_t _side_count{};
-    GLuint _vertex_array_object{};
-    GLuint _vertex_buffer_object{};
-    GLuint _index_buffer_object{};
-
-  public:
-    CylinderMesh(const Math::Vector3 &color, std::size_t side_count);
-
-    void draw() const override;
-};
-} // namespace Old
-
-using ModelId = std::uint16_t;
-
-enum class ModelType : std::uint8_t
-{
-    MESH_ELEMENTS_1,
-    MESH_ELEMENTS_3
-};
-
-struct ModelIndex
-{
-    std::uint16_t mesh_buffer_index{};
-    std::uint16_t model_index{};
-    ModelType model_type{};
-};
-
 struct MeshBuffer
 {
     GLuint vertex_array_object{};
@@ -70,31 +18,65 @@ struct MeshBuffer
     GLuint index_buffer_object{};
 };
 
-struct MeshElements
+struct Mesh
 {
     GLenum rendering_mode{};
     GLsizei element_count{};
     std::size_t buffer_offset{};
 };
 
-struct IModel
+using ModelId = std::uint16_t;
+
+inline constexpr ModelId USER_MODEL_START_ID{32};
+
+struct Model
 {
+    std::uint32_t mesh_offset{};
+    std::uint16_t mesh_count{};
+    std::uint16_t mesh_buffer_index{};
 };
 
-struct Model1MeshElements : public IModel
+struct ModelRef
 {
-    MeshElements mesh_elements{};
+    static constexpr auto TYPE{Core::ComponentType::MODEL};
+
+    ModelId model_id{};
 };
 
-struct Model3MeshElements : public IModel
+struct DrawCommand
 {
-    MeshElements mesh_elements[3]{};
+    GLuint vertex_array_object{};
+    std::span<const Mesh> meshes{};
 };
+
+extern std::vector<Mesh> g_meshes;
+extern std::vector<Model> g_models;
 
 void init_mesh_system();
 
-void create_model(ModelId model_id, std::function<void(MeshBuffer &, Model1MeshElements &)> model_creator);
-void create_model(ModelId model_id, std::function<void(MeshBuffer &, Model3MeshElements &)> model_creator);
+MeshBuffer &create_mesh_buffer(std::uint16_t &index);
 
-void get_model(ModelId model_id, GLuint &vertex_array_object, ModelType &model_type, IModel &model);
+template <std::uint16_t MeshCount>
+std::span<Mesh, MeshCount> create_meshes(std::uint32_t &offset)
+{
+    offset = static_cast<std::uint32_t>(g_meshes.size());
+    g_meshes.resize(g_meshes.size() + MeshCount);
+    return std::span<Mesh, MeshCount>{g_meshes.begin() + offset, MeshCount};
+}
+
+template <std::uint16_t MeshCount>
+void create_model(ModelId model_id, std::function<void(MeshBuffer &, std::span<Mesh, MeshCount>)> model_creator)
+{
+    if (model_id >= g_models.size())
+        g_models.resize(model_id + 1);
+
+    Model &model{g_models[model_id]};
+    MeshBuffer &mesh_buffer{create_mesh_buffer(model.mesh_buffer_index)};
+    std::span<Mesh, MeshCount> meshes{create_meshes<MeshCount>(model.mesh_offset)};
+    model.mesh_count = MeshCount;
+
+    model_creator(mesh_buffer, meshes);
+}
+
+DrawCommand get_draw_command(ModelId model_id);
 } // namespace Age::Gfx

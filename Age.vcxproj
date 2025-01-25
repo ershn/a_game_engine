@@ -136,45 +136,68 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\ECS.cpp" />
     <ClCompile Include="src\FlyCamera.cpp" />
+    <ClCompile Include="src\game\Processing.cpp" />
+    <ClCompile Include="src\game\Game.cpp" />
+    <ClCompile Include="src\GLFW.cpp" />
     <ClCompile Include="src\Hash.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MainLoop.cpp" />
+    <ClCompile Include="src\Material.cpp" />
+    <ClCompile Include="src\MaterialInstances.cpp" />
     <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\Meshes.cpp" />
+    <ClCompile Include="src\MeshInstances.cpp" />
+    <ClCompile Include="src\Input.cpp" />
+    <ClCompile Include="src\OpenGL.cpp" />
     <ClCompile Include="src\Quaternion.cpp" />
     <ClCompile Include="src\Random.cpp" />
     <ClCompile Include="src\Rendering.cpp" />
     <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\Shaders.cpp" />
+    <ClCompile Include="src\ShaderInstances.cpp" />
     <ClCompile Include="src\SphericalCamera.cpp" />
+    <ClCompile Include="src\SphericalCoord.cpp" />
     <ClCompile Include="src\third_parties\gl.c" />
+    <ClCompile Include="src\Time.cpp" />
     <ClCompile Include="src\Transformations.cpp" />
     <ClCompile Include="src\UniformBuffer.cpp" />
-    <ClCompile Include="src\UniformBuffers.cpp" />
+    <ClCompile Include="src\UniformBufferInstances.cpp" />
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Camera.hpp" />
     <ClInclude Include="include\Components.hpp" />
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
+    <ClInclude Include="include\game\Processing.hpp" />
+    <ClInclude Include="include\game\Game.hpp" />
+    <ClInclude Include="include\GLFW.hpp" />
     <ClInclude Include="include\Hash.hpp" />
     <ClInclude Include="include\IdGenerator.hpp" />
+    <ClInclude Include="include\Input.hpp" />
+    <ClInclude Include="include\MainLoop.hpp" />
+    <ClInclude Include="include\Material.hpp" />
+    <ClInclude Include="include\MaterialInstances.hpp" />
     <ClInclude Include="include\Math.hpp" />
     <ClInclude Include="include\Matrix.hpp" />
     <ClInclude Include="include\Memory.hpp" />
     <ClInclude Include="include\Mesh.hpp" />
-    <ClInclude Include="include\Meshes.hpp" />
+    <ClInclude Include="include\MeshInstances.hpp" />
+    <ClInclude Include="include\OpenGL.hpp" />
     <ClInclude Include="include\Quaternion.hpp" />
     <ClInclude Include="include\Random.hpp" />
     <ClInclude Include="include\Rendering.hpp" />
     <ClInclude Include="include\Shader.hpp" />
-    <ClInclude Include="include\Shaders.hpp" />
+    <ClInclude Include="include\ShaderInstances.hpp" />
     <ClInclude Include="include\SphericalCamera.hpp" />
+    <ClInclude Include="include\SphericalCoord.hpp" />
+    <ClInclude Include="include\Time.hpp" />
+    <ClInclude Include="include\Transform.hpp" />
     <ClInclude Include="include\Transformations.hpp" />
     <ClInclude Include="include\UniformBuffer.hpp" />
-    <ClInclude Include="include\UniformBuffers.hpp" />
+    <ClInclude Include="include\UniformBufferInstances.hpp" />
     <ClInclude Include="include\Vector.hpp" />
   </ItemGroup>
   <ItemGroup>

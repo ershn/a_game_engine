@@ -2,42 +2,52 @@
 #include <unordered_map>
 
 #include "ECS.hpp"
+#include "Hash.hpp"
+#include "IdGenerator.hpp"
 #include "Memory.hpp"
 
+#include "game/Game.hpp"
+
 template <>
-struct std::hash<std::span<const Age::ECS::ComponentType>>
+struct std::hash<std::span<const Age::Core::ComponentType>>
 {
-    inline std::size_t operator()(std::span<const Age::ECS::ComponentType> types) const noexcept
+    inline std::size_t operator()(std::span<const Age::Core::ComponentType> types) const noexcept
     {
         std::size_t seed{};
         for (auto type : types)
         {
-            Age::Util::hash_combine(seed, std::hash<Age::ECS::ComponentType>{}(type));
+            Age::Util::hash_combine(seed, std::hash<Age::Core::ComponentType>{}(type));
         }
         return seed;
     }
 };
 
-namespace Age::ECS
+namespace Age::Core
 {
-static Memory::ChunkAllocator<1U << 18, ARCHETYPE_CHUNK_SIZE> s_chunk_allocator{};
+static Memory::PoolAllocator<1U << 18, ARCHETYPE_CHUNK_SIZE> s_chunk_allocator{};
 
 std::vector<Archetype> g_archetypes{};
 // Stored ArchetypeIds are +1
 static std::unordered_map<std::size_t, ArchetypeId> s_component_types_to_archetype_ids{};
 
-std::array<std::vector<ArchetypeId>, COMPONENT_TYPE_COUNT> g_component_archetype_ids{};
-std::array<std::vector<ComponentOffset>, COMPONENT_TYPE_COUNT> g_component_archetype_offsets{};
+std::vector<std::vector<ArchetypeId>> g_component_archetype_ids{};
+std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets{};
 
 static Util::IdGenerator<EntityId> s_entity_id_generator{0};
 std::vector<EntityLocation> g_entity_locations{};
 
 void init_ecs()
 {
+    std::size_t component_type_count{static_cast<std::size_t>(ComponentType::LAST_VALUE) +
+                                     Game::get_component_type_count()};
+
     g_archetypes.reserve(256);
     s_component_types_to_archetype_ids.reserve(256);
 
-    for (std::size_t index{}; index < COMPONENT_TYPE_COUNT; ++index)
+    g_component_archetype_ids.resize(component_type_count);
+    g_component_archetype_offsets.resize(component_type_count);
+
+    for (std::size_t index{}; index < component_type_count; ++index)
     {
         g_component_archetype_ids[index].reserve(8);
         g_component_archetype_offsets[index].reserve(8);
@@ -65,7 +75,8 @@ ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_ty
     }
 }
 
-Archetype create_archetype(ArchetypeId archetype_id, std::span<const ComponentType> component_types,
+Archetype create_archetype(ArchetypeId archetype_id,
+                           std::span<const ComponentType> component_types,
                            std::span<const std::size_t> component_sizes)
 {
     using Memory::padding_to;
@@ -116,8 +127,10 @@ Archetype create_archetype(ArchetypeId archetype_id, std::span<const ComponentTy
     return archetype;
 }
 
-EntityId add_entity_to_archetype(ArchetypeId archetype_id, Archetype &archetype,
-                                 std::span<const ComponentType> component_types, std::span<const void *> component_ptrs,
+EntityId add_entity_to_archetype(ArchetypeId archetype_id,
+                                 Archetype &archetype,
+                                 std::span<const ComponentType> component_types,
+                                 std::span<const void *> component_ptrs,
                                  std::span<const std::size_t> component_sizes)
 {
     EntityId entity_id{s_entity_id_generator.generate()};
@@ -153,4 +166,4 @@ EntityId add_entity_to_archetype(ArchetypeId archetype_id, Archetype &archetype,
 
     return entity_id;
 }
-} // namespace Age::ECS
+} // namespace Age::Core

@@ -6,87 +6,45 @@
 
 namespace Age::Gfx
 {
-Shader::Use::Use(Shader &program)
-    : _program{program}
+namespace
 {
-    _program.use_program();
+std::string read_file(std::string_view path)
+{
+    std::ifstream file{path.data()};
+    file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    std::stringstream stringstream{};
+    stringstream << file.rdbuf();
+    return std::string{std::move(stringstream).str()};
 }
 
-Shader::Use::~Use()
+GLuint create_shader(GLenum shader_type, std::string_view source_code)
 {
-    _program.use_program(false);
+    GLuint shader = glCreateShader(shader_type);
+    if (shader == 0)
+        throw std::runtime_error("Shader creation failed");
+
+    const char *source{source_code.data()};
+    glShaderSource(shader, 1, &source, nullptr);
+    glCompileShader(shader);
+
+    GLint compilation_succeeded;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compilation_succeeded);
+    if (!compilation_succeeded)
+    {
+        GLint log_length;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+
+        std::string log{static_cast<std::string::size_type>(log_length - 1), '\0', std::string::allocator_type{}};
+        glGetShaderInfoLog(shader, log_length, nullptr, log.data());
+        std::cerr << "Shader compilation failed:\n" << log;
+
+        throw std::runtime_error("Shader compilation failed");
+    }
+
+    return shader;
 }
 
-Shader::Shader(const std::string &vertex_shader_path, const std::string &fragment_shader_path)
-    : _program{create_program(vertex_shader_path, fragment_shader_path)}
-{
-}
-
-Shader::~Shader()
-{
-    glDeleteProgram(_program);
-}
-
-GLint Shader::get_uniform_location(const std::string &name) const
-{
-    GLint location{glGetUniformLocation(_program, name.data())};
-    if (location == -1)
-        std::cerr << "Uniform variable not found: " << name << '\n';
-    return location;
-}
-
-void Shader::set_uniform(GLint location, float value)
-{
-    glUniform1f(location, value);
-}
-
-void Shader::set_uniform(GLint location, const Math::Vector3 &vector)
-{
-    glUniform3fv(location, 1, static_cast<const GLfloat *>(vector));
-}
-
-void Shader::set_uniform(GLint location, const Math::Vector4 &vector)
-{
-    glUniform4fv(location, 1, static_cast<const GLfloat *>(vector));
-}
-
-void Shader::set_uniform(GLint location, const Math::Matrix3 &matrix)
-{
-    glUniformMatrix3fv(location, 1, false, static_cast<const GLfloat *>(matrix));
-}
-
-void Shader::set_uniform(GLint location, const Math::Matrix4 &matrix)
-{
-    glUniformMatrix4fv(location, 1, false, static_cast<const GLfloat *>(matrix));
-}
-
-GLuint Shader::get_uniform_block_index(const std::string &name) const
-{
-    GLuint index{glGetUniformBlockIndex(_program, name.data())};
-    if (index == GL_INVALID_INDEX)
-        std::cerr << "Uniform block not found: " << name << '\n';
-    return index;
-}
-
-void Shader::bind_uniform_block(GLuint block_index, GLuint block_binding)
-{
-    glUniformBlockBinding(_program, block_index, block_binding);
-}
-
-GLuint Shader::create_program(const std::string &vertex_shader_path,
-                              const std::string &fragment_shader_path) const
-{
-    std::string vertex_shader_source{read_file(vertex_shader_path)};
-    std::string fragment_shader_source{read_file(fragment_shader_path)};
-    GLuint vertex_shader{create_shader(GL_VERTEX_SHADER, vertex_shader_source)};
-    GLuint fragment_shader{create_shader(GL_FRAGMENT_SHADER, fragment_shader_source)};
-    GLuint program{create_program(vertex_shader, fragment_shader)};
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
-    return program;
-}
-
-GLuint Shader::create_program(GLuint vertex_shader, GLuint fragment_shader) const
+GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader)
 {
     GLuint program = glCreateProgram();
     if (program == 0)
@@ -104,8 +62,7 @@ GLuint Shader::create_program(GLuint vertex_shader, GLuint fragment_shader) cons
         GLint log_length;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
-        std::string log{static_cast<std::string::size_type>(log_length - 1), '\0',
-                        std::string::allocator_type{}};
+        std::string log{static_cast<std::string::size_type>(log_length - 1), '\0', std::string::allocator_type{}};
         glGetProgramInfoLog(program, log_length, nullptr, log.data());
         std::cerr << "Program linking failed:\n" << log;
 
@@ -117,46 +74,40 @@ GLuint Shader::create_program(GLuint vertex_shader, GLuint fragment_shader) cons
 
     return program;
 }
+} // namespace
 
-GLuint Shader::create_shader(GLenum shader_type, const std::string &source_code) const
+Shader::Shader(GLuint shader_program, unsigned int options)
+    : shader_program{shader_program}
+    , model_to_camera_matrix{get_uniform_location(shader_program, "uModelToCameraMatrix")}
+    , projection_block{get_uniform_block_index(shader_program, "ProjectionBlock")}
 {
-    GLuint shader = glCreateShader(shader_type);
-    if (shader == 0)
-        throw std::runtime_error("Shader creation failed");
-
-    const char *source{source_code.data()};
-    glShaderSource(shader, 1, &source, nullptr);
-    glCompileShader(shader);
-
-    GLint compilation_succeeded;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compilation_succeeded);
-    if (!compilation_succeeded)
-    {
-        GLint log_length;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-
-        std::string log{static_cast<std::string::size_type>(log_length - 1), '\0',
-                        std::string::allocator_type{}};
-        glGetShaderInfoLog(shader, log_length, nullptr, log.data());
-        std::cerr << "Shader compilation failed:\n" << log;
-
-        throw std::runtime_error("Shader compilation failed");
-    }
-
-    return shader;
+    if (options & SHADER_CAMERA_NORMAL_MATRIX)
+        model_to_camera_normal_matrix = get_uniform_location(shader_program, "uModelToCameraNormalMatrix");
+    if (options & SHADER_LIGHT_DATA_BLOCK)
+        light_data_block = get_uniform_block_index(shader_program, "LightDataBlock");
 }
 
-void Shader::use_program(bool use)
+std::vector<std::unique_ptr<Shader>> g_shaders{};
+
+void init_shader_system()
 {
-    glUseProgram(use ? _program : 0);
+    g_shaders.reserve(256);
 }
 
-std::string Shader::read_file(const std::string &path) const
+GLuint create_shader_program(std::string_view vertex_shader_path, std::string_view fragment_shader_path)
 {
-    std::ifstream file{path};
-    file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-    std::stringstream stringstream{};
-    stringstream << file.rdbuf();
-    return std::string{std::move(stringstream).str()};
+    std::string vertex_shader_source{read_file(vertex_shader_path)};
+    std::string fragment_shader_source{read_file(fragment_shader_path)};
+    GLuint vertex_shader{create_shader(GL_VERTEX_SHADER, vertex_shader_source)};
+    GLuint fragment_shader{create_shader(GL_FRAGMENT_SHADER, fragment_shader_source)};
+    GLuint program{create_shader_program(vertex_shader, fragment_shader)};
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+    return program;
+}
+
+const Shader &get_shader(ShaderId shader_id)
+{
+    return *g_shaders[shader_id];
 }
 } // namespace Age::Gfx

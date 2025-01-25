@@ -9,7 +9,7 @@ layout(location = 1) in vec3 aNormal;
 uniform mat4 uModelToCameraMatrix;
 uniform mat3 uNormalModelToCameraMatrix;
 
-layout(std140) uniform SharedMatrices
+layout(std140) uniform ProjectionBlock
 {
     mat4 uCameraToClipMatrix;
 };

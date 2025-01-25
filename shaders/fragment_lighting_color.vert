@@ -7,7 +7,7 @@ uniform mat4 uModelToCameraMatrix;
 uniform mat3 uModelToCameraNormalMatrix;
 uniform vec4 uColor;
 
-layout(std140) uniform SharedMatrices
+layout(std140) uniform ProjectionBlock
 {
     mat4 uCameraToClipMatrix;
 };

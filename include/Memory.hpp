@@ -12,19 +12,19 @@ constexpr std::size_t padding_to(std::size_t size)
 }
 
 template <std::size_t AllocSize, std::size_t ChunkSize>
-class ChunkAllocator
+class PoolAllocator
 {
     static_assert(ChunkSize <= AllocSize, "ChunkSize must be less than or equal to AllocSize");
     static_assert(AllocSize % ChunkSize == 0, "AllocSize must be divisible by ChunkSize");
 
     constexpr static std::size_t CHUNK_COUNT_PER_PAGE{AllocSize / ChunkSize};
 
-    char *_last_allocated_page{nullptr};
+    std::byte *_last_allocated_page{nullptr};
     std::size_t _page_next_free_chunk_index{};
     std::vector<void *> _returned_chunks{};
 
   public:
-    ChunkAllocator()
+    PoolAllocator()
     {
         _returned_chunks.reserve(16);
     }
@@ -40,7 +40,7 @@ class ChunkAllocator
 
         if (_last_allocated_page == nullptr || _page_next_free_chunk_index == CHUNK_COUNT_PER_PAGE)
         {
-            _last_allocated_page = new char[AllocSize];
+            _last_allocated_page = new std::byte[AllocSize];
             _page_next_free_chunk_index = 0;
         }
 

@@ -1,23 +1,45 @@
 #pragma once
 
-#include <glad/gl.h>
-
 #include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <vector>
+
+#include "OpenGL.hpp"
 
 namespace Age::Gfx
 {
-class UniformBuffer
+using UniformBufferId = std::uint16_t;
+
+GLuint create_uniform_buffer(std::size_t size);
+void write_uniform_buffer(GLuint uniform_buffer_object, std::size_t offset, const void *data, std::size_t size);
+void bind_uniform_buffer(GLuint uniform_buffer_object, std::size_t size, GLuint binding_point);
+
+struct UniformBuffer
 {
-    std::size_t _size{};
-    GLuint _uniform_buffer_object{};
+    GLuint uniform_buffer_object{};
+    std::size_t size{};
 
-  protected:
     UniformBuffer(std::size_t size);
-    virtual ~UniformBuffer() = default;
-
-    void copy_data(std::size_t offset, std::size_t size, const void *data);
-
-  public:
-    void bind(GLuint binding_point);
 };
+
+extern std::vector<std::unique_ptr<UniformBuffer>> g_uniform_buffers;
+
+void init_uniform_buffer_system();
+
+template <typename TUniformBuffer>
+void create_uniform_buffer(UniformBufferId buffer_id, GLuint binding_point)
+{
+    if (buffer_id >= g_uniform_buffers.size())
+        g_uniform_buffers.resize(buffer_id + 1);
+
+    g_uniform_buffers[buffer_id] = std::make_unique<TUniformBuffer>();
+
+    const UniformBuffer &uniform_buffer{*g_uniform_buffers[buffer_id]};
+    bind_uniform_buffer(uniform_buffer.uniform_buffer_object, uniform_buffer.size, binding_point);
+}
+
+const UniformBuffer &get_uniform_buffer(UniformBufferId buffer_id);
+
+void bind_uniform_buffer(const UniformBuffer &buffer, GLuint binding_point);
 } // namespace Age::Gfx
