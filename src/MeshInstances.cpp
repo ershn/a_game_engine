@@ -10,33 +10,33 @@ using Math::Vector3;
 namespace
 {
 // clang-format off
-const Vector3 plane_vertex_positions[] = {
+const Vector3 s_plane_vertex_positions[] = {
     {-0.5f,  0.5f, 0.0f},
     { 0.5f,  0.5f, 0.0f},
     {-0.5f, -0.5f, 0.0f},
     { 0.5f, -0.5f, 0.0f},
 };
 
-const Vector3 plane_vertex_colors[] = {
+const Vector3 s_plane_vertex_colors[] = {
     {0.859f, 0.533f, 0.416f},
     {0.859f, 0.533f, 0.416f},
     {0.859f, 0.533f, 0.416f},
     {0.859f, 0.533f, 0.416f},
 };
 
-const Vector3 plane_vertex_normals[] = {
+const Vector3 s_plane_vertex_normals[] = {
     {0.0f, 0.0f, 1.0f},
     {0.0f, 0.0f, 1.0f},
     {0.0f, 0.0f, 1.0f},
     {0.0f, 0.0f, 1.0f},
 };
 
-const GLushort plane_vertex_indices[] = {
+const GLushort s_plane_vertex_indices[] = {
     0, 1, 2,
     1, 3, 2,
 };
 
-const Vector3 cube_vertex_positions[] = {
+const Vector3 s_cube_vertex_positions[] = {
     {-0.5f,  0.5f,  0.5f},
     { 0.5f,  0.5f,  0.5f},
     {-0.5f, -0.5f,  0.5f},
@@ -68,7 +68,7 @@ const Vector3 cube_vertex_positions[] = {
     {-0.5f, -0.5f, -0.5f},
 };
 
-const Vector3 cube_vertex_colors[] = {
+const Vector3 s_cube_vertex_colors[] = {
     {0.000f, 0.980f, 0.529f},
     {0.000f, 0.980f, 0.529f},
     {0.000f, 0.980f, 0.529f},
@@ -100,7 +100,7 @@ const Vector3 cube_vertex_colors[] = {
     {0.239f, 0.309f, 0.278f},
 };
 
-const Vector3 cube_vertex_normals[] = {
+const Vector3 s_cube_vertex_normals[] = {
     { 0.0f,  0.0f,  1.0f},
     { 0.0f,  0.0f,  1.0f},
     { 0.0f,  0.0f,  1.0f},
@@ -132,7 +132,7 @@ const Vector3 cube_vertex_normals[] = {
     {-1.0f,  0.0f,  0.0f},
 };
 
-const GLushort cube_vertex_indices[] = {
+const GLushort s_cube_vertex_indices[] = {
     0, 1, 3,
     0, 3, 2,
 
@@ -154,63 +154,18 @@ const GLushort cube_vertex_indices[] = {
 // clang-format on
 } // namespace
 
-void create_elements_mesh(const Math::Vector3 *vertex_positions,
-                          const Math::Vector3 *vertex_colors,
-                          const Math::Vector3 *vertex_normals,
-                          std::size_t vertex_count,
-                          const unsigned short *vertex_indexes,
-                          std::size_t vertex_index_count,
-                          MeshBuffer &mesh_buffer,
-                          Mesh &mesh)
-{
-    std::size_t attr_array_size{vertex_count * sizeof(Vector3)};
-
-    glGenBuffers(1, &mesh_buffer.vertex_buffer_object);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffer.vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, attr_array_size * 3, nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, attr_array_size, vertex_positions);
-    glBufferSubData(GL_ARRAY_BUFFER, attr_array_size, attr_array_size, vertex_colors);
-    glBufferSubData(GL_ARRAY_BUFFER, attr_array_size * 2, attr_array_size, vertex_normals);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    std::size_t index_array_size{vertex_index_count * sizeof(unsigned short)};
-
-    glGenBuffers(1, &mesh_buffer.index_buffer_object);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_array_size, vertex_indexes, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    glGenVertexArrays(1, &mesh_buffer.vertex_array_object);
-    glBindVertexArray(mesh_buffer.vertex_array_object);
-
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffer.vertex_buffer_object);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<const void *>(attr_array_size));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<const void *>(attr_array_size * 2));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
-
-    glBindVertexArray(0);
-
-    mesh.rendering_mode = GL_TRIANGLES;
-    mesh.element_count = static_cast<GLsizei>(vertex_index_count);
-    mesh.buffer_offset = 0;
-}
-
 void create_plane_model(MeshBuffer &mesh_buffer, std::span<Mesh, 1> meshes)
 {
-    create_elements_mesh(plane_vertex_positions, plane_vertex_colors, plane_vertex_normals,
-                         sizeof(plane_vertex_positions) / sizeof(Vector3), plane_vertex_indices,
-                         sizeof(plane_vertex_indices) / sizeof(GLushort), mesh_buffer, meshes[0]);
+    create_elements_mesh(s_plane_vertex_positions, s_plane_vertex_colors, s_plane_vertex_normals,
+                         sizeof(s_plane_vertex_positions) / sizeof(Vector3), s_plane_vertex_indices,
+                         sizeof(s_plane_vertex_indices) / sizeof(GLushort), mesh_buffer, meshes[0]);
 }
 
 void create_cube_model(MeshBuffer &mesh_buffer, std::span<Mesh, 1> meshes)
 {
-    create_elements_mesh(cube_vertex_positions, cube_vertex_colors, cube_vertex_normals,
-                         sizeof(cube_vertex_positions) / sizeof(Vector3), cube_vertex_indices,
-                         sizeof(cube_vertex_indices) / sizeof(GLushort), mesh_buffer, meshes[0]);
+    create_elements_mesh(s_cube_vertex_positions, s_cube_vertex_colors, s_cube_vertex_normals,
+                         sizeof(s_cube_vertex_positions) / sizeof(Vector3), s_cube_vertex_indices,
+                         sizeof(s_cube_vertex_indices) / sizeof(GLushort), mesh_buffer, meshes[0]);
 }
 
 void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, std::span<Mesh, 3> meshes)

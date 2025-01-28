@@ -22,6 +22,11 @@ struct Vector2
 
     float operator[](size_t index) const;
     float &operator[](size_t index);
+
+    static const Vector2 right;
+    static const Vector2 left;
+    static const Vector2 up;
+    static const Vector2 down;
 };
 
 std::ostream &operator<<(std::ostream &out, const Vector2 &vector);
@@ -42,6 +47,13 @@ struct Vector3
 
     float operator[](size_t index) const;
     float &operator[](size_t index);
+
+    static const Vector3 right;
+    static const Vector3 left;
+    static const Vector3 up;
+    static const Vector3 down;
+    static const Vector3 forward;
+    static const Vector3 backward;
 };
 
 std::ostream &operator<<(std::ostream &out, const Vector3 &vector);
@@ -62,6 +74,13 @@ struct Vector4
 
     float operator[](size_t index) const;
     float &operator[](size_t index);
+
+    static const Vector4 right;
+    static const Vector4 left;
+    static const Vector4 up;
+    static const Vector4 down;
+    static const Vector4 forward;
+    static const Vector4 backward;
 };
 
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector);

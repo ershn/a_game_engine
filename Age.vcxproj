@@ -136,9 +136,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Path.cpp" />
+    <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\ECS.cpp" />
     <ClCompile Include="src\FlyCamera.cpp" />
+    <ClCompile Include="src\game\GroundMesh.cpp" />
     <ClCompile Include="src\game\Processing.cpp" />
     <ClCompile Include="src\game\Game.cpp" />
     <ClCompile Include="src\GLFW.cpp" />
@@ -171,6 +174,7 @@
     <ClInclude Include="include\Components.hpp" />
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
+    <ClInclude Include="include\game\GroundMesh.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
     <ClInclude Include="include\GLFW.hpp" />
@@ -186,6 +190,7 @@
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\MeshInstances.hpp" />
     <ClInclude Include="include\OpenGL.hpp" />
+    <ClInclude Include="include\Path.hpp" />
     <ClInclude Include="include\Quaternion.hpp" />
     <ClInclude Include="include\Random.hpp" />
     <ClInclude Include="include\Rendering.hpp" />

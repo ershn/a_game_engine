@@ -1,3 +1,5 @@
+#include <bitset>
+
 #include "Input.hpp"
 
 namespace Age::Input
@@ -24,9 +26,24 @@ void scroll_callback(GLFWwindow *window, double x_delta, double y_delta)
 Math::Vector2 s_scroll_delta{};
 } // namespace
 
-bool is_key_pressed(int key)
+bool is_key_up(int key)
+{
+    return glfwGetKey(s_window, key) == GLFW_RELEASE;
+}
+
+bool is_key_down(int key)
 {
     return glfwGetKey(s_window, key) == GLFW_PRESS;
+}
+
+bool is_key_pressed(int key, PressedKeys &pressed_keys)
+{
+    bool is_key_pressed{glfwGetKey(s_window, key) == GLFW_PRESS};
+    auto was_key_pressed{pressed_keys[key]};
+    if (is_key_pressed && was_key_pressed)
+        return false;
+    was_key_pressed = is_key_pressed;
+    return is_key_pressed;
 }
 
 Math::Vector2 get_cursor_position_delta(const MouseInput &mouse_input)

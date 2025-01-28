@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "ECS.hpp"
 #include "Quaternion.hpp"
 #include "Vector.hpp"
@@ -14,4 +16,6 @@ struct Transform
     Math::Quaternion orientation{1.0f, 0.0f, 0.0f, 0.0f};
     Math::Vector3 scale{1.0f};
 };
+
+std::ostream &operator<<(std::ostream &out, const Transform &transform);
 } // namespace Age::Core

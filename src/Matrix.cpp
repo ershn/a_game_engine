@@ -15,8 +15,7 @@ float determinant(const Vector3 &col1, const Vector3 &col2, const Vector3 &col3)
            col3.x * determinant(yz(col1), yz(col2));
 }
 
-float determinant(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3,
-                  const Vector4 &col4)
+float determinant(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3, const Vector4 &col4)
 {
     return col1.x * determinant(yzw(col2), yzw(col3), yzw(col4)) -
            col2.x * determinant(yzw(col1), yzw(col3), yzw(col4)) +
@@ -187,25 +186,26 @@ Matrix3 Matrix3::inverted() const
     adjugate[2].y = -Math::determinant(xy(_columns[0]), xy(_columns[2]));
     adjugate[2].z = Math::determinant(xy(_columns[0]), xy(_columns[1]));
 
-    float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y +
-                      _columns[2].x * adjugate[0].z};
+    float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y + _columns[2].x * adjugate[0].z};
     adjugate *= 1.0f / determinant;
     return adjugate;
 }
 
 std::ostream &operator<<(std::ostream &out, const Matrix3 &matrix)
 {
+    out << std::showpoint << '{';
     for (std::size_t i{}; i < 3; i++)
     {
-        out << '|';
         for (std::size_t j{}; j < 3; j++)
         {
-            if (j > 0)
-                out << ", ";
             out << matrix._columns[j][i];
+            if (j < 2)
+                out << ", ";
         }
-        out << "|\n";
+        if (i < 2)
+            out << ",\n ";
     }
+    out << "}\n";
     return out;
 }
 
@@ -228,8 +228,7 @@ Matrix4::Matrix4(const Vector4 &col1, const Vector4 &col2, const Vector4 &col3, 
 }
 
 Matrix4::Matrix4(const Matrix3 &matrix, const Vector3 &translation)
-    : _columns{Vector4{matrix[0], 0.0f}, Vector4{matrix[1], 0.0f}, Vector4{matrix[2], 0.0f},
-               Vector4{translation, 1.0f}}
+    : _columns{Vector4{matrix[0], 0.0f}, Vector4{matrix[1], 0.0f}, Vector4{matrix[2], 0.0f}, Vector4{translation, 1.0f}}
 {
 }
 
@@ -395,25 +394,27 @@ Matrix4 Matrix4::inverted() const
     adjugate[3].z = -Math::determinant(xyz(_columns[0]), xyz(_columns[1]), xyz(_columns[3]));
     adjugate[3].w = Math::determinant(xyz(_columns[0]), xyz(_columns[1]), xyz(_columns[2]));
 
-    float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y +
-                      _columns[2].x * adjugate[0].z + _columns[3].x * adjugate[0].w};
+    float determinant{_columns[0].x * adjugate[0].x + _columns[1].x * adjugate[0].y + _columns[2].x * adjugate[0].z +
+                      _columns[3].x * adjugate[0].w};
     adjugate *= 1.0f / determinant;
     return adjugate;
 }
 
 std::ostream &operator<<(std::ostream &out, const Matrix4 &matrix)
 {
+    out << std::showpoint << '{';
     for (std::size_t i{}; i < 4; i++)
     {
-        out << '|';
         for (std::size_t j{}; j < 4; j++)
         {
-            if (j > 0)
-                out << ", ";
             out << matrix._columns[j][i];
+            if (j < 3)
+                out << ", ";
         }
-        out << "|\n";
+        if (i < 3)
+            out << ",\n ";
     }
+    out << "}\n";
     return out;
 }
 } // namespace Age::Math

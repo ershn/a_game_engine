@@ -28,6 +28,8 @@ enum class ComponentType : std::uint16_t
 
     MOUSE_INPUT,
 
+    PATH_FOLLOWER,
+
     LAST_VALUE
 };
 } // namespace Age::Core

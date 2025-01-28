@@ -59,9 +59,14 @@ float &Vector2::operator[](size_t index)
     }
 }
 
+const Vector2 Vector2::right{1.0f, 0.0f};
+const Vector2 Vector2::left{-1.0f, 0.0f};
+const Vector2 Vector2::up{0.0f, 1.0f};
+const Vector2 Vector2::down{0.0f, -1.0f};
+
 std::ostream &operator<<(std::ostream &out, const Vector2 &vector)
 {
-    out << '(' << vector.x << ", " << vector.y << ')';
+    out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f}";
     return out;
 }
 
@@ -135,9 +140,16 @@ float &Vector3::operator[](size_t index)
     }
 }
 
+const Vector3 Vector3::right{1.0f, 0.0f, 0.0f};
+const Vector3 Vector3::left{-1.0f, 0.0f, 0.0f};
+const Vector3 Vector3::up{0.0f, 1.0f, 0.0f};
+const Vector3 Vector3::down{0.0f, -1.0f, 0.0f};
+const Vector3 Vector3::forward{0.0f, 0.0f, -1.0f};
+const Vector3 Vector3::backward{0.0f, 0.0f, 1.0f};
+
 std::ostream &operator<<(std::ostream &out, const Vector3 &vector)
 {
-    out << '(' << vector.x << ", " << vector.y << ", " << vector.z << ')';
+    out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f, " << vector.z << "f}";
     return out;
 }
 
@@ -212,9 +224,16 @@ float &Vector4::operator[](size_t index)
     }
 }
 
+const Vector4 Vector4::right{1.0f, 0.0f, 0.0f, 1.0f};
+const Vector4 Vector4::left{-1.0f, 0.0f, 0.0f, 1.0f};
+const Vector4 Vector4::up{0.0f, 1.0f, 0.0f, 1.0f};
+const Vector4 Vector4::down{0.0f, -1.0f, 0.0f, 1.0f};
+const Vector4 Vector4::forward{0.0f, 0.0f, -1.0f, 1.0f};
+const Vector4 Vector4::backward{0.0f, 0.0f, 1.0f, 1.0f};
+
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector)
 {
-    out << '(' << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ')';
+    out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f, " << vector.z << "f, " << vector.w << "f}";
     return out;
 }
 
@@ -397,7 +416,6 @@ float dot(const Vector4 &lhs, const Vector4 &rhs)
 
 Vector3 cross(const Vector3 &lhs, const Vector3 &rhs)
 {
-    return Vector3{lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
-                   lhs.x * rhs.y - lhs.y * rhs.x};
+    return Vector3{lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x};
 }
 } // namespace Age::Math

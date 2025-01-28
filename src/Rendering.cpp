@@ -183,20 +183,21 @@ void init_rendering_system(GLFWwindow *window)
 }
 
 void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &model_to_camera_matrix,
-                   MaterialId material_id,
-                   ModelId model_id)
+                   const ModelToCameraMatrix &model_to_camera_matrix,
+                   const MaterialRef &material,
+                   const ModelRef &model)
 {
-    init_renderer(renderer, model_to_camera_matrix, nullptr, material_id, model_id);
+    init_renderer(renderer, model_to_camera_matrix.matrix, nullptr, material.material_id, model.model_id);
 }
 
 void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &model_to_camera_matrix,
-                   const Math::Matrix3 &model_to_camera_normal_matrix,
-                   MaterialId material_id,
-                   ModelId model_id)
+                   const ModelToCameraMatrix &model_to_camera_matrix,
+                   const ModelToCameraNormalMatrix &model_to_camera_normal_matrix,
+                   const MaterialRef &material,
+                   const ModelRef &model)
 {
-    init_renderer(renderer, model_to_camera_matrix, &model_to_camera_normal_matrix, material_id, model_id);
+    init_renderer(renderer, model_to_camera_matrix.matrix, &model_to_camera_normal_matrix.matrix, material.material_id,
+                  model.model_id);
 }
 
 void render()

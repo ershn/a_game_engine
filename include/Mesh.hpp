@@ -54,6 +54,15 @@ extern std::vector<Model> g_models;
 
 void init_mesh_system();
 
+void create_elements_mesh(const Math::Vector3 *vertex_positions,
+                          const Math::Vector3 *vertex_colors,
+                          const Math::Vector3 *vertex_normals,
+                          std::size_t vertex_count,
+                          const unsigned short *vertex_indexes,
+                          std::size_t vertex_index_count,
+                          MeshBuffer &mesh_buffer,
+                          Mesh &mesh);
+
 MeshBuffer &create_mesh_buffer(std::uint16_t &index);
 
 template <std::uint16_t MeshCount>

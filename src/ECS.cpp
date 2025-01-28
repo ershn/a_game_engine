@@ -3,8 +3,6 @@
 
 #include "ECS.hpp"
 #include "Hash.hpp"
-#include "IdGenerator.hpp"
-#include "Memory.hpp"
 
 #include "game/Game.hpp"
 
@@ -24,7 +22,7 @@ struct std::hash<std::span<const Age::Core::ComponentType>>
 
 namespace Age::Core
 {
-static Memory::PoolAllocator<1U << 18, ARCHETYPE_CHUNK_SIZE> s_chunk_allocator{};
+Memory::PoolAllocator<1U << 18, ARCHETYPE_CHUNK_SIZE> g_chunk_allocator{};
 
 std::vector<Archetype> g_archetypes{};
 // Stored ArchetypeIds are +1
@@ -33,7 +31,7 @@ static std::unordered_map<std::size_t, ArchetypeId> s_component_types_to_archety
 std::vector<std::vector<ArchetypeId>> g_component_archetype_ids{};
 std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets{};
 
-static Util::IdGenerator<EntityId> s_entity_id_generator{0};
+Util::IdGenerator<EntityId> g_entity_id_generator{0};
 std::vector<EntityLocation> g_entity_locations{};
 
 void init_ecs()
@@ -125,45 +123,5 @@ Archetype create_archetype(ArchetypeId archetype_id,
     }
 
     return archetype;
-}
-
-EntityId add_entity_to_archetype(ArchetypeId archetype_id,
-                                 Archetype &archetype,
-                                 std::span<const ComponentType> component_types,
-                                 std::span<const void *> component_ptrs,
-                                 std::span<const std::size_t> component_sizes)
-{
-    EntityId entity_id{s_entity_id_generator.generate()};
-    std::uint32_t entity_index{archetype.entity_count % archetype.entity_count_per_chunk};
-
-    void *chunk{};
-    if (entity_index == 0)
-        chunk = archetype.chunks.emplace_back(s_chunk_allocator.get_chunk());
-    else
-        chunk = archetype.chunks.back();
-
-    EntityId *entity_id_array{static_cast<EntityId *>(chunk)};
-    entity_id_array[entity_index] = entity_id;
-
-    for (std::size_t index{}; index < component_types.size(); ++index)
-    {
-        std::size_t cmpt_type{static_cast<std::size_t>(component_types[index])};
-        const auto &cmpt_archetype_ids{g_component_archetype_ids[cmpt_type]};
-        auto cmpt_arrays_offset{std::find(cmpt_archetype_ids.cbegin(), cmpt_archetype_ids.cend(), archetype_id) -
-                                cmpt_archetype_ids.cbegin()};
-        ComponentOffset cmpt_offset{g_component_archetype_offsets[cmpt_type][cmpt_arrays_offset]};
-        void *cmpt_storage{static_cast<char *>(chunk) + cmpt_offset + entity_index * component_sizes[index]};
-
-        std::memcpy(cmpt_storage, component_ptrs[index], component_sizes[index]);
-    }
-
-    ++archetype.entity_count;
-
-    if (entity_id == g_entity_locations.size())
-        g_entity_locations.emplace_back(archetype_id, entity_index);
-    else
-        g_entity_locations[entity_id] = {archetype_id, entity_index};
-
-    return entity_id;
 }
 } // namespace Age::Core

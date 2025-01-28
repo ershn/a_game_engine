@@ -73,14 +73,33 @@ struct Renderer
 void init_rendering_system(GLFWwindow *window);
 
 void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &model_to_camera_matrix,
-                   MaterialId material_id,
-                   ModelId model_id);
+                   const ModelToCameraMatrix &model_to_camera_matrix,
+                   const MaterialRef &material,
+                   const ModelRef &model);
 void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &model_to_camera_matrix,
-                   const Math::Matrix3 &model_to_camera_normal_matrix,
-                   MaterialId material_id,
-                   ModelId model_id);
+                   const ModelToCameraMatrix &model_to_camera_matrix,
+                   const ModelToCameraNormalMatrix &model_to_camera_normal_matrix,
+                   const MaterialRef &material,
+                   const ModelRef &model);
+
+template <bool WithNormalMatrix>
+void init_renderer(Core::EntityId entity_id)
+{
+    if constexpr (WithNormalMatrix)
+    {
+        auto [renderer, model_to_camera_matrix, model_to_camera_normal_matrix, material, model] =
+            Core::get_entity_components<Renderer, const ModelToCameraMatrix, const ModelToCameraNormalMatrix,
+                                        const MaterialRef, const ModelRef>(entity_id);
+        init_renderer(renderer, model_to_camera_matrix, model_to_camera_normal_matrix, material, model);
+    }
+    else
+    {
+        auto [renderer, model_to_camera_matrix, material, model] =
+            Core::get_entity_components<Renderer, const ModelToCameraMatrix, const MaterialRef, const ModelRef>(
+                entity_id);
+        init_renderer(renderer, model_to_camera_matrix, material, model);
+    }
+}
 
 void render();
 } // namespace Age::Gfx

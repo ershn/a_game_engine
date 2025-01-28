@@ -11,6 +11,8 @@
 #include <vector>
 
 #include "Components.hpp"
+#include "IdGenerator.hpp"
+#include "Memory.hpp"
 
 namespace Age::Core
 {
@@ -39,11 +41,14 @@ struct ArchetypeRef
     Archetype &archetype;
 };
 
+extern Memory::PoolAllocator<1U << 18, ARCHETYPE_CHUNK_SIZE> g_chunk_allocator;
+
 extern std::vector<Archetype> g_archetypes;
 
 extern std::vector<std::vector<ArchetypeId>> g_component_archetype_ids;
 extern std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets;
 
+extern Util::IdGenerator<EntityId> g_entity_id_generator;
 extern std::vector<EntityLocation> g_entity_locations;
 
 void init_ecs();
@@ -54,12 +59,6 @@ ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_ty
 Archetype create_archetype(ArchetypeId archetype_id,
                            std::span<const ComponentType> component_types,
                            std::span<const std::size_t> component_sizes);
-
-EntityId add_entity_to_archetype(ArchetypeId archetype_id,
-                                 Archetype &archetype,
-                                 std::span<const ComponentType> component_types,
-                                 std::span<const void *> component_ptrs,
-                                 std::span<const std::size_t> component_sizes);
 
 template <std::size_t N>
 struct SortedComponentAttrs
@@ -86,24 +85,54 @@ consteval SortedComponentAttrs<sizeof...(TComponents)> get_sorted_component_attr
     return sorted_attrs;
 }
 
+template <typename... TComponents, std::size_t... IS>
+EntityId add_entity_to_archetype(ArchetypeId archetype_id,
+                                 Archetype &archetype,
+                                 const TComponents &...components,
+                                 std::index_sequence<IS...>)
+{
+    EntityId entity_id{g_entity_id_generator.generate()};
+    std::uint32_t entity_index{archetype.entity_count % archetype.entity_count_per_chunk};
+
+    void *chunk{};
+    if (entity_index == 0)
+        chunk = archetype.chunks.emplace_back(g_chunk_allocator.get_chunk());
+    else
+        chunk = archetype.chunks.back();
+
+    EntityId *entity_id_array{static_cast<EntityId *>(chunk)};
+    entity_id_array[entity_index] = entity_id;
+
+    std::array<std::size_t, sizeof...(TComponents)> cmpt_types{static_cast<std::size_t>(TComponents::TYPE)...};
+    std::array<const std::vector<ArchetypeId> *, sizeof...(TComponents)> cmpt_archetype_id_arrays{
+        &g_component_archetype_ids[cmpt_types[IS]]...};
+    std::array<std::size_t, sizeof...(TComponents)> cmpt_array_indexes{static_cast<std::size_t>(
+        std::find(cmpt_archetype_id_arrays[IS]->cbegin(), cmpt_archetype_id_arrays[IS]->cend(), archetype_id) -
+        cmpt_archetype_id_arrays[IS]->cbegin())...};
+    std::array<ComponentOffset, sizeof...(TComponents)> cmpt_offsets{
+        g_component_archetype_offsets[cmpt_types[IS]][cmpt_array_indexes[IS]]...};
+    std::array<void *, sizeof...(TComponents)> cmpt_ptrs{static_cast<char *>(chunk) + cmpt_offsets[IS] +
+                                                         entity_index * sizeof(TComponents)...};
+    (new (cmpt_ptrs[IS]) TComponents{components}, ...);
+
+    ++archetype.entity_count;
+
+    if (entity_id == g_entity_locations.size())
+        g_entity_locations.emplace_back(archetype_id, entity_index);
+    else
+        g_entity_locations[entity_id] = {archetype_id, entity_index};
+
+    return entity_id;
+}
+
 template <typename... TComponents>
 EntityId create_entity(const TComponents &...components)
 {
-    constexpr static std::array<ComponentType, sizeof...(TComponents)> component_types{TComponents::TYPE...};
-    constexpr static std::array<std::size_t, sizeof...(TComponents)> component_sizes{sizeof(TComponents)...};
-    constexpr static auto sorted_component_attrs{get_sorted_component_attrs<TComponents...>()};
-    std::array<const void *, sizeof...(TComponents)> component_ptrs{&components...};
-
-    ArchetypeRef archetype_ref{
-        get_or_create_archetype(sorted_component_attrs.component_types, sorted_component_attrs.component_sizes)};
-    return add_entity_to_archetype(archetype_ref.archetype_id, archetype_ref.archetype, component_types, component_ptrs,
-                                   component_sizes);
+    constexpr static auto sorted_attrs = get_sorted_component_attrs<TComponents...>();
+    ArchetypeRef archetype_ref{get_or_create_archetype(sorted_attrs.component_types, sorted_attrs.component_sizes)};
+    return add_entity_to_archetype<TComponents...>(archetype_ref.archetype_id, archetype_ref.archetype, components...,
+                                                   std::index_sequence_for<TComponents...>{});
 }
-
-void remove_entity();
-
-void add_component_to_entity();
-void remove_component_from_entity();
 
 template <typename... TComponents, std::size_t... IS>
 std::tuple<TComponents &...> get_entity_components_impl(EntityId entity_id, std::index_sequence<IS...>)
