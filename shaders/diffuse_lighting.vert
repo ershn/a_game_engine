@@ -6,8 +6,8 @@ const float TAU = 2.0f * PI;
 layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec3 aNormal;
 
-uniform mat4 uModelToCameraMatrix;
-uniform mat3 uNormalModelToCameraMatrix;
+uniform mat4 uLocalToViewMatrix;
+uniform mat3 uNormalLocalToViewMatrix;
 
 layout(std140) uniform ProjectionBlock
 {
@@ -24,9 +24,9 @@ void main()
 {
     vec4 diffuseColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    vec4 cameraPosition = uModelToCameraMatrix * aPosition;
+    vec4 cameraPosition = uLocalToViewMatrix * aPosition;
     gl_Position = uCameraToClipMatrix * cameraPosition;
-    vec3 normal = normalize(uNormalModelToCameraMatrix * aNormal);
+    vec3 normal = normalize(uNormalLocalToViewMatrix * aNormal);
 
     vec3 lightDirection = normalize(uLightPosition - vec3(cameraPosition));
     float incidenceAngleCos = dot(normal, lightDirection);

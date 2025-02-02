@@ -3,25 +3,25 @@
 layout(location = 0) in vec4 aPosition;
 layout(location = 2) in vec3 aNormal;
 
-uniform mat4 uModelToCameraMatrix;
-uniform mat3 uModelToCameraNormalMatrix;
+uniform mat4 uLocalToViewMatrix;
+uniform mat3 uLocalToViewNormalMatrix;
 uniform vec4 uColor;
 
 layout(std140) uniform ProjectionBlock
 {
-    mat4 uCameraToClipMatrix;
+    mat4 uViewToClipMatrix;
 };
 
-smooth out vec4 iCameraPosition;
+smooth out vec4 iViewPosition;
 smooth out vec4 iColor;
-smooth out vec3 iCameraNormal;
+smooth out vec3 iViewNormal;
 
 void main()
 {
-    vec4 cameraPosition = uModelToCameraMatrix * aPosition;
-    gl_Position = uCameraToClipMatrix * cameraPosition;
+    vec4 viewPosition = uLocalToViewMatrix * aPosition;
+    gl_Position = uViewToClipMatrix * viewPosition;
 
-    iCameraPosition = cameraPosition;
+    iViewPosition = viewPosition;
     iColor = uColor;
-    iCameraNormal = uModelToCameraNormalMatrix * aNormal;
+    iViewNormal = uLocalToViewNormalMatrix * aNormal;
 }

@@ -1,12 +1,12 @@
 #include <algorithm>
 #include <functional>
+#include <tuple>
 #include <vector>
 
 #include "Camera.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
 #include "Transformations.hpp"
-#include "UniformBufferInstances.hpp"
 
 namespace Age::Gfx
 {
@@ -66,15 +66,15 @@ void calc_model_to_camera_normal_matrix(const ModelToCameraMatrix &camera_matrix
 }
 
 void write_point_light_to_buffer(const Math::Matrix4 &world_to_camera_matrix,
-                                 const LightDataUniformBuffer &light_data_buffer,
+                                 const LightDataBufferBlock &light_data_buffer_block,
                                  const Core::Transform &transform,
                                  const PointLight &point_light)
 {
-    light_data_buffer.set_camera_light_position(
-        Math::Vector3{world_to_camera_matrix * Math::Vector4{transform.position, 1.0f}});
-    light_data_buffer.set_light_intensity(point_light.light_intensity);
-    light_data_buffer.set_light_attenuation(point_light.light_attenuation);
-    light_data_buffer.set_ambient_light_intensity(point_light.ambient_light_intensity);
+    light_data_buffer_block = {
+        .light_intensity{point_light.light_intensity},
+        .ambient_light_intensity{point_light.ambient_light_intensity},
+        .camera_light_position{Math::Vector3{world_to_camera_matrix * Math::Vector4{transform.position, 1.0f}}},
+        .light_attenuation{point_light.light_attenuation}};
 }
 
 ////////////////////////////////////////
@@ -87,19 +87,6 @@ std::vector<DrawCallKey> s_draw_call_keys{};
 
 GLuint s_bound_vao{};
 
-void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &model_to_camera_matrix,
-                   const Math::Matrix3 *model_to_camera_normal_matrix,
-                   MaterialId material_id,
-                   ModelId model_id)
-{
-    s_draw_calls.emplace_back(model_to_camera_matrix, model_to_camera_normal_matrix, material_id, model_id);
-
-    renderer.draw_call_key.index = static_cast<DrawCallIndex>(s_draw_calls.size() - 1);
-    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & model_id << MODEL_ID_SHIFT_COUNT;
-    renderer.is_active = true;
-}
-
 void enqueue_draw_calls(const Renderer &renderer)
 {
     if (renderer.is_active)
@@ -107,17 +94,14 @@ void enqueue_draw_calls(const Renderer &renderer)
 }
 
 void render_entities_to_camera(const WorldToCameraMatrix &camera_matrix,
-                               const ProjectionBufferRef &projection_buffer_ref,
-                               const LightDataBufferRef &light_data_buffer_ref)
+                               const ProjectionBufferBlock &projection_buffer_block,
+                               const LightDataBufferBlock &light_data_buffer_block)
 {
-    const auto &light_data_buffer =
-        static_cast<const LightDataUniformBuffer &>(get_uniform_buffer(light_data_buffer_ref.buffer_id));
-
-    bind_uniform_buffer(get_uniform_buffer(projection_buffer_ref.buffer_id), PROJECTION_BLOCK_BINDING);
-    bind_uniform_buffer(light_data_buffer, LIGHT_DATA_BLOCK_BINDING);
+    bind_uniform_buffer(PROJECTION_BLOCK_BINDING, projection_buffer_block.get_buffer_range());
+    bind_uniform_buffer(LIGHT_DATA_BLOCK_BINDING, light_data_buffer_block.get_buffer_range());
 
     Core::process_components(std::function<void(const Core::Transform &, const PointLight &)>{
-        std::bind_front(write_point_light_to_buffer, camera_matrix.matrix, light_data_buffer)});
+        std::bind_front(write_point_light_to_buffer, camera_matrix.matrix, light_data_buffer_block)});
 
     Core::process_components(std::function<void(const Core::Transform &, ModelToCameraMatrix &)>{
         std::bind_front(calc_model_to_camera_matrix, camera_matrix.matrix)});
@@ -127,20 +111,23 @@ void render_entities_to_camera(const WorldToCameraMatrix &camera_matrix,
     {
         const DrawCall &draw_call{s_draw_calls[draw_call_key.index]};
 
+        if (draw_call.uniform_buffer_range_bind != nullptr)
+            bind_uniform_buffer(*draw_call.uniform_buffer_range_bind);
+
         const Material &material{use_material(draw_call.material_id)};
-        set_uniform(material.shader.model_to_camera_matrix, draw_call.model_to_camera_matrix);
+        OGL::set_uniform(material.shader.local_to_view_matrix, draw_call.model_to_camera_matrix);
         if (draw_call.model_to_camera_normal_matrix != nullptr)
-            set_uniform(material.shader.model_to_camera_normal_matrix, *draw_call.model_to_camera_normal_matrix);
+            OGL::set_uniform(material.shader.local_to_view_normal_matrix, *draw_call.model_to_camera_normal_matrix);
 
         DrawCommand draw_command{get_draw_command(draw_call.model_id)};
         if (draw_command.vertex_array_object != s_bound_vao)
         {
-            bind_vertex_array_object(draw_command.vertex_array_object);
+            OGL::bind_vertex_array_object(draw_command.vertex_array_object);
             s_bound_vao = draw_command.vertex_array_object;
         }
         for (const Mesh &mesh : draw_command.meshes)
         {
-            draw_elements(mesh.rendering_mode, mesh.element_count, mesh.buffer_offset);
+            OGL::draw_elements(mesh.rendering_mode, mesh.element_count, mesh.buffer_offset);
         }
     }
 }
@@ -183,21 +170,40 @@ void init_rendering_system(GLFWwindow *window)
 }
 
 void init_renderer(Renderer &renderer,
-                   const ModelToCameraMatrix &model_to_camera_matrix,
-                   const MaterialRef &material,
-                   const ModelRef &model)
+                   const Math::Matrix4 &model_to_camera_matrix,
+                   const Math::Matrix3 *model_to_camera_normal_matrix,
+                   const UniformBufferRangeBind *buffer_range_bind,
+                   MaterialId material_id,
+                   ModelId model_id)
 {
-    init_renderer(renderer, model_to_camera_matrix.matrix, nullptr, material.material_id, model.model_id);
+    s_draw_calls.emplace_back(model_to_camera_matrix, model_to_camera_normal_matrix, buffer_range_bind, material_id,
+                              model_id);
+
+    renderer.draw_call_key.index = static_cast<DrawCallIndex>(s_draw_calls.size() - 1);
+    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & model_id << MODEL_ID_SHIFT_COUNT;
+    renderer.is_active = true;
 }
 
-void init_renderer(Renderer &renderer,
-                   const ModelToCameraMatrix &model_to_camera_matrix,
-                   const ModelToCameraNormalMatrix &model_to_camera_normal_matrix,
-                   const MaterialRef &material,
-                   const ModelRef &model)
+void init_renderer(Core::EntityId entity_id, unsigned int options)
 {
-    init_renderer(renderer, model_to_camera_matrix.matrix, &model_to_camera_normal_matrix.matrix, material.material_id,
-                  model.model_id);
+    auto [renderer, model_to_camera_matrix, material, model] =
+        Core::get_entity_components<Renderer, const ModelToCameraMatrix, const MaterialRef, const ModelRef>(entity_id);
+
+    const Math::Matrix3 *model_to_camera_normal_matrix{};
+    if (options & RENDER_WITH_NORMAL_MATRIX)
+    {
+        model_to_camera_normal_matrix =
+            &std::get<0>(Core::get_entity_components<const ModelToCameraNormalMatrix>(entity_id)).matrix;
+    }
+
+    const UniformBufferRangeBind *uniform_buffer_range_bind{};
+    if (options & RENDER_WITH_BUFFER_RANGE_BIND)
+    {
+        uniform_buffer_range_bind = &std::get<0>(Core::get_entity_components<const UniformBufferRangeBind>(entity_id));
+    }
+
+    init_renderer(renderer, model_to_camera_matrix.matrix, model_to_camera_normal_matrix, uniform_buffer_range_bind,
+                  material.material_id, model.model_id);
 }
 
 void render()

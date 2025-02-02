@@ -112,6 +112,7 @@
       <AdditionalIncludeDirectories>C:\Users\ershn\Documents\GameDev\OpenGL\Age\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Camera.cpp" />
@@ -166,7 +168,6 @@
     <ClCompile Include="src\Time.cpp" />
     <ClCompile Include="src\Transformations.cpp" />
     <ClCompile Include="src\UniformBuffer.cpp" />
-    <ClCompile Include="src\UniformBufferInstances.cpp" />
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +178,7 @@
     <ClInclude Include="include\game\GroundMesh.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
+    <ClInclude Include="include\game\ShadersAndMaterials.hpp" />
     <ClInclude Include="include\GLFW.hpp" />
     <ClInclude Include="include\Hash.hpp" />
     <ClInclude Include="include\IdGenerator.hpp" />
@@ -202,7 +204,7 @@
     <ClInclude Include="include\Transform.hpp" />
     <ClInclude Include="include\Transformations.hpp" />
     <ClInclude Include="include\UniformBuffer.hpp" />
-    <ClInclude Include="include\UniformBufferInstances.hpp" />
+    <ClInclude Include="include\UniformBlocks.hpp" />
     <ClInclude Include="include\Vector.hpp" />
   </ItemGroup>
   <ItemGroup>

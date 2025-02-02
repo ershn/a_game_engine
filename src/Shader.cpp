@@ -78,13 +78,13 @@ GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader)
 
 Shader::Shader(GLuint shader_program, unsigned int options)
     : shader_program{shader_program}
-    , model_to_camera_matrix{get_uniform_location(shader_program, "uModelToCameraMatrix")}
-    , projection_block{get_uniform_block_index(shader_program, "ProjectionBlock")}
+    , local_to_view_matrix{OGL::get_uniform_location(shader_program, "uLocalToViewMatrix")}
+    , projection_block{OGL::get_uniform_block_index(shader_program, "ProjectionBlock")}
 {
     if (options & SHADER_CAMERA_NORMAL_MATRIX)
-        model_to_camera_normal_matrix = get_uniform_location(shader_program, "uModelToCameraNormalMatrix");
+        local_to_view_normal_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewNormalMatrix");
     if (options & SHADER_LIGHT_DATA_BLOCK)
-        light_data_block = get_uniform_block_index(shader_program, "LightDataBlock");
+        light_data_block = OGL::get_uniform_block_index(shader_program, "LightDataBlock");
 }
 
 std::vector<std::unique_ptr<Shader>> g_shaders{};

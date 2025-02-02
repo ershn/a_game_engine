@@ -21,7 +21,7 @@ void NoLightingColorMaterial::apply_properties() const
 {
     NoLightingMaterial::apply_properties();
     const auto &shader = static_cast<const NoLightingColorShader &>(this->shader);
-    set_uniform(shader.color, color);
+    OGL::set_uniform(shader.color, color);
 }
 
 FragmentLightingMaterial::FragmentLightingMaterial(const Shader &shader)
@@ -32,8 +32,8 @@ FragmentLightingMaterial::FragmentLightingMaterial(const Shader &shader)
 void FragmentLightingMaterial::apply_properties() const
 {
     const auto &shader = static_cast<const FragmentLightingShader &>(this->shader);
-    set_uniform(shader.specular_color, specular_color);
-    set_uniform(shader.surface_shininess, surface_shininess);
+    OGL::set_uniform(shader.specular_color, specular_color);
+    OGL::set_uniform(shader.surface_shininess, surface_shininess);
 }
 
 FragmentLightingColorMaterial::FragmentLightingColorMaterial(const Shader &shader)
@@ -45,6 +45,6 @@ void FragmentLightingColorMaterial::apply_properties() const
 {
     FragmentLightingMaterial::apply_properties();
     const auto &shader = static_cast<const FragmentLightingColorShader &>(this->shader);
-    set_uniform(shader.color, color);
+    OGL::set_uniform(shader.color, color);
 }
 } // namespace Age::Gfx

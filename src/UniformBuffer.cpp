@@ -2,32 +2,23 @@
 
 namespace Age::Gfx
 {
-GLuint create_uniform_buffer(std::size_t size)
+namespace
 {
-    GLuint uniform_buffer_object;
+GLint s_uniform_buffer_alignment;
+} // namespace
 
-    glGenBuffers(1, &uniform_buffer_object);
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
-    glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    return uniform_buffer_object;
+std::size_t get_uniform_buffer_alignment()
+{
+    return static_cast<std::size_t>(s_uniform_buffer_alignment);
 }
 
-void write_uniform_buffer(GLuint uniform_buffer_object, std::size_t offset, const void *data, std::size_t size)
+std::size_t get_uniform_block_alignment(std::size_t block_size)
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void bind_uniform_buffer(GLuint uniform_buffer_object, std::size_t size, GLuint binding_point)
-{
-    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer_object, 0, size);
+    return block_size + s_uniform_buffer_alignment - (block_size % s_uniform_buffer_alignment);
 }
 
 UniformBuffer::UniformBuffer(std::size_t size)
-    : uniform_buffer_object{create_uniform_buffer(size)}
+    : uniform_buffer_object{OGL::create_uniform_buffer(size)}
     , size{size}
 {
 }
@@ -36,6 +27,8 @@ std::vector<std::unique_ptr<UniformBuffer>> g_uniform_buffers{};
 
 void init_uniform_buffer_system()
 {
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &s_uniform_buffer_alignment);
+
     g_uniform_buffers.reserve(64);
 }
 
@@ -44,8 +37,15 @@ const UniformBuffer &get_uniform_buffer(UniformBufferId buffer_id)
     return *g_uniform_buffers[buffer_id];
 }
 
-void bind_uniform_buffer(const UniformBuffer &buffer, GLuint binding_point)
+void bind_uniform_buffer(GLuint binding_point, const UniformBufferRange &buffer_range)
 {
-    bind_uniform_buffer(buffer.uniform_buffer_object, buffer.size, binding_point);
+    OGL::bind_uniform_buffer_range(binding_point, buffer_range.uniform_buffer_object, buffer_range.offset,
+                                   buffer_range.size);
+}
+
+void bind_uniform_buffer(const UniformBufferRangeBind &buffer_bind)
+{
+    OGL::bind_uniform_buffer_range(buffer_bind.binding_point, buffer_bind.buffer_range.uniform_buffer_object,
+                                   buffer_bind.buffer_range.offset, buffer_bind.buffer_range.size);
 }
 } // namespace Age::Gfx

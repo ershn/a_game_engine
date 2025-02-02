@@ -2,6 +2,7 @@
 
 #include "ECS.hpp"
 #include "Matrix.hpp"
+#include "UniformBlocks.hpp"
 #include "UniformBuffer.hpp"
 
 namespace Age::Gfx
@@ -30,11 +31,11 @@ struct Camera
     float vertical_fov{};
 };
 
-struct ProjectionBufferRef
+struct ProjectionBufferBlock : public UniformBufferBlock<ProjectionUniformBlock>
 {
-    static constexpr auto TYPE{Core::ComponentType::PROJECTION_BUFFER};
+    static constexpr auto TYPE{Core::ComponentType::PROJECTION_BUFFER_BLOCK};
 
-    UniformBufferId buffer_id{};
+    using UniformBufferBlock<ProjectionUniformBlock>::operator=;
 };
 
 void update_cameras_aspect_ratio(float aspect_ratio);

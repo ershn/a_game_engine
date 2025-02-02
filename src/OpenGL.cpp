@@ -2,7 +2,7 @@
 
 #include "OpenGL.hpp"
 
-namespace Age::Gfx
+namespace Age::Gfx::OGL
 {
 void use_program(GLuint shader_program)
 {
@@ -42,6 +42,38 @@ void set_uniform(GLint location, const Math::Matrix4 &matrix)
     glUniformMatrix4fv(location, 1, false, static_cast<const GLfloat *>(matrix));
 }
 
+GLuint create_uniform_buffer(std::size_t size)
+{
+    GLuint uniform_buffer_object;
+
+    glGenBuffers(1, &uniform_buffer_object);
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
+    glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+
+    return uniform_buffer_object;
+}
+
+void write_uniform_buffer(GLuint uniform_buffer_object, const void *data, std::size_t size)
+{
+    write_uniform_buffer(uniform_buffer_object, 0, data, size);
+}
+
+void write_uniform_buffer(GLuint uniform_buffer_object, std::size_t offset, const void *data, std::size_t size)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+}
+
+void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer_object, std::size_t size)
+{
+    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer_object, 0, size);
+}
+
+void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer_object, std::size_t offset, std::size_t size)
+{
+    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer_object, offset, size);
+}
+
 GLuint get_uniform_block_index(GLuint shader_program, std::string_view name)
 {
     GLuint index{glGetUniformBlockIndex(shader_program, name.data())};
@@ -64,4 +96,4 @@ void draw_elements(GLenum rendering_mode, GLsizei element_count, std::size_t buf
 {
     glDrawElements(rendering_mode, element_count, GL_UNSIGNED_SHORT, reinterpret_cast<const void *>(buffer_offset));
 }
-} // namespace Age::Gfx
+} // namespace Age::Gfx::OGL

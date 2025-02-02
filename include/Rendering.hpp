@@ -11,6 +11,7 @@
 #include "Mesh.hpp"
 #include "Shader.hpp"
 #include "Transform.hpp"
+#include "UniformBlocks.hpp"
 #include "UniformBuffer.hpp"
 
 namespace Age::Gfx
@@ -38,17 +39,18 @@ struct PointLight
     Math::Vector4 ambient_light_intensity{};
 };
 
-struct LightDataBufferRef
+struct LightDataBufferBlock : public UniformBufferBlock<LightDataUniformBlock>
 {
-    static constexpr auto TYPE{Core::ComponentType::LIGHT_DATA_BUFFER_REF};
+    static constexpr auto TYPE{Core::ComponentType::LIGHT_DATA_BUFFER_BLOCK};
 
-    UniformBufferId buffer_id{};
+    using UniformBufferBlock<LightDataUniformBlock>::operator=;
 };
 
 struct DrawCall
 {
     const Math::Matrix4 &model_to_camera_matrix;
-    const Math::Matrix3 *model_to_camera_normal_matrix;
+    const Math::Matrix3 *model_to_camera_normal_matrix{};
+    const UniformBufferRangeBind *uniform_buffer_range_bind{};
     MaterialId material_id{};
     ModelId model_id{};
 };
@@ -73,33 +75,16 @@ struct Renderer
 void init_rendering_system(GLFWwindow *window);
 
 void init_renderer(Renderer &renderer,
-                   const ModelToCameraMatrix &model_to_camera_matrix,
-                   const MaterialRef &material,
-                   const ModelRef &model);
-void init_renderer(Renderer &renderer,
-                   const ModelToCameraMatrix &model_to_camera_matrix,
-                   const ModelToCameraNormalMatrix &model_to_camera_normal_matrix,
-                   const MaterialRef &material,
-                   const ModelRef &model);
+                   const Math::Matrix4 &model_to_camera_matrix,
+                   const Math::Matrix3 *model_to_camera_normal_matrix,
+                   const UniformBufferRangeBind *buffer_block_bind,
+                   MaterialId material_id,
+                   ModelId model_id);
 
-template <bool WithNormalMatrix>
-void init_renderer(Core::EntityId entity_id)
-{
-    if constexpr (WithNormalMatrix)
-    {
-        auto [renderer, model_to_camera_matrix, model_to_camera_normal_matrix, material, model] =
-            Core::get_entity_components<Renderer, const ModelToCameraMatrix, const ModelToCameraNormalMatrix,
-                                        const MaterialRef, const ModelRef>(entity_id);
-        init_renderer(renderer, model_to_camera_matrix, model_to_camera_normal_matrix, material, model);
-    }
-    else
-    {
-        auto [renderer, model_to_camera_matrix, material, model] =
-            Core::get_entity_components<Renderer, const ModelToCameraMatrix, const MaterialRef, const ModelRef>(
-                entity_id);
-        init_renderer(renderer, model_to_camera_matrix, material, model);
-    }
-}
+inline constexpr unsigned int RENDER_WITH_NORMAL_MATRIX{0b1};
+inline constexpr unsigned int RENDER_WITH_BUFFER_RANGE_BIND{0b10};
+
+void init_renderer(Core::EntityId entity_id, unsigned int options = 0);
 
 void render();
 } // namespace Age::Gfx
