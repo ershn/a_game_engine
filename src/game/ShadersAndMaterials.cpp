@@ -7,7 +7,7 @@ namespace Game
 using namespace Age;
 
 FragmentLightingShader::FragmentLightingShader(GLuint shader_program)
-    : Shader{shader_program, Gfx::SHADER_CAMERA_NORMAL_MATRIX | Gfx::SHADER_LIGHT_DATA_BLOCK}
+    : Shader{shader_program, Gfx::SHADER_VIEW_NORMAL_MATRIX | Gfx::SHADER_LIGHT_DATA_BLOCK}
     , material_block{Gfx::OGL::get_uniform_block_index(shader_program, "MaterialBlock")}
 {
     Gfx::OGL::bind_uniform_block(shader_program, material_block, MATERIAL_BLOCK_BINDING);

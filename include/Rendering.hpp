@@ -16,16 +16,16 @@
 
 namespace Age::Gfx
 {
-struct ModelToCameraMatrix
+struct LocalToViewMatrix
 {
-    static constexpr auto TYPE{Core::ComponentType::MODEL_TO_CAMERA_MATRIX};
+    static constexpr auto TYPE{Core::ComponentType::LOCAL_TO_VIEW_MATRIX};
 
     Math::Matrix4 matrix{};
 };
 
-struct ModelToCameraNormalMatrix
+struct LocalToViewNormalMatrix
 {
-    static constexpr auto TYPE{Core::ComponentType::MODEL_TO_CAMERA_NORMAL_MATRIX};
+    static constexpr auto TYPE{Core::ComponentType::LOCAL_TO_VIEW_NORMAL_MATRIX};
 
     Math::Matrix3 matrix{};
 };
@@ -48,8 +48,8 @@ struct LightDataBufferBlock : public UniformBufferBlock<LightDataUniformBlock>
 
 struct DrawCall
 {
-    const Math::Matrix4 &model_to_camera_matrix;
-    const Math::Matrix3 *model_to_camera_normal_matrix{};
+    const Math::Matrix4 &local_to_view_matrix;
+    const Math::Matrix3 *local_to_view_normal_matrix{};
     const UniformBufferRangeBind *uniform_buffer_range_bind{};
     MaterialId material_id{};
     ModelId model_id{};
@@ -75,8 +75,8 @@ struct Renderer
 void init_rendering_system(GLFWwindow *window);
 
 void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &model_to_camera_matrix,
-                   const Math::Matrix3 *model_to_camera_normal_matrix,
+                   const Math::Matrix4 &local_to_view_matrix,
+                   const Math::Matrix3 *local_to_view_normal_matrix,
                    const UniformBufferRangeBind *buffer_block_bind,
                    MaterialId material_id,
                    ModelId model_id);

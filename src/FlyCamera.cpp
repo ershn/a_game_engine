@@ -5,8 +5,7 @@
 
 namespace Age::Gfx
 {
-FlyCamera::FlyCamera(const Math::Vector3 &position, const Math::Vector2 &rotation,
-                     const Math::Vector3 &world_up)
+FlyCamera::FlyCamera(const Math::Vector3 &position, const Math::Vector2 &rotation, const Math::Vector3 &world_up)
     : _position{position}
     , _world_up{world_up}
 {
@@ -15,8 +14,7 @@ FlyCamera::FlyCamera(const Math::Vector3 &position, const Math::Vector2 &rotatio
 
 void FlyCamera::add_axial_movement(const Math::Vector3 &axial_movement)
 {
-    _position +=
-        axial_movement.x * _right + axial_movement.y * _world_up + axial_movement.z * _forward;
+    _position += axial_movement.x * _right + axial_movement.y * _world_up + axial_movement.z * _forward;
 }
 
 void FlyCamera::add_rotation(const Math::Vector2 &rotation)
@@ -32,8 +30,8 @@ void FlyCamera::add_rotation(const Math::Vector2 &rotation)
     _right = Math::normalize(Math::cross(_world_up, _forward));
 }
 
-Math::Matrix4 FlyCamera::calc_camera_matrix() const
+Math::Matrix4 FlyCamera::calc_view_matrix() const
 {
-    return Math::camera_matrix(_position, _position - _forward, _world_up);
+    return Math::view_matrix(_position, _position - _forward, _world_up);
 }
 } // namespace Age::Gfx

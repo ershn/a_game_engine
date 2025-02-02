@@ -20,9 +20,9 @@ void update_spherical_camera_via_input(const Input::MouseInput &mouse_input, Sph
     spherical_camera.cartesian_coord = Math::to_cartesian_coord(spherical_coord);
 }
 
-void calc_spherical_camera_matrix(const SphericalCamera &spherical_camera, WorldToCameraMatrix &camera_matrix)
+void calc_spherical_camera_view_matrix(const SphericalCamera &spherical_camera, WorldToViewMatrix &view_matrix)
 {
-    camera_matrix.matrix = Math::camera_matrix(spherical_camera.origin + spherical_camera.cartesian_coord,
-                                               spherical_camera.origin, Math::Vector3{0.0f, 1.0f, 0.0f});
+    view_matrix.matrix = Math::view_matrix(spherical_camera.origin + spherical_camera.cartesian_coord,
+                                           spherical_camera.origin, Math::Vector3{0.0f, 1.0f, 0.0f});
 }
 } // namespace Age::Gfx

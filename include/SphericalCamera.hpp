@@ -22,5 +22,5 @@ struct SphericalCamera
 
 void update_spherical_camera_via_input(const Input::MouseInput &mouse_input, SphericalCamera &spherical_camera);
 
-void calc_spherical_camera_matrix(const SphericalCamera &spherical_camera, WorldToCameraMatrix &camera_matrix);
+void calc_spherical_camera_view_matrix(const SphericalCamera &spherical_camera, WorldToViewMatrix &view_matrix);
 } // namespace Age::Gfx

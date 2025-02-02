@@ -15,13 +15,13 @@ struct LightDataUniformBlock
 {
     Math::Vector4 light_intensity;
     Math::Vector4 ambient_light_intensity;
-    Math::Vector3 camera_light_position;
+    Math::Vector3 view_light_position;
     float light_attenuation;
 };
 
 struct FragmentPositionDataUniformBlock
 {
-    Math::Matrix4 clip_to_camera_matrix;
+    Math::Matrix4 clip_to_view_matrix;
     int width;
     int height;
 };

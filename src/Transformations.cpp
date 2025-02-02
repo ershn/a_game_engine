@@ -150,7 +150,7 @@ void update_fov(Matrix4 &perspective_matrix, float aspect_ratio, float vertical_
     perspective_matrix[1].y = zoom.y;
 }
 
-Matrix4 camera_matrix(const Vector3 &camera_pos, const Vector3 &target_pos, const Vector3 &world_up)
+Matrix4 view_matrix(const Vector3 &camera_pos, const Vector3 &target_pos, const Vector3 &world_up)
 {
     Matrix4 matrix{1.0f};
 

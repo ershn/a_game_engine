@@ -7,16 +7,16 @@
 
 namespace Age::Gfx
 {
-struct WorldToCameraMatrix
+struct WorldToViewMatrix
 {
-    static constexpr auto TYPE{Core::ComponentType::WORLD_TO_CAMERA_MATRIX};
+    static constexpr auto TYPE{Core::ComponentType::WORLD_TO_VIEW_MATRIX};
 
     Math::Matrix4 matrix{};
 };
 
-struct CameraToClipMatrix
+struct ViewToClipMatrix
 {
-    static constexpr auto TYPE{Core::ComponentType::CAMERA_TO_CLIP_MATRIX};
+    static constexpr auto TYPE{Core::ComponentType::VIEW_TO_CLIP_MATRIX};
 
     Math::Matrix4 matrix{};
 };

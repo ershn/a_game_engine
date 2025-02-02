@@ -74,8 +74,8 @@ void init_entities()
     // Camera
     {
         Gfx::Camera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
-        Gfx::WorldToCameraMatrix camera_matrix{};
-        Gfx::CameraToClipMatrix clip_matrix{
+        Gfx::WorldToViewMatrix view_matrix{};
+        Gfx::ViewToClipMatrix clip_matrix{
             Math::perspective_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)};
         Gfx::ProjectionBufferBlock camera_projection{projection_buffer.get_block()};
         Gfx::LightDataBufferBlock camera_light{light_data_buffer.get_block()};
@@ -84,7 +84,7 @@ void init_entities()
                                               .spherical_coord{Math::Vector2{Math::radians(60.0f), 0.0f}, 30.0f}};
         spherical_camera.cartesian_coord = Math::to_cartesian_coord(spherical_camera.spherical_coord);
 
-        Core::create_entity(camera, camera_matrix, clip_matrix, camera_projection, camera_light, camera_input,
+        Core::create_entity(camera, view_matrix, clip_matrix, camera_projection, camera_light, camera_input,
                             spherical_camera, GameKeyboardController{});
     }
 
@@ -94,7 +94,7 @@ void init_entities()
         Gfx::create_material<Gfx::NoLightingColorMaterial>(material_id, NO_LIGHTING_COLOR_SHADER);
 
         auto id = Core::create_entity(
-            Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}}, Gfx::ModelToCameraMatrix{},
+            Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}}, Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id}, Gfx::ModelRef{Gfx::CUBE_MODEL_ID}, Gfx::Renderer{},
             Gfx::PointLight{.light_intensity{0.8f, 0.8f, 0.8f, 1.0f},
                             .light_attenuation{0.2f},
@@ -115,7 +115,7 @@ void init_entities()
         auto id = Core::create_entity(
             Core::Transform{.orientation{Math::axis_angle_quaternion({1.0f, 0.0f, 0.0f}, Math::radians(-90.0f))},
                             .scale{0.2f}},
-            Gfx::ModelToCameraMatrix{}, Gfx::ModelToCameraNormalMatrix{}, Gfx::MaterialRef{material_id},
+            Gfx::LocalToViewMatrix{}, Gfx::LocalToViewNormalMatrix{}, Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(0).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::ModelRef{ground_model_id}, Gfx::Renderer{});
 
@@ -136,7 +136,7 @@ void init_entities()
             Core::Transform{.position{-0.300010f, 7.40000f, -2.30000f},
                             .orientation{1.00000f, 0.00000f, 0.00000f, 0.00000f},
                             .scale{4.00000f, 4.00000f, 4.00000f}},
-            Gfx::ModelToCameraMatrix{}, Gfx::ModelToCameraNormalMatrix{}, Gfx::MaterialRef{material_id},
+            Gfx::LocalToViewMatrix{}, Gfx::LocalToViewNormalMatrix{}, Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(1).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::ModelRef{model_id}, Gfx::Renderer{});
 
@@ -155,7 +155,7 @@ void init_entities()
             Core::Transform{.position{12.9000f, 3.40000f, 17.6000f},
                             .orientation{0.859259f, -0.268912f, -0.229626f, -0.369666f},
                             .scale{4.40000f, 4.40000f, 4.40000f}},
-            Gfx::ModelToCameraMatrix{}, Gfx::ModelToCameraNormalMatrix{}, Gfx::MaterialRef{material_id},
+            Gfx::LocalToViewMatrix{}, Gfx::LocalToViewNormalMatrix{}, Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(2).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::ModelRef{model_id}, Gfx::Renderer{});
 
@@ -174,7 +174,7 @@ void init_entities()
             Core::Transform{.position{-16.0000f, 7.90000f, -14.2000f},
                             .orientation{0.594317f, -0.573115f, -0.382432f, -0.414812f},
                             .scale{4.50000f, 4.40000f, 13.1000f}},
-            Gfx::ModelToCameraMatrix{}, Gfx::ModelToCameraNormalMatrix{}, Gfx::MaterialRef{material_id},
+            Gfx::LocalToViewMatrix{}, Gfx::LocalToViewNormalMatrix{}, Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(3).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::ModelRef{model_id}, Gfx::Renderer{});
 
@@ -192,7 +192,7 @@ void run_systems()
     process_components(control_material_via_keyboard);
     process_components(control_transform_via_keyboard);
     process_components(Gfx::update_spherical_camera_via_input);
-    process_components(Gfx::calc_spherical_camera_matrix);
+    process_components(Gfx::calc_spherical_camera_view_matrix);
     process_components(Core::move_along_path);
 }
 } // namespace Game

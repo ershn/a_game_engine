@@ -19,12 +19,11 @@ class FlyCamera
     const Math::Vector3 _world_up{};
 
   public:
-    FlyCamera(const Math::Vector3 &position, const Math::Vector2 &rotation,
-              const Math::Vector3 &world_up);
+    FlyCamera(const Math::Vector3 &position, const Math::Vector2 &rotation, const Math::Vector3 &world_up);
 
     void add_axial_movement(const Math::Vector3 &axial_movement);
     void add_rotation(const Math::Vector2 &rotation);
 
-    Math::Matrix4 calc_camera_matrix() const;
+    Math::Matrix4 calc_view_matrix() const;
 };
 } // namespace Age::Gfx

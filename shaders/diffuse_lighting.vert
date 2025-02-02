@@ -11,7 +11,7 @@ uniform mat3 uNormalLocalToViewMatrix;
 
 layout(std140) uniform ProjectionBlock
 {
-    mat4 uCameraToClipMatrix;
+    mat4 uViewToClipMatrix;
 };
 
 uniform vec3 uLightPosition;
@@ -24,11 +24,11 @@ void main()
 {
     vec4 diffuseColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    vec4 cameraPosition = uLocalToViewMatrix * aPosition;
-    gl_Position = uCameraToClipMatrix * cameraPosition;
+    vec4 viewPosition = uLocalToViewMatrix * aPosition;
+    gl_Position = uViewToClipMatrix * viewPosition;
     vec3 normal = normalize(uNormalLocalToViewMatrix * aNormal);
 
-    vec3 lightDirection = normalize(uLightPosition - vec3(cameraPosition));
+    vec3 lightDirection = normalize(uLightPosition - vec3(viewPosition));
     float incidenceAngleCos = dot(normal, lightDirection);
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0f, 1.0f);
     color =

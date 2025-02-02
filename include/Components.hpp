@@ -7,8 +7,8 @@ namespace Age::Core
 enum class ComponentType : std::uint16_t
 {
     TRANSFORM,
-    MODEL_TO_CAMERA_MATRIX,
-    MODEL_TO_CAMERA_NORMAL_MATRIX,
+    LOCAL_TO_VIEW_MATRIX,
+    LOCAL_TO_VIEW_NORMAL_MATRIX,
 
     MATERIAL,
 
@@ -17,8 +17,8 @@ enum class ComponentType : std::uint16_t
     UNIFORM_BUFFER_RANGE_BIND,
     UNIFORM_BUFFER_BLOCK,
 
-    WORLD_TO_CAMERA_MATRIX,
-    CAMERA_TO_CLIP_MATRIX,
+    WORLD_TO_VIEW_MATRIX,
+    VIEW_TO_CLIP_MATRIX,
     CAMERA,
     PROJECTION_BUFFER_BLOCK,
 
