@@ -11,12 +11,20 @@ struct ProjectionUniformBlock
     Math::Matrix4 view_to_clip_matrix;
 };
 
-struct LightDataUniformBlock
+struct LightsUniformBlock
 {
-    Math::Vector4 light_intensity;
+    static constexpr std::size_t LIGHT_COUNT{4};
+
+    struct Light
+    {
+        Math::Vector4 view_position;
+        Math::Vector4 intensity;
+    };
+
     Math::Vector4 ambient_light_intensity;
-    Math::Vector3 view_light_position;
-    float light_attenuation;
+    float light_attenuation{};
+    float _padding_[3];
+    Light lights[LIGHT_COUNT];
 };
 
 struct FragmentPositionDataUniformBlock

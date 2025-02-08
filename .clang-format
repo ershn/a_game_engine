@@ -8,3 +8,6 @@ BreakConstructorInitializers: BeforeComma
 BreakTemplateDeclarations: Yes
 SeparateDefinitionBlocks: Always
 BinPackParameters: false
+BinPackArguments: false
+AlignAfterOpenBracket: BlockIndent
+AlignOperands: AlignAfterOperator

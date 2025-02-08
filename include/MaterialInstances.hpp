@@ -32,7 +32,7 @@ struct FragmentLightingMaterial : public Material
 
 struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 {
-    Math::Vector4 color{1.0f};
+    Math::Vector4 diffuse_color{1.0f};
 
     FragmentLightingColorMaterial(const Shader &shader);
 

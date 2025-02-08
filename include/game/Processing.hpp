@@ -2,9 +2,11 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <vector>
 
 #include "Components.hpp"
 #include "Material.hpp"
+#include "Rendering.hpp"
 #include "Transform.hpp"
 
 namespace Game
@@ -14,6 +16,8 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
     GAME_KEYBOARD_CONTROLLER = Age::Core::ComponentType::LAST_VALUE,
     MATERIAL_KEYBOARD_CONTROLLER,
     TRANSFORM_KEYBOARD_CONTROLLER,
+
+    SUNLIGHT,
 
     LAST_VALUE
 };
@@ -53,4 +57,25 @@ struct TransformKeyboardController
 };
 
 void control_transform_via_keyboard(TransformKeyboardController &controller, Age::Core::Transform &transform);
+
+struct Sunlight
+{
+    static constexpr Age::Core::ComponentType TYPE{ComponentType::SUNLIGHT};
+
+    struct LightIntensity
+    {
+        float normalized_time{};
+        Age::Math::Vector4 intensity;
+        Age::Math::Vector4 sky_color;
+    };
+
+    std::vector<LightIntensity> light_intensities;
+    float day_length{};
+    float time{};
+    Age::Core::EntityId camera_id{};
+};
+
+void update_sunlight(
+    Sunlight &sunlight, Age::Core::Transform &transform, Age::Gfx::DirectionalLight &directional_light
+);
 } // namespace Game

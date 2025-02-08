@@ -13,7 +13,7 @@ layout(std140) uniform ProjectionBlock
 };
 
 smooth out vec4 iViewPosition;
-smooth out vec4 iColor;
+smooth out vec4 iDiffuseColor;
 smooth out vec3 iViewNormal;
 
 void main()
@@ -22,6 +22,6 @@ void main()
     gl_Position = uViewToClipMatrix * viewPosition;
 
     iViewPosition = viewPosition;
-    iColor = aColor;
+    iDiffuseColor = aColor;
     iViewNormal = uLocalToViewNormalMatrix * aNormal;
 }

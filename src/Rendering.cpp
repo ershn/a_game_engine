@@ -49,13 +49,14 @@ void update_viewport()
 
 ////////////////////////////////////////
 
-void calc_local_to_view_matrix(const Math::Matrix4 &world_to_view_matrix,
-                               const Core::Transform &transform,
-                               LocalToViewMatrix &local_to_view_matrix)
+void calc_local_to_view_matrix(
+    const Math::Matrix4 &world_to_view_matrix, const Core::Transform &transform, LocalToViewMatrix &local_to_view_matrix
+)
 {
-    Math::Matrix4 local_to_world_matrix{Math::translation_matrix(transform.position) *
-                                        Math::affine_rotation_matrix(transform.orientation) *
-                                        Math::affine_scaling_matrix(transform.scale)};
+    Math::Matrix4 local_to_world_matrix{
+        Math::translation_matrix(transform.position) * Math::affine_rotation_matrix(transform.orientation) *
+        Math::affine_scaling_matrix(transform.scale)
+    };
     local_to_view_matrix.matrix = world_to_view_matrix * local_to_world_matrix;
 }
 
@@ -64,16 +65,46 @@ void calc_local_to_view_normal_matrix(const LocalToViewMatrix &view_matrix, Loca
     view_normal_matrix.matrix = Math::Matrix3{view_matrix.matrix}.invert().transpose();
 }
 
-void write_point_light_to_buffer(const Math::Matrix4 &world_to_view_matrix,
-                                 const LightDataBufferBlock &light_data_buffer_block,
-                                 const Core::Transform &transform,
-                                 const PointLight &point_light)
+void set_global_light_settings(
+    LightsUniformBlock &lights_uniform_block, const GlobalLightSettings &global_light_settings
+)
 {
-    light_data_buffer_block = {
-        .light_intensity{point_light.light_intensity},
-        .ambient_light_intensity{point_light.ambient_light_intensity},
-        .view_light_position{Math::Vector3{world_to_view_matrix * Math::Vector4{transform.position, 1.0f}}},
-        .light_attenuation{point_light.light_attenuation}};
+    lights_uniform_block.ambient_light_intensity = global_light_settings.ambient_light_intensity;
+    lights_uniform_block.light_attenuation = global_light_settings.light_attenuation;
+}
+
+void set_directional_light(
+    LightsUniformBlock &lights_uniform_block,
+    std::size_t &light_index,
+    const Math::Matrix4 &world_to_view_matrix,
+    const Core::Transform &transform,
+    const DirectionalLight &directional_light
+)
+{
+    if (light_index < LightsUniformBlock::LIGHT_COUNT)
+    {
+        lights_uniform_block.lights[light_index++] = {
+            .view_position{world_to_view_matrix * Math::Vector4{transform.position, 0.0f}},
+            .intensity{directional_light.light_intensity}
+        };
+    }
+}
+
+void set_point_light(
+    LightsUniformBlock &lights_uniform_block,
+    std::size_t &light_index,
+    const Math::Matrix4 &world_to_view_matrix,
+    const Core::Transform &transform,
+    const PointLight &point_light
+)
+{
+    if (light_index < LightsUniformBlock::LIGHT_COUNT)
+    {
+        lights_uniform_block.lights[light_index++] = {
+            .view_position{world_to_view_matrix * Math::Vector4{transform.position, 1.0f}},
+            .intensity{point_light.light_intensity}
+        };
+    }
 }
 
 ////////////////////////////////////////
@@ -86,24 +117,64 @@ std::vector<DrawCallKey> s_draw_call_keys{};
 
 GLuint s_bound_vao{};
 
+void init_renderer(
+    Renderer &renderer,
+    const Math::Matrix4 &local_to_view_matrix,
+    const Math::Matrix3 *local_to_view_normal_matrix,
+    const UniformBufferRangeBind *buffer_range_bind,
+    MaterialId material_id,
+    ModelId model_id
+)
+{
+    s_draw_calls.emplace_back(
+        local_to_view_matrix, local_to_view_normal_matrix, buffer_range_bind, material_id, model_id
+    );
+
+    renderer.draw_call_key.index = static_cast<DrawCallIndex>(s_draw_calls.size() - 1);
+    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & model_id << MODEL_ID_SHIFT_COUNT;
+    renderer.is_active = true;
+}
+
 void enqueue_draw_calls(const Renderer &renderer)
 {
     if (renderer.is_active)
         s_draw_call_keys.emplace_back(renderer.draw_call_key);
 }
 
-void render_entities_to_camera(const WorldToViewMatrix &view_matrix,
-                               const ProjectionBufferBlock &projection_buffer_block,
-                               const LightDataBufferBlock &light_data_buffer_block)
+void render_entities_to_camera(
+    const RenderState &render_settings,
+    const WorldToViewMatrix &view_matrix,
+    const ProjectionBufferBlock &projection_buffer_block,
+    const LightsBufferBlock &lights_buffer_block
+)
 {
-    bind_uniform_buffer(PROJECTION_BLOCK_BINDING, projection_buffer_block.get_buffer_range());
-    bind_uniform_buffer(LIGHT_DATA_BLOCK_BINDING, light_data_buffer_block.get_buffer_range());
+    OGL::set_clear_color(render_settings.clear_color);
+    OGL::set_clear_depth(1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Core::process_components(std::function<void(const Core::Transform &, const PointLight &)>{
-        std::bind_front(write_point_light_to_buffer, view_matrix.matrix, light_data_buffer_block)});
+    bind_uniform_buffer(PROJECTION_BLOCK_BINDING, projection_buffer_block.get_buffer_range());
+    bind_uniform_buffer(LIGHT_DATA_BLOCK_BINDING, lights_buffer_block.get_buffer_range());
+
+    {
+        LightsUniformBlock lights_block;
+        std::size_t light_index{};
+
+        Core::process_components(std::function<void(const GlobalLightSettings &)>{
+            std::bind_front(set_global_light_settings, std::ref(lights_block))
+        });
+        Core::process_components(std::function<void(const Core::Transform &, const DirectionalLight &)>{std::bind_front(
+            set_directional_light, std::ref(lights_block), std::ref(light_index), std::cref(view_matrix.matrix)
+        )});
+        Core::process_components(std::function<void(const Core::Transform &, const PointLight &)>{std::bind_front(
+            set_point_light, std::ref(lights_block), std::ref(light_index), std::cref(view_matrix.matrix)
+        )});
+
+        lights_buffer_block = lights_block;
+    }
 
     Core::process_components(std::function<void(const Core::Transform &, LocalToViewMatrix &)>{
-        std::bind_front(calc_local_to_view_matrix, view_matrix.matrix)});
+        std::bind_front(calc_local_to_view_matrix, std::cref(view_matrix.matrix))
+    });
     Core::process_components(calc_local_to_view_normal_matrix);
 
     for (DrawCallKey draw_call_key : s_draw_call_keys)
@@ -135,8 +206,9 @@ void render_entities()
 {
     s_draw_call_keys.clear();
     Core::process_components(enqueue_draw_calls);
-    std::sort(s_draw_call_keys.begin(), s_draw_call_keys.end(),
-              [](const DrawCallKey &lhs, const DrawCallKey &rhs) { return lhs.sort_key < rhs.sort_key; });
+    std::sort(s_draw_call_keys.begin(), s_draw_call_keys.end(), [](const DrawCallKey &lhs, const DrawCallKey &rhs) {
+        return lhs.sort_key < rhs.sort_key;
+    });
 
     Core::process_components(render_entities_to_camera);
 }
@@ -168,21 +240,6 @@ void init_rendering_system(GLFWwindow *window)
     glDepthRange(0.0, 1.0);
 }
 
-void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &local_to_view_matrix,
-                   const Math::Matrix3 *local_to_view_normal_matrix,
-                   const UniformBufferRangeBind *buffer_range_bind,
-                   MaterialId material_id,
-                   ModelId model_id)
-{
-    s_draw_calls.emplace_back(local_to_view_matrix, local_to_view_normal_matrix, buffer_range_bind, material_id,
-                              model_id);
-
-    renderer.draw_call_key.index = static_cast<DrawCallIndex>(s_draw_calls.size() - 1);
-    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & model_id << MODEL_ID_SHIFT_COUNT;
-    renderer.is_active = true;
-}
-
 void init_renderer(Core::EntityId entity_id, unsigned int options)
 {
     auto [renderer, local_to_view_matrix, material, model] =
@@ -201,17 +258,19 @@ void init_renderer(Core::EntityId entity_id, unsigned int options)
         uniform_buffer_range_bind = &std::get<0>(Core::get_entity_components<const UniformBufferRangeBind>(entity_id));
     }
 
-    init_renderer(renderer, local_to_view_matrix.matrix, local_to_view_normal_matrix, uniform_buffer_range_bind,
-                  material.material_id, model.model_id);
+    init_renderer(
+        renderer,
+        local_to_view_matrix.matrix,
+        local_to_view_normal_matrix,
+        uniform_buffer_range_bind,
+        material.material_id,
+        model.model_id
+    );
 }
 
 void render()
 {
     update_viewport();
-
-    glClearColor(0.294f, 0.22f, 0.192f, 1.0f);
-    glClearDepth(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     render_entities();
 

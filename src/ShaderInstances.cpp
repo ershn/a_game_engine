@@ -22,7 +22,7 @@ FragmentLightingShader::FragmentLightingShader(GLuint shader_program)
 
 FragmentLightingColorShader::FragmentLightingColorShader(GLuint shader_program)
     : FragmentLightingShader{shader_program}
-    , color{OGL::get_uniform_location(shader_program, "uColor")}
+    , diffuse_color{OGL::get_uniform_location(shader_program, "uDiffuseColor")}
 {
 }
 } // namespace Age::Gfx

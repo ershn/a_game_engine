@@ -26,7 +26,7 @@ struct FragmentLightingShader : public Shader
 
 struct FragmentLightingColorShader : public FragmentLightingShader
 {
-    GLint color{-1};
+    GLint diffuse_color{-1};
 
     FragmentLightingColorShader(GLuint shader_program);
 };

@@ -17,7 +17,7 @@ struct FragmentLightingShader : public Age::Gfx::Shader
 
 struct FragmentLightingColorShader : public FragmentLightingShader
 {
-    GLint color{-1};
+    GLint diffuse_color{-1};
 
     FragmentLightingColorShader(GLuint shader_program);
 };
@@ -33,7 +33,7 @@ struct FragmentLightingMaterial : public Age::Gfx::Material
 
 struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 {
-    Age::Math::Vector4 color{1.0f};
+    Age::Math::Vector4 diffuse_color{1.0f};
 
     FragmentLightingColorMaterial(const Age::Gfx::Shader &shader);
 

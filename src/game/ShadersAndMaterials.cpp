@@ -15,7 +15,7 @@ FragmentLightingShader::FragmentLightingShader(GLuint shader_program)
 
 FragmentLightingColorShader::FragmentLightingColorShader(GLuint shader_program)
     : FragmentLightingShader{shader_program}
-    , color{Gfx::OGL::get_uniform_location(shader_program, "uColor")}
+    , diffuse_color{Gfx::OGL::get_uniform_location(shader_program, "uDiffuseColor")}
 {
 }
 
@@ -39,6 +39,6 @@ void FragmentLightingColorMaterial::apply_properties() const
 {
     FragmentLightingMaterial::apply_properties();
     const auto &shader = static_cast<const FragmentLightingColorShader &>(this->shader);
-    Gfx::OGL::set_uniform(shader.color, color);
+    Gfx::OGL::set_uniform(shader.diffuse_color, diffuse_color);
 }
 } // namespace Game

@@ -84,7 +84,7 @@ Shader::Shader(GLuint shader_program, unsigned int options)
     if (options & SHADER_VIEW_NORMAL_MATRIX)
         local_to_view_normal_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewNormalMatrix");
     if (options & SHADER_LIGHT_DATA_BLOCK)
-        light_data_block = OGL::get_uniform_block_index(shader_program, "LightDataBlock");
+        light_data_block = OGL::get_uniform_block_index(shader_program, "LightsBlock");
 }
 
 std::vector<std::unique_ptr<Shader>> g_shaders{};

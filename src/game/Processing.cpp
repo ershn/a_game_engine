@@ -1,6 +1,11 @@
+#include <algorithm>
+#include <cmath>
+
 #include "Input.hpp"
 #include "MainLoop.hpp"
 #include "MaterialInstances.hpp"
+#include "Math.hpp"
+#include "Time.hpp"
 #include "Transformations.hpp"
 
 #include "game/Processing.hpp"
@@ -87,5 +92,33 @@ void control_transform_via_keyboard(TransformKeyboardController &controller, Cor
 
     if (Input::is_key_pressed(GLFW_KEY_SPACE, controller.pressed_keys))
         std::cout << transform << '\n';
+}
+
+void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::DirectionalLight &directional_light)
+{
+    sunlight.time += Time::delta_time();
+    if (sunlight.time >= sunlight.day_length)
+        sunlight.time -= sunlight.day_length;
+
+    float normalized_time{sunlight.time / sunlight.day_length};
+    auto intensity_it_2 = std::find_if(
+        sunlight.light_intensities.cbegin(),
+        sunlight.light_intensities.cend(),
+        [=](const auto &light_intensity) { return normalized_time < light_intensity.normalized_time; }
+    );
+    auto intensity_it_1 = intensity_it_2 - 1;
+
+    float segment_normalized_time{
+        Math::inverse_lerp(intensity_it_1->normalized_time, intensity_it_2->normalized_time, normalized_time)
+    };
+    directional_light.light_intensity =
+        Math::lerp(intensity_it_1->intensity, intensity_it_2->intensity, segment_normalized_time);
+
+    float sun_angle{Math::TAU - Math::TAU * normalized_time - Math::PI * 0.5f};
+    transform.position = {std::cos(sun_angle), std::sin(sun_angle), 0.0f};
+
+    auto [render_state] = Core::get_entity_components<Gfx::RenderState>(sunlight.camera_id);
+    render_state.clear_color =
+        Math::lerp(intensity_it_1->sky_color, intensity_it_2->sky_color, segment_normalized_time);
 }
 } // namespace Game

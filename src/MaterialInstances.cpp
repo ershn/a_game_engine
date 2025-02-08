@@ -45,6 +45,6 @@ void FragmentLightingColorMaterial::apply_properties() const
 {
     FragmentLightingMaterial::apply_properties();
     const auto &shader = static_cast<const FragmentLightingColorShader &>(this->shader);
-    OGL::set_uniform(shader.color, color);
+    OGL::set_uniform(shader.diffuse_color, diffuse_color);
 }
 } // namespace Age::Gfx

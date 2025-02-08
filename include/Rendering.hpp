@@ -30,20 +30,40 @@ struct LocalToViewNormalMatrix
     Math::Matrix3 matrix{};
 };
 
+struct GlobalLightSettings
+{
+    static constexpr auto TYPE{Core::ComponentType::GLOBAL_LIGHT_SETTINGS};
+
+    Math::Vector4 ambient_light_intensity{};
+    float light_attenuation{};
+};
+
+struct DirectionalLight
+{
+    static constexpr auto TYPE{Core::ComponentType::DIRECTIONAL_LIGHT};
+
+    Math::Vector4 light_intensity{};
+};
+
 struct PointLight
 {
     static constexpr auto TYPE{Core::ComponentType::POINT_LIGHT};
 
     Math::Vector4 light_intensity{};
-    float light_attenuation{};
-    Math::Vector4 ambient_light_intensity{};
 };
 
-struct LightDataBufferBlock : public UniformBufferBlock<LightDataUniformBlock>
+struct LightsBufferBlock : public UniformBufferBlock<LightsUniformBlock>
 {
-    static constexpr auto TYPE{Core::ComponentType::LIGHT_DATA_BUFFER_BLOCK};
+    static constexpr auto TYPE{Core::ComponentType::LIGHTS_BUFFER_BLOCK};
 
-    using UniformBufferBlock<LightDataUniformBlock>::operator=;
+    using UniformBufferBlock<LightsUniformBlock>::operator=;
+};
+
+struct RenderState
+{
+    static constexpr auto TYPE{Core::ComponentType::RENDER_STATE};
+
+    Math::Vector4 clear_color;
 };
 
 struct DrawCall
@@ -73,13 +93,6 @@ struct Renderer
 };
 
 void init_rendering_system(GLFWwindow *window);
-
-void init_renderer(Renderer &renderer,
-                   const Math::Matrix4 &local_to_view_matrix,
-                   const Math::Matrix3 *local_to_view_normal_matrix,
-                   const UniformBufferRangeBind *buffer_block_bind,
-                   MaterialId material_id,
-                   ModelId model_id);
 
 inline constexpr unsigned int RENDER_WITH_NORMAL_MATRIX{0b1};
 inline constexpr unsigned int RENDER_WITH_BUFFER_RANGE_BIND{0b10};

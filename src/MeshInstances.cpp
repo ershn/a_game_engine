@@ -1,6 +1,6 @@
 #include <functional>
-#include <numbers>
 
+#include "Math.hpp"
 #include "MeshInstances.hpp"
 
 namespace Age::Gfx
@@ -181,7 +181,7 @@ void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, std:
     auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count * 3)};
     auto index_buffer{std::make_unique<GLushort[]>(index_count)};
 
-    float angle_increment{std::numbers::pi_v<float> * 2.0f / side_count};
+    float angle_increment{Math::TAU / side_count};
     for (std::size_t side_index{}; side_index < side_count; side_index++)
     {
         std::size_t top_vertex_index{side_index * 2};

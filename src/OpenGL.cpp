@@ -4,6 +4,16 @@
 
 namespace Age::Gfx::OGL
 {
+void set_clear_color(const Math::Vector4 &color)
+{
+    glClearColor(color.x, color.y, color.z, color.w);
+}
+
+void set_clear_depth(float depth)
+{
+    glClearDepth(depth);
+}
+
 void use_program(GLuint shader_program)
 {
     glUseProgram(shader_program);

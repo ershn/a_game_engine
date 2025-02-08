@@ -1,7 +1,7 @@
 #version 330
 
 smooth in vec4 iViewPosition;
-smooth in vec4 iColor;
+smooth in vec4 iDiffuseColor;
 smooth in vec3 iViewNormal;
 
 layout(std140) uniform;
@@ -15,13 +15,20 @@ uniform MaterialBlock
     float surfaceShininess;
 } Material;
 
-uniform LightDataBlock
+struct Light
 {
+    vec4 viewPosition;
     vec4 intensity;
+};
+
+const int LIGHT_COUNT = 4;
+
+uniform LightsBlock
+{
     vec4 ambientIntensity;
-    vec3 viewPosition;
     float attenuation;
-} Light;
+    Light lights[LIGHT_COUNT];
+} Lights;
 
 // unused
 uniform FragmentPositionDataBlock
@@ -45,27 +52,37 @@ vec3 viewPositionFromFragmentCoord()
     return (uClipToViewMatrix * clipPosition).xyz;
 }
 
-vec4 attenuatedLightIntensity(in vec3 viewPosition, out vec3 directionToLight)
+float attenuatedLightIntensity(in vec3 viewPosition, in vec3 viewLightPosition, out vec3 directionToLight)
 {
-    vec3 differenceToLight = Light.viewPosition - viewPosition;
+    vec3 differenceToLight = viewLightPosition - viewPosition;
     float distanceToLightSquare = dot(differenceToLight, differenceToLight);
     directionToLight = differenceToLight * inversesqrt(distanceToLightSquare);
-    return Light.intensity / (1.0 + Light.attenuation * sqrt(distanceToLightSquare));
+    return 1.0 / (1.0 + Lights.attenuation * sqrt(distanceToLightSquare));
 }
 
-void main()
+vec4 calcLighting(in Light light)
 {
     vec3 viewPosition = vec3(iViewPosition);
     vec3 viewNormal = normalize(iViewNormal);
 
     vec3 directionToLight;
-    vec4 attenuatedLight = attenuatedLightIntensity(viewPosition, directionToLight);
+    vec4 lightIntensity;
+    if (light.viewPosition.w == 0.0)
+    {
+        directionToLight = vec3(light.viewPosition);
+        lightIntensity = light.intensity;
+    }
+    else
+    {
+        lightIntensity = light.intensity * attenuatedLightIntensity(viewPosition, light.viewPosition.xyz, directionToLight);
+    }
 
+    // Diffuse lighting
     float incidenceAngleCos = dot(directionToLight, viewNormal);
     incidenceAngleCos = clamp(incidenceAngleCos, 0.0, 1.0);
 
+    // Specular lighting
     vec3 viewDirection = normalize(-viewPosition);
-
     vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
     float halfAngle = acos(dot(viewNormal, halfAngleDirection));
 
@@ -74,7 +91,16 @@ void main()
     float gaussianTerm = exp(gaussianExponent);
     gaussianTerm = incidenceAngleCos != 0.0 ? gaussianTerm : 0.0;
 
-    oColor = iColor * attenuatedLight * 0.75 * incidenceAngleCos
-      + Material.specularColor * attenuatedLight * 0.25 * gaussianTerm
-      + iColor * Light.ambientIntensity;
+    return iDiffuseColor * 0.75 * lightIntensity * incidenceAngleCos
+      + Material.specularColor * 0.25 * lightIntensity * gaussianTerm;
+}
+
+void main()
+{
+    vec4 accumulatedLight = iDiffuseColor * Lights.ambientIntensity;
+    for (int index = 0; index < LIGHT_COUNT; ++index)
+    {
+        accumulatedLight += calcLighting(Lights.lights[index]);
+    }
+    oColor = accumulatedLight;
 }
