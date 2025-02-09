@@ -66,6 +66,7 @@ struct Sunlight
     {
         float normalized_time{};
         Age::Math::Vector4 intensity;
+        Age::Math::Vector4 ambient_intensity;
         Age::Math::Vector4 sky_color;
     };
 
@@ -73,6 +74,7 @@ struct Sunlight
     float day_length{};
     float time{};
     Age::Core::EntityId camera_id{};
+    Age::Core::EntityId light_settings_id{};
 };
 
 void update_sunlight(

@@ -109,13 +109,13 @@ void init_entities()
     };
 
     std::vector<Sunlight::LightIntensity> sunlight_intensities{
-        {0.0f, {0.0f}, {0.0f}},
-        {0.25f, {0.0f}, {0.0f}},
-        {0.3f, {0.55f, 0.55f, 0.55f, 1.0f}, {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.5f, {0.7f, 0.7f, 0.7f, 1.0f}, {185 / 255.0f, 235 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.7f, {0.55f, 0.55f, 0.55f, 1.0f}, {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.75f, {0.0f}, {0.0f}},
-        {1.0f, {0.0f}, {0.0f}}
+        {0.0f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}},
+        {0.25f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}},
+        {0.3f, {0.5f, 0.5f, 0.5f, 1.0f}, {0.2f, 0.2f, 0.2f, 1.0f}, {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.5f, {0.6f, 0.6f, 0.6f, 1.0f}, {0.2f, 0.2f, 0.2f, 1.0f}, {185 / 255.0f, 235 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.7f, {0.5f, 0.5f, 0.5f, 1.0f}, {0.2f, 0.2f, 0.2f, 1.0f}, {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.75f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}},
+        {1.0f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}}
     };
 
     // Camera
@@ -141,9 +141,10 @@ void init_entities()
     }
 
     // Global light settings
+    Core::EntityId light_settings_id;
     {
-        Core::create_entity(
-            Gfx::GlobalLightSettings{.ambient_light_intensity{0.1f, 0.1f, 0.1f, 1.0f}, .light_attenuation{0.2f}}
+        light_settings_id = Core::create_entity(
+            Gfx::GlobalLightSettings{.ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f}, .light_attenuation{0.2f}}
         );
     }
 
@@ -152,7 +153,13 @@ void init_entities()
         Core::create_entity(
             Core::Transform{.position{Math::normalize(Math::Vector3{1.0f, 1.0f, -1.0f})}},
             Gfx::DirectionalLight{},
-            Sunlight{.light_intensities{sunlight_intensities}, .day_length{20.0f}, .time{10.0f}, .camera_id{camera_id}}
+            Sunlight{
+                .light_intensities{sunlight_intensities},
+                .day_length{20.0f},
+                .time{5.0f},
+                .camera_id{camera_id},
+                .light_settings_id{light_settings_id}
+            }
         );
     }
 
@@ -167,7 +174,7 @@ void init_entities()
             Gfx::MaterialRef{material_id},
             Gfx::ModelRef{Gfx::CUBE_MODEL_ID},
             Gfx::Renderer{},
-            Gfx::PointLight{.light_intensity{0.5f, 0.5f, 0.5f, 1.0f}},
+            Gfx::PointLight{.light_intensity{0.6f, 0.6f, 0.6f, 1.0f}},
             Core::PathFollower{
                 .path{point_light_path_1},
                 .target_position{point_light_path_1[0]},
@@ -195,7 +202,7 @@ void init_entities()
             Gfx::MaterialRef{material_id},
             Gfx::ModelRef{Gfx::CUBE_MODEL_ID},
             Gfx::Renderer{},
-            Gfx::PointLight{.light_intensity{0.0f, 0.0f, 0.5f, 1.0f}},
+            Gfx::PointLight{.light_intensity{0.0f, 0.0f, 0.7f, 1.0f}},
             Core::PathFollower{
                 .path{point_light_path_2},
                 .target_position{point_light_path_2[0]},
@@ -223,7 +230,7 @@ void init_entities()
             Gfx::MaterialRef{material_id},
             Gfx::ModelRef{Gfx::CUBE_MODEL_ID},
             Gfx::Renderer{},
-            Gfx::PointLight{.light_intensity{0.5f, 0.0f, 0.0f, 1.0f}},
+            Gfx::PointLight{.light_intensity{0.7f, 0.0f, 0.0f, 1.0f}},
             Core::PathFollower{
                 .path{point_light_path_3},
                 .target_position{point_light_path_3[1]},
