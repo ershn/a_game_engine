@@ -65,6 +65,7 @@ struct Sunlight
     struct LightIntensity
     {
         float normalized_time{};
+        float max_intensity{};
         Age::Math::Vector4 intensity;
         Age::Math::Vector4 ambient_intensity;
         Age::Math::Vector4 sky_color;

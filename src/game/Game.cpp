@@ -109,13 +109,25 @@ void init_entities()
     };
 
     std::vector<Sunlight::LightIntensity> sunlight_intensities{
-        {0.0f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}},
-        {0.25f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}},
-        {0.3f, {0.5f, 0.5f, 0.5f, 1.0f}, {0.2f, 0.2f, 0.2f, 1.0f}, {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.5f, {0.6f, 0.6f, 0.6f, 1.0f}, {0.2f, 0.2f, 0.2f, 1.0f}, {185 / 255.0f, 235 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.7f, {0.5f, 0.5f, 0.5f, 1.0f}, {0.2f, 0.2f, 0.2f, 1.0f}, {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.75f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}},
-        {1.0f, {0.3f, 0.1f, 0.1f, 1.0f}, {0.15f, 0.05f, 0.05f, 1.0f}, {0.0f}}
+        {0.0f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}},
+        {0.25f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}},
+        {0.3f,
+         3.0f,
+         {1.6f, 1.6f, 1.6f, 1.0f},
+         {0.6f, 0.6f, 0.6f, 1.0f},
+         {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.5f,
+         3.0f,
+         {1.8f, 1.8f, 1.8f, 1.0f},
+         {0.6f, 0.6f, 0.6f, 1.0f},
+         {185 / 255.0f, 235 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.7f,
+         3.0f,
+         {1.6f, 1.6f, 1.6f, 1.0f},
+         {0.6f, 0.6f, 0.6f, 1.0f},
+         {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.75f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}},
+        {1.0f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}}
     };
 
     // Camera
@@ -143,9 +155,7 @@ void init_entities()
     // Global light settings
     Core::EntityId light_settings_id;
     {
-        light_settings_id = Core::create_entity(
-            Gfx::GlobalLightSettings{.ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f}, .light_attenuation{0.2f}}
-        );
+        light_settings_id = Core::create_entity(Gfx::GlobalLightSettings{.light_attenuation{0.2f}});
     }
 
     // Directional light 1
@@ -178,7 +188,7 @@ void init_entities()
             Core::PathFollower{
                 .path{point_light_path_1},
                 .target_position{point_light_path_1[0]},
-                .move_speed{3.0f},
+                .move_speed{6.0f},
                 .repeat_path{true}
             }
         );
@@ -206,7 +216,7 @@ void init_entities()
             Core::PathFollower{
                 .path{point_light_path_2},
                 .target_position{point_light_path_2[0]},
-                .move_speed{3.5f},
+                .move_speed{7.0f},
                 .repeat_path{true}
             }
         );
@@ -234,7 +244,7 @@ void init_entities()
             Core::PathFollower{
                 .path{point_light_path_3},
                 .target_position{point_light_path_3[1]},
-                .move_speed{2.5f},
+                .move_speed{5.0f},
                 .repeat_path{true}
             }
         );
@@ -297,7 +307,7 @@ void init_entities()
         auto material_id = next_material_id++;
         Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
 
-        material_buffer_writer[2] = {.specular_color{1.0f}, .surface_shininess{0.5f}};
+        material_buffer_writer[2] = {.specular_color{1.0f}, .surface_shininess{0.01f}};
 
         auto id = Core::create_entity(
             Core::Transform{
@@ -322,7 +332,7 @@ void init_entities()
         auto material_id = next_material_id++;
         Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
 
-        material_buffer_writer[3] = {.specular_color{1.0f}, .surface_shininess{0.5f}};
+        material_buffer_writer[3] = {.specular_color{1.0f}, .surface_shininess{0.01f}};
 
         auto id = Core::create_entity(
             Core::Transform{

@@ -122,6 +122,8 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
         Math::lerp(intensity_it_1->sky_color, intensity_it_2->sky_color, segment_normalized_time);
 
     auto [light_settings] = Core::get_entity_components<Gfx::GlobalLightSettings>(sunlight.light_settings_id);
+    light_settings.max_intensity =
+        Math::lerp(intensity_it_1->max_intensity, intensity_it_2->max_intensity, segment_normalized_time);
     light_settings.ambient_light_intensity =
         Math::lerp(intensity_it_1->ambient_intensity, intensity_it_2->ambient_intensity, segment_normalized_time);
 }

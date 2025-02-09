@@ -36,6 +36,7 @@ struct GlobalLightSettings
 
     Math::Vector4 ambient_light_intensity{};
     float light_attenuation{};
+    float max_intensity{};
 };
 
 struct DirectionalLight

@@ -27,6 +27,7 @@ uniform LightsBlock
 {
     vec4 ambientIntensity;
     float attenuation;
+    float maxIntensity;
     Light lights[LIGHT_COUNT];
 } Lights;
 
@@ -102,5 +103,5 @@ void main()
     {
         accumulatedLight += calcLighting(Lights.lights[index]);
     }
-    oColor = accumulatedLight;
+    oColor = accumulatedLight / Lights.maxIntensity;
 }

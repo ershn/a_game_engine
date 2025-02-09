@@ -71,6 +71,7 @@ void set_global_light_settings(
 {
     lights_uniform_block.ambient_light_intensity = global_light_settings.ambient_light_intensity;
     lights_uniform_block.light_attenuation = global_light_settings.light_attenuation;
+    lights_uniform_block.max_intensity = global_light_settings.max_intensity;
 }
 
 void set_directional_light(

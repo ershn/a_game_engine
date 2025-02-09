@@ -23,7 +23,8 @@ struct LightsUniformBlock
 
     Math::Vector4 ambient_light_intensity;
     float light_attenuation{};
-    float _padding_[3];
+    float max_intensity{};
+    float _padding_[2];
     Light lights[LIGHT_COUNT];
 };
 
