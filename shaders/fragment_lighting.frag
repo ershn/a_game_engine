@@ -9,11 +9,10 @@ layout(std140) uniform;
 uniform vec4 uSpecularColor;
 uniform float uSurfaceShininess;
 
-uniform MaterialBlock
+uniform GammaCorrectionBlock
 {
-    vec4 specularColor;
-    float surfaceShininess;
-} Material;
+	float gammaInverse;
+};
 
 struct Light
 {
@@ -30,6 +29,12 @@ uniform LightsBlock
     float maxIntensity;
     Light lights[LIGHT_COUNT];
 } Lights;
+
+uniform MaterialBlock
+{
+    vec4 specularColor;
+    float surfaceShininess;
+} Material;
 
 // unused
 uniform FragmentPositionDataBlock
@@ -58,7 +63,7 @@ float attenuatedLightIntensity(in vec3 viewPosition, in vec3 viewLightPosition, 
     vec3 differenceToLight = viewLightPosition - viewPosition;
     float distanceToLightSquare = dot(differenceToLight, differenceToLight);
     directionToLight = differenceToLight * inversesqrt(distanceToLightSquare);
-    return 1.0 / (1.0 + Lights.attenuation * sqrt(distanceToLightSquare));
+    return 1.0 / (1.0 + Lights.attenuation * distanceToLightSquare);
 }
 
 vec4 calcLighting(in Light light)
@@ -92,8 +97,8 @@ vec4 calcLighting(in Light light)
     float gaussianTerm = exp(gaussianExponent);
     gaussianTerm = incidenceAngleCos != 0.0 ? gaussianTerm : 0.0;
 
-    return iDiffuseColor * 0.75 * lightIntensity * incidenceAngleCos
-      + Material.specularColor * 0.25 * lightIntensity * gaussianTerm;
+    return iDiffuseColor * lightIntensity * incidenceAngleCos
+      + Material.specularColor * lightIntensity * gaussianTerm;
 }
 
 void main()
@@ -103,5 +108,6 @@ void main()
     {
         accumulatedLight += calcLighting(Lights.lights[index]);
     }
-    oColor = accumulatedLight / Lights.maxIntensity;
+	accumulatedLight /= Lights.maxIntensity;
+    oColor = pow(accumulatedLight, vec4(vec3(gammaInverse), 1.0));
 }

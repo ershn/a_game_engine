@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <numbers>
 
 namespace Age::Math
@@ -23,5 +24,11 @@ template <typename T>
 float inverse_lerp(T a, T b, T i)
 {
     return (i - a) / (b - a);
+}
+
+template <typename T>
+T pow(T base, T exponent)
+{
+    return std::pow(base, exponent);
 }
 } // namespace Age::Math

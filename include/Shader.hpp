@@ -20,6 +20,7 @@ struct Shader
     GLuint shader_program{};
     GLint local_to_view_matrix{-1};
     GLint local_to_view_normal_matrix{-1};
+    GLuint gamma_correction_block{GL_INVALID_INDEX};
     GLuint projection_block{GL_INVALID_INDEX};
     GLuint light_data_block{GL_INVALID_INDEX};
 
@@ -28,6 +29,7 @@ struct Shader
 
 enum BlockBinding : GLuint
 {
+    GAMMA_CORRECTION_BLOCK_BINDING,
     PROJECTION_BLOCK_BINDING,
     LIGHT_DATA_BLOCK_BINDING
 };
@@ -50,6 +52,7 @@ void create_shader(ShaderId shader_id, std::string_view vertex_shader_path, std:
     g_shaders[shader_id] = std::make_unique<TShader>(shader_program);
 
     const Shader &shader{*g_shaders[shader_id]};
+    OGL::bind_uniform_block(shader_program, shader.gamma_correction_block, GAMMA_CORRECTION_BLOCK_BINDING);
     OGL::bind_uniform_block(shader_program, shader.projection_block, PROJECTION_BLOCK_BINDING);
     if (shader.light_data_block != GL_INVALID_INDEX)
         OGL::bind_uniform_block(shader_program, shader.light_data_block, LIGHT_DATA_BLOCK_BINDING);

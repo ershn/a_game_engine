@@ -399,6 +399,50 @@ Vector4 &operator*=(Vector4 &lhs, float scalar)
     return lhs;
 }
 
+Vector2 &operator/=(Vector2 &lhs, float scalar)
+{
+    lhs.x /= scalar;
+    lhs.y /= scalar;
+    return lhs;
+}
+
+Vector3 &operator/=(Vector3 &lhs, float scalar)
+{
+    lhs.x /= scalar;
+    lhs.y /= scalar;
+    lhs.z /= scalar;
+    return lhs;
+}
+
+Vector4 &operator/=(Vector4 &lhs, float scalar)
+{
+    lhs.x /= scalar;
+    lhs.y /= scalar;
+    lhs.z /= scalar;
+    lhs.w /= scalar;
+    return lhs;
+}
+
+Vector2 pow(const Vector2 &base, const Vector2 &exponent)
+{
+    return {std::pow(base.x, exponent.x), std::pow(base.y, exponent.y)};
+}
+
+Vector3 pow(const Vector3 &base, const Vector3 &exponent)
+{
+    return {std::pow(base.x, exponent.x), std::pow(base.y, exponent.y), std::pow(base.z, exponent.z)};
+}
+
+Vector4 pow(const Vector4 &base, const Vector4 &exponent)
+{
+    return {
+        std::pow(base.x, exponent.x),
+        std::pow(base.y, exponent.y),
+        std::pow(base.z, exponent.z),
+        std::pow(base.w, exponent.w)
+    };
+}
+
 float dot(const Vector2 &lhs, const Vector2 &rhs)
 {
     return lhs.x * rhs.x + lhs.y * rhs.y;

@@ -13,6 +13,7 @@
 # Rendering
 
 # Shader
+- add a diffuse only shader
 - add an error shader used in place of a shader that failed to compile
 
 # Mesh

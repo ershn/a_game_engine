@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\Transform.cpp" />
@@ -172,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Camera.hpp" />
+    <ClInclude Include="include\Color.hpp" />
     <ClInclude Include="include\Components.hpp" />
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />

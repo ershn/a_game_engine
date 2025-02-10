@@ -120,6 +120,14 @@ Vector2 &operator*=(Vector2 &vector, float scalar);
 Vector3 &operator*=(Vector3 &vector, float scalar);
 Vector4 &operator*=(Vector4 &vector, float scalar);
 
+Vector2 &operator/=(Vector2 &vector, float scalar);
+Vector3 &operator/=(Vector3 &vector, float scalar);
+Vector4 &operator/=(Vector4 &vector, float scalar);
+
+Vector2 pow(const Vector2 &base, const Vector2 &exponent);
+Vector3 pow(const Vector3 &base, const Vector3 &exponent);
+Vector4 pow(const Vector4 &base, const Vector4 &exponent);
+
 float dot(const Vector2 &lhs, const Vector2 &rhs);
 float dot(const Vector3 &lhs, const Vector3 &rhs);
 float dot(const Vector4 &lhs, const Vector4 &rhs);

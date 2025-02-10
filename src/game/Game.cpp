@@ -4,6 +4,7 @@
 #include "Rendering.hpp"
 #include "Transformations.hpp"
 
+#include "Color.hpp"
 #include "MaterialInstances.hpp"
 #include "MeshInstances.hpp"
 #include "Path.hpp"
@@ -54,11 +55,19 @@ void init_entities()
         FRAGMENT_LIGHTING_COLOR_SHADER, "shaders/fragment_lighting_color.vert", "shaders/fragment_lighting.frag"
     );
 
-    Gfx::create_material<Gfx::NoLightingMaterial>(NO_LIGHTING_MATERIAL, NO_LIGHTING_SHADER);
+    auto &no_lighting_material =
+        Gfx::create_material<Gfx::NoLightingMaterial>(NO_LIGHTING_MATERIAL, NO_LIGHTING_SHADER);
+
+    auto gamma_correction_buffer_id = next_uniform_buffer_id++;
+    auto &gamma_correction_buffer =
+        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::GammaCorrectionUniformBlock>>(
+            gamma_correction_buffer_id
+        );
 
     auto projection_buffer_id = next_uniform_buffer_id++;
     auto &projection_buffer =
         Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionUniformBlock>>(projection_buffer_id);
+
     auto lights_buffer_id = next_uniform_buffer_id++;
     auto &lights_buffer =
         Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsUniformBlock>>(lights_buffer_id);
@@ -109,25 +118,30 @@ void init_entities()
     };
 
     std::vector<Sunlight::LightIntensity> sunlight_intensities{
-        {0.0f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}},
-        {0.25f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}},
-        {0.3f,
-         3.0f,
-         {1.6f, 1.6f, 1.6f, 1.0f},
-         {0.6f, 0.6f, 0.6f, 1.0f},
+        {0.0f, 3.0f, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f}},
+        {0.2f, 3.0f, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f}},
+        {0.25f,
+         5.0f,
+         {2.5f, 0.2f, 0.2f, 1.0f},
+         {0.01f, 0.025f, 0.025f, 1.0f},
          {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.5f,
-         3.0f,
-         {1.8f, 1.8f, 1.8f, 1.0f},
-         {0.6f, 0.6f, 0.6f, 1.0f},
+        {0.3f,
+         10.0f,
+         {6.5f, 6.5f, 6.5f, 1.0f},
+         {0.4f, 0.4f, 0.4f, 1.0f},
          {185 / 255.0f, 235 / 255.0f, 255 / 255.0f, 1.0f}},
         {0.7f,
-         3.0f,
-         {1.6f, 1.6f, 1.6f, 1.0f},
-         {0.6f, 0.6f, 0.6f, 1.0f},
+         10.0f,
+         {6.5f, 6.5f, 6.5f, 1.0f},
+         {0.4f, 0.4f, 0.4f, 1.0f},
+         {185 / 255.0f, 235 / 255.0f, 255 / 255.0f, 1.0f}},
+        {0.75f,
+         5.0f,
+         {2.5f, 0.2f, 0.2f, 1.0f},
+         {0.01f, 0.025f, 0.025f, 1.0f},
          {115 / 255.0f, 215 / 255.0f, 255 / 255.0f, 1.0f}},
-        {0.75f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}},
-        {1.0f, 1.5f, {0.45f, 0.15f, 0.15f, 1.0f}, {0.225f, 0.075f, 0.075f, 1.0f}, {0.0f}}
+        {0.8f, 3.0f, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f}},
+        {1.0f, 3.0f, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f}}
     };
 
     // Camera
@@ -142,6 +156,7 @@ void init_entities()
                 Math::perspective_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
+            Gfx::GammaCorrectionBufferBlock{gamma_correction_buffer.get_block()},
             Gfx::ProjectionBufferBlock{projection_buffer.get_block()},
             Gfx::LightsBufferBlock{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
@@ -152,10 +167,12 @@ void init_entities()
         );
     }
 
-    // Global light settings
-    Core::EntityId light_settings_id;
+    // Global settings
+    Core::EntityId global_settings_id;
     {
-        light_settings_id = Core::create_entity(Gfx::GlobalLightSettings{.light_attenuation{0.2f}});
+        global_settings_id = Core::create_entity(
+            Gfx::GlobalColorSettings{.gamma_inverse{1 / 2.2f}}, Gfx::GlobalLightSettings{.light_attenuation{0.2f}}
+        );
     }
 
     // Directional light 1
@@ -165,10 +182,10 @@ void init_entities()
             Gfx::DirectionalLight{},
             Sunlight{
                 .light_intensities{sunlight_intensities},
-                .day_length{20.0f},
+                .day_length{30.0f},
                 .time{5.0f},
                 .camera_id{camera_id},
-                .light_settings_id{light_settings_id}
+                .light_settings_id{global_settings_id}
             }
         );
     }
@@ -252,12 +269,12 @@ void init_entities()
         Gfx::init_renderer(id);
     }
 
-    // Floor
+    // Ground
     {
         auto material_id = next_material_id++;
         Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
 
-        material_buffer_writer[0] = {.specular_color{1.0f}, .surface_shininess{0.95f}};
+        material_buffer_writer[0] = {.specular_color{0.0f}, .surface_shininess{1.0f}};
 
         auto id = Core::create_entity(
             Core::Transform{
@@ -282,7 +299,7 @@ void init_entities()
             Gfx::create_material<FragmentLightingColorMaterial>(material_id, FRAGMENT_LIGHTING_COLOR_SHADER);
         material.diffuse_color = {0.968f, 0.141f, 0.019f, 1.0f};
 
-        material_buffer_writer[1] = {.specular_color{1.0f}, .surface_shininess{0.5f}};
+        material_buffer_writer[1] = {.specular_color{0.22f, 0.20f, 0.0f, 1.0f}, .surface_shininess{0.3f}};
 
         auto id = Core::create_entity(
             Core::Transform{
@@ -307,7 +324,7 @@ void init_entities()
         auto material_id = next_material_id++;
         Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
 
-        material_buffer_writer[2] = {.specular_color{1.0f}, .surface_shininess{0.01f}};
+        material_buffer_writer[2] = {.specular_color{0.3f, 0.3f, 0.3f, 1.0f}, .surface_shininess{0.3f}};
 
         auto id = Core::create_entity(
             Core::Transform{
