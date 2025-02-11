@@ -120,7 +120,7 @@ void set_point_light(
 ////////////////////////////////////////
 
 constexpr unsigned int MATERIAL_ID_SHIFT_COUNT{16U};
-constexpr unsigned int MODEL_ID_SHIFT_COUNT{0U};
+constexpr unsigned int MESH_ID_SHIFT_COUNT{0U};
 
 std::vector<DrawCall> s_draw_calls{};
 std::vector<DrawCallKey> s_draw_call_keys{};
@@ -133,15 +133,15 @@ void init_renderer(
     const Math::Matrix3 *local_to_view_normal_matrix,
     const UniformBufferRangeBind *buffer_range_bind,
     MaterialId material_id,
-    ModelId model_id
+    MeshId mesh_id
 )
 {
     s_draw_calls.emplace_back(
-        local_to_view_matrix, local_to_view_normal_matrix, buffer_range_bind, material_id, model_id
+        local_to_view_matrix, local_to_view_normal_matrix, buffer_range_bind, material_id, mesh_id
     );
 
     renderer.draw_call_key.index = static_cast<DrawCallIndex>(s_draw_calls.size() - 1);
-    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & model_id << MODEL_ID_SHIFT_COUNT;
+    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & mesh_id << MESH_ID_SHIFT_COUNT;
     renderer.is_active = true;
 }
 
@@ -207,15 +207,15 @@ void render_entities_to_camera(
         if (draw_call.local_to_view_normal_matrix != nullptr)
             OGL::set_uniform(material.shader.local_to_view_normal_matrix, *draw_call.local_to_view_normal_matrix);
 
-        DrawCommand draw_command{get_draw_command(draw_call.model_id)};
-        if (draw_command.vertex_array_object != s_bound_vao)
+        MeshDrawCommands mesh_draw_commands{get_mesh_draw_commands(draw_call.mesh_id)};
+        if (mesh_draw_commands.vertex_array_object != s_bound_vao)
         {
-            OGL::bind_vertex_array_object(draw_command.vertex_array_object);
-            s_bound_vao = draw_command.vertex_array_object;
+            OGL::bind_vertex_array_object(mesh_draw_commands.vertex_array_object);
+            s_bound_vao = mesh_draw_commands.vertex_array_object;
         }
-        for (const Mesh &mesh : draw_command.meshes)
+        for (const DrawCommand &draw_command : mesh_draw_commands.draw_commands)
         {
-            OGL::draw_elements(mesh.rendering_mode, mesh.element_count, mesh.buffer_offset);
+            OGL::draw_elements(draw_command.rendering_mode, draw_command.element_count, draw_command.buffer_offset);
         }
     }
 }
@@ -260,8 +260,8 @@ void init_rendering_system(GLFWwindow *window)
 
 void init_renderer(Core::EntityId entity_id, unsigned int options)
 {
-    auto [renderer, local_to_view_matrix, material, model] =
-        Core::get_entity_components<Renderer, const LocalToViewMatrix, const MaterialRef, const ModelRef>(entity_id);
+    auto [renderer, local_to_view_matrix, material, mesh] =
+        Core::get_entity_components<Renderer, const LocalToViewMatrix, const MaterialRef, const MeshRef>(entity_id);
 
     const Math::Matrix3 *local_to_view_normal_matrix{};
     if (options & RENDER_WITH_NORMAL_MATRIX)
@@ -282,7 +282,7 @@ void init_renderer(Core::EntityId entity_id, unsigned int options)
         local_to_view_normal_matrix,
         uniform_buffer_range_bind,
         material.material_id,
-        model.model_id
+        mesh.mesh_id
     );
 }
 

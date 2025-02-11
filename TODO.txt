@@ -17,7 +17,6 @@
 - add an error shader used in place of a shader that failed to compile
 
 # Mesh
-- improve the naming of the structs
 
 # Uniform buffer
 

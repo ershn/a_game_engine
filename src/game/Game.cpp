@@ -37,10 +37,10 @@ void init_entities()
 {
     Gfx::UniformBufferId next_uniform_buffer_id{0};
     Gfx::MaterialId next_material_id{100};
-    Gfx::ModelId next_model_id{Gfx::USER_MODEL_START_ID};
+    Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
 
-    auto ground_model_id = next_model_id++;
-    Gfx::create_model<1>(ground_model_id, create_ground_mesh);
+    auto ground_mesh_id = next_mesh_id++;
+    Gfx::create_mesh<1>(ground_mesh_id, create_ground_mesh);
 
     Gfx::create_shader<Gfx::NoLightingShader>(
         NO_LIGHTING_SHADER, "shaders/no_lighting.vert", "shaders/no_lighting.frag"
@@ -199,7 +199,7 @@ void init_entities()
             Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}},
             Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::ModelRef{Gfx::CUBE_MODEL_ID},
+            Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             Gfx::PointLight{.light_intensity{0.6f, 0.6f, 0.6f, 1.0f}},
             Core::PathFollower{
@@ -227,7 +227,7 @@ void init_entities()
             },
             Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::ModelRef{Gfx::CUBE_MODEL_ID},
+            Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             Gfx::PointLight{.light_intensity{0.0f, 0.0f, 0.7f, 1.0f}},
             Core::PathFollower{
@@ -255,7 +255,7 @@ void init_entities()
             },
             Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::ModelRef{Gfx::CUBE_MODEL_ID},
+            Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             Gfx::PointLight{.light_intensity{0.7f, 0.0f, 0.0f, 1.0f}},
             Core::PathFollower{
@@ -284,7 +284,7 @@ void init_entities()
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(0).get_buffer_range(), MATERIAL_BLOCK_BINDING},
-            Gfx::ModelRef{ground_model_id},
+            Gfx::MeshRef{ground_mesh_id},
             Gfx::Renderer{}
         );
 
@@ -293,7 +293,7 @@ void init_entities()
 
     // Cylinder
     {
-        auto model_id = Gfx::CYLINDER_MODEL_ID;
+        auto mesh_id = Gfx::CYLINDER_MESH_ID;
         auto material_id = next_material_id++;
         auto &material =
             Gfx::create_material<FragmentLightingColorMaterial>(material_id, FRAGMENT_LIGHTING_COLOR_SHADER);
@@ -311,7 +311,7 @@ void init_entities()
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(1).get_buffer_range(), MATERIAL_BLOCK_BINDING},
-            Gfx::ModelRef{model_id},
+            Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
@@ -320,7 +320,7 @@ void init_entities()
 
     // Cube 1
     {
-        auto model_id = Gfx::CUBE_MODEL_ID;
+        auto mesh_id = Gfx::CUBE_MESH_ID;
         auto material_id = next_material_id++;
         Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
 
@@ -336,7 +336,7 @@ void init_entities()
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(2).get_buffer_range(), MATERIAL_BLOCK_BINDING},
-            Gfx::ModelRef{model_id},
+            Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
@@ -345,7 +345,7 @@ void init_entities()
 
     // Cube 2
     {
-        auto model_id = Gfx::CUBE_MODEL_ID;
+        auto mesh_id = Gfx::CUBE_MESH_ID;
         auto material_id = next_material_id++;
         Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
 
@@ -361,7 +361,7 @@ void init_entities()
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(3).get_buffer_range(), MATERIAL_BLOCK_BINDING},
-            Gfx::ModelRef{model_id},
+            Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 

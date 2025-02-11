@@ -12,7 +12,7 @@ enum class ComponentType : std::uint16_t
 
     MATERIAL,
 
-    MODEL,
+    MESH,
 
     UNIFORM_BUFFER_RANGE_BIND,
     UNIFORM_BUFFER_BLOCK,

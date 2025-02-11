@@ -11,81 +11,83 @@
 
 namespace Age::Gfx
 {
-struct MeshBuffer
+struct MeshBuffers
 {
     GLuint vertex_array_object{};
     GLuint vertex_buffer_object{};
     GLuint index_buffer_object{};
 };
 
-struct Mesh
+struct DrawCommand
 {
     GLenum rendering_mode{};
     GLsizei element_count{};
     std::size_t buffer_offset{};
 };
 
-using ModelId = std::uint16_t;
+using MeshId = std::uint16_t;
 
-inline constexpr ModelId USER_MODEL_START_ID{32};
+inline constexpr MeshId USER_MESH_START_ID{32};
 
-struct Model
+struct Mesh
 {
-    std::uint32_t mesh_offset{};
-    std::uint16_t mesh_count{};
-    std::uint16_t mesh_buffer_index{};
+    std::uint32_t draw_command_offset{};
+    std::uint16_t draw_command_count{};
+    std::uint16_t mesh_buffers_index{};
 };
 
-struct ModelRef
+struct MeshRef
 {
-    static constexpr auto TYPE{Core::ComponentType::MODEL};
+    static constexpr auto TYPE{Core::ComponentType::MESH};
 
-    ModelId model_id{};
+    MeshId mesh_id{};
 };
 
-struct DrawCommand
+struct MeshDrawCommands
 {
     GLuint vertex_array_object{};
-    std::span<const Mesh> meshes{};
+    std::span<const DrawCommand> draw_commands{};
 };
 
+extern std::vector<DrawCommand> g_draw_commands;
 extern std::vector<Mesh> g_meshes;
-extern std::vector<Model> g_models;
 
 void init_mesh_system();
 
-void create_elements_mesh(const Math::Vector3 *vertex_positions,
-                          const Math::Vector3 *vertex_colors,
-                          const Math::Vector3 *vertex_normals,
-                          std::size_t vertex_count,
-                          const unsigned short *vertex_indexes,
-                          std::size_t vertex_index_count,
-                          MeshBuffer &mesh_buffer,
-                          Mesh &mesh);
+void create_elements_mesh(
+    const Math::Vector3 *vertex_positions,
+    const Math::Vector3 *vertex_colors,
+    const Math::Vector3 *vertex_normals,
+    std::size_t vertex_count,
+    const unsigned short *vertex_indexes,
+    std::size_t vertex_index_count,
+    MeshBuffers &mesh_buffers,
+    DrawCommand &draw_command
+);
 
-MeshBuffer &create_mesh_buffer(std::uint16_t &index);
+MeshBuffers &create_mesh_buffers(std::uint16_t &index);
 
-template <std::uint16_t MeshCount>
-std::span<Mesh, MeshCount> create_meshes(std::uint32_t &offset)
+template <std::uint16_t Count>
+std::span<DrawCommand, Count> create_draw_commands(std::uint32_t &offset)
 {
-    offset = static_cast<std::uint32_t>(g_meshes.size());
-    g_meshes.resize(g_meshes.size() + MeshCount);
-    return std::span<Mesh, MeshCount>{g_meshes.begin() + offset, MeshCount};
+    offset = static_cast<std::uint32_t>(g_draw_commands.size());
+    g_draw_commands.resize(g_draw_commands.size() + Count);
+    return std::span<DrawCommand, Count>{g_draw_commands.begin() + offset, Count};
 }
 
-template <std::uint16_t MeshCount>
-void create_model(ModelId model_id, std::function<void(MeshBuffer &, std::span<Mesh, MeshCount>)> model_creator)
+template <std::uint16_t Count>
+void create_mesh(MeshId mesh_id, std::function<void(MeshBuffers &, std::span<DrawCommand, Count>)> mesh_creator)
 {
-    if (model_id >= g_models.size())
-        g_models.resize(model_id + 1);
+    if (mesh_id >= g_meshes.size())
+        g_meshes.resize(mesh_id + 1);
 
-    Model &model{g_models[model_id]};
-    MeshBuffer &mesh_buffer{create_mesh_buffer(model.mesh_buffer_index)};
-    std::span<Mesh, MeshCount> meshes{create_meshes<MeshCount>(model.mesh_offset)};
-    model.mesh_count = MeshCount;
+    Mesh &mesh{g_meshes[mesh_id]};
+    MeshBuffers &mesh_buffers{create_mesh_buffers(mesh.mesh_buffers_index)};
+    std::span<DrawCommand, Count> draw_commands{create_draw_commands<Count>(mesh.draw_command_offset)};
+    mesh.draw_command_count = Count;
 
-    model_creator(mesh_buffer, meshes);
+    mesh_creator(mesh_buffers, draw_commands);
 }
 
-DrawCommand get_draw_command(ModelId model_id);
+MeshDrawCommands get_mesh_draw_commands(MeshId mesh_id);
 } // namespace Age::Gfx

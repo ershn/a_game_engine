@@ -61,7 +61,7 @@ void run_engine()
     Input::init_input_system(window);
     Gfx::init_rendering_system(window);
 
-    Gfx::load_primitive_models();
+    Gfx::load_primitive_meshes();
     Game::init_entities();
 
     Time::init_frame_time();

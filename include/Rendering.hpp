@@ -73,7 +73,7 @@ struct DrawCall
     const Math::Matrix3 *local_to_view_normal_matrix{};
     const UniformBufferRangeBind *uniform_buffer_range_bind{};
     MaterialId material_id{};
-    ModelId model_id{};
+    MeshId mesh_id{};
 };
 
 using DrawCallIndex = std::uint32_t;

@@ -154,21 +154,35 @@ const GLushort s_cube_vertex_indices[] = {
 // clang-format on
 } // namespace
 
-void create_plane_model(MeshBuffer &mesh_buffer, std::span<Mesh, 1> meshes)
+void create_plane_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands)
 {
-    create_elements_mesh(s_plane_vertex_positions, s_plane_vertex_colors, s_plane_vertex_normals,
-                         sizeof(s_plane_vertex_positions) / sizeof(Vector3), s_plane_vertex_indices,
-                         sizeof(s_plane_vertex_indices) / sizeof(GLushort), mesh_buffer, meshes[0]);
+    create_elements_mesh(
+        s_plane_vertex_positions,
+        s_plane_vertex_colors,
+        s_plane_vertex_normals,
+        sizeof(s_plane_vertex_positions) / sizeof(Vector3),
+        s_plane_vertex_indices,
+        sizeof(s_plane_vertex_indices) / sizeof(GLushort),
+        mesh_buffers,
+        draw_commands[0]
+    );
 }
 
-void create_cube_model(MeshBuffer &mesh_buffer, std::span<Mesh, 1> meshes)
+void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands)
 {
-    create_elements_mesh(s_cube_vertex_positions, s_cube_vertex_colors, s_cube_vertex_normals,
-                         sizeof(s_cube_vertex_positions) / sizeof(Vector3), s_cube_vertex_indices,
-                         sizeof(s_cube_vertex_indices) / sizeof(GLushort), mesh_buffer, meshes[0]);
+    create_elements_mesh(
+        s_cube_vertex_positions,
+        s_cube_vertex_colors,
+        s_cube_vertex_normals,
+        sizeof(s_cube_vertex_positions) / sizeof(Vector3),
+        s_cube_vertex_indices,
+        sizeof(s_cube_vertex_indices) / sizeof(GLushort),
+        mesh_buffers,
+        draw_commands[0]
+    );
 }
 
-void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, std::span<Mesh, 3> meshes)
+void create_cylinder_mesh(std::size_t side_count, MeshBuffers &mesh_buffers, std::span<DrawCommand, 3> draw_commands)
 {
     const Vector3 color{1.0f, 1.0f, 1.0f};
 
@@ -178,8 +192,8 @@ void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, std:
     std::size_t color_offset{vertex_count};
     std::size_t normal_offset{vertex_count * 2};
     std::size_t index_count{side_vertex_count + 2 + (cap_vertex_count + 1) * 2};
-    auto vertex_buffer{std::make_unique<Vector3[]>(vertex_count * 3)};
-    auto index_buffer{std::make_unique<GLushort[]>(index_count)};
+    auto vertex_buffer = std::make_unique<Vector3[]>(vertex_count * 3);
+    auto index_buffer = std::make_unique<GLushort[]>(index_count);
 
     float angle_increment{Math::TAU / side_count};
     for (std::size_t side_index{}; side_index < side_count; side_index++)
@@ -251,45 +265,51 @@ void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, std:
     }
     index_buffer[bottom_cap_index_offset + 1 + side_count] = static_cast<GLushort>(bottom_cap_vertex_offset + 1);
 
-    glGenBuffers(1, &mesh_buffer.vertex_buffer_object);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffer.vertex_buffer_object);
+    glGenBuffers(1, &mesh_buffers.vertex_buffer_object);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffers.vertex_buffer_object);
     glBufferData(GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(Vector3), vertex_buffer.get(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &mesh_buffer.index_buffer_object);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
+    glGenBuffers(1, &mesh_buffers.index_buffer_object);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(GLushort), index_buffer.get(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glGenVertexArrays(1, &mesh_buffer.vertex_array_object);
-    glBindVertexArray(mesh_buffer.vertex_array_object);
+    glGenVertexArrays(1, &mesh_buffers.vertex_array_object);
+    glBindVertexArray(mesh_buffers.vertex_array_object);
 
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffer.vertex_buffer_object);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffers.vertex_buffer_object);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<const GLvoid *>(color_offset * sizeof(Vector3)));
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<const GLvoid *>(normal_offset * sizeof(Vector3)));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffer.index_buffer_object);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
 
     glBindVertexArray(0);
 
-    meshes[0] = Mesh{.rendering_mode = GL_TRIANGLE_STRIP,
-                     .element_count = static_cast<GLsizei>((side_count + 1) * 2),
-                     .buffer_offset = 0};
-    meshes[1] = Mesh{.rendering_mode = GL_TRIANGLE_FAN,
-                     .element_count = static_cast<GLsizei>(side_count + 2),
-                     .buffer_offset = (side_count + 1) * 2 * sizeof(GLushort)};
-    meshes[2] = Mesh{.rendering_mode = GL_TRIANGLE_FAN,
-                     .element_count = static_cast<GLsizei>(side_count + 2),
-                     .buffer_offset = ((side_count + 1) * 2 + side_count + 2) * sizeof(GLushort)};
+    draw_commands[0] = DrawCommand{
+        .rendering_mode = GL_TRIANGLE_STRIP,
+        .element_count = static_cast<GLsizei>((side_count + 1) * 2),
+        .buffer_offset = 0
+    };
+    draw_commands[1] = DrawCommand{
+        .rendering_mode = GL_TRIANGLE_FAN,
+        .element_count = static_cast<GLsizei>(side_count + 2),
+        .buffer_offset = (side_count + 1) * 2 * sizeof(GLushort)
+    };
+    draw_commands[2] = DrawCommand{
+        .rendering_mode = GL_TRIANGLE_FAN,
+        .element_count = static_cast<GLsizei>(side_count + 2),
+        .buffer_offset = ((side_count + 1) * 2 + side_count + 2) * sizeof(GLushort)
+    };
 }
 
-void load_primitive_models()
+void load_primitive_meshes()
 {
-    create_model<1>(PLANE_MODEL_ID, create_plane_model);
-    create_model<1>(CUBE_MODEL_ID, create_cube_model);
-    create_model<3>(CYLINDER_MODEL_ID, std::bind_front(create_cylinder_model, 30));
+    create_mesh<1>(PLANE_MESH_ID, create_plane_mesh);
+    create_mesh<1>(CUBE_MESH_ID, create_cube_mesh);
+    create_mesh<3>(CYLINDER_MESH_ID, std::bind_front(create_cylinder_mesh, 30));
 }
 } // namespace Age::Gfx

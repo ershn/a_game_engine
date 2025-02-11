@@ -4,19 +4,19 @@
 
 namespace Age::Gfx
 {
-void create_plane_model(MeshBuffer &mesh_buffer, std::span<Mesh, 1> meshes);
-void create_cube_model(MeshBuffer &mesh_buffer, std::span<Mesh, 1> meshes);
-void create_cylinder_model(std::size_t side_count, MeshBuffer &mesh_buffer, std::span<Mesh, 3> meshes);
+void create_plane_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands);
+void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands);
+void create_cylinder_mesh(std::size_t side_count, MeshBuffers &mesh_buffers, std::span<DrawCommand, 3> draw_commands);
 
-// TODO: add sphere model
-// TODO: add capsule model
+// TODO: add sphere mesh
+// TODO: add capsule mesh
 
-enum PrimitiveModel : ModelId
+enum PrimitiveMesh : MeshId
 {
-    PLANE_MODEL_ID,
-    CUBE_MODEL_ID,
-    CYLINDER_MODEL_ID
+    PLANE_MESH_ID,
+    CUBE_MESH_ID,
+    CYLINDER_MESH_ID
 };
 
-void load_primitive_models();
+void load_primitive_meshes();
 } // namespace Age::Gfx

@@ -16635,9 +16635,17 @@ const GLushort s_indices[] = {
 // clang-format on
 } // namespace
 
-void create_ground_mesh(Gfx::MeshBuffer &mesh_buffer, std::span<Gfx::Mesh, 1> meshes)
+void create_ground_mesh(Gfx::MeshBuffers &mesh_buffer, std::span<Gfx::DrawCommand, 1> draw_commands)
 {
-    Gfx::create_elements_mesh(s_positions, s_colors, s_normals, sizeof(s_positions) / sizeof(s_positions[0]), s_indices,
-                              sizeof(s_indices) / sizeof(s_indices[0]), mesh_buffer, meshes[0]);
+    Gfx::create_elements_mesh(
+        s_positions,
+        s_colors,
+        s_normals,
+        sizeof(s_positions) / sizeof(s_positions[0]),
+        s_indices,
+        sizeof(s_indices) / sizeof(s_indices[0]),
+        mesh_buffer,
+        draw_commands[0]
+    );
 }
 } // namespace Game
