@@ -102,8 +102,20 @@ void bind_vertex_array_object(GLuint vao)
     glBindVertexArray(vao);
 }
 
-void draw_elements(GLenum rendering_mode, GLsizei element_count, std::size_t buffer_offset)
+void draw_arrays(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t start_index)
 {
-    glDrawElements(rendering_mode, element_count, GL_UNSIGNED_SHORT, reinterpret_cast<const void *>(buffer_offset));
+    glDrawArrays(
+        static_cast<GLenum>(rendering_mode), static_cast<GLint>(start_index), static_cast<GLsizei>(element_count)
+    );
+}
+
+void draw_elements(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t buffer_offset)
+{
+    glDrawElements(
+        static_cast<GLenum>(rendering_mode),
+        static_cast<GLsizei>(element_count),
+        GL_UNSIGNED_SHORT,
+        reinterpret_cast<const void *>(buffer_offset)
+    );
 }
 } // namespace Age::Gfx::OGL

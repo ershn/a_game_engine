@@ -55,9 +55,10 @@ void create_elements_mesh(
 
     glBindVertexArray(0);
 
-    draw_command.rendering_mode = GL_TRIANGLES;
-    draw_command.element_count = static_cast<GLsizei>(vertex_index_count);
-    draw_command.buffer_offset = 0;
+    draw_command.type = DrawCommandType::DRAW_ELEMENTS;
+    draw_command.rendering_mode = OGL::RenderingMode::TRIANGLES;
+    draw_command.element_count = static_cast<std::uint32_t>(vertex_index_count);
+    draw_command.offset = 0;
 }
 
 MeshBuffers &create_mesh_buffers(std::uint16_t &index)

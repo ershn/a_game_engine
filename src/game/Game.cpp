@@ -1,3 +1,6 @@
+#include <functional>
+#include <span>
+#include <utility>
 #include <vector>
 
 #include "ECS.hpp"
@@ -35,9 +38,10 @@ constexpr Gfx::MaterialId NO_LIGHTING_MATERIAL{0};
 
 void init_entities()
 {
-    Gfx::UniformBufferId next_uniform_buffer_id{0};
-    Gfx::MaterialId next_material_id{100};
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
+    Gfx::ShaderId next_shader_id{100};
+    Gfx::MaterialId next_material_id{100};
+    Gfx::UniformBufferId next_uniform_buffer_id{0};
 
     auto ground_mesh_id = next_mesh_id++;
     Gfx::create_mesh<1>(ground_mesh_id, create_ground_mesh);
@@ -74,8 +78,21 @@ void init_entities()
 
     auto material_buffer_id = next_uniform_buffer_id++;
     auto &material_buffer =
-        Gfx::create_uniform_buffer<Gfx::ArrayUniformBuffer<Gfx::MaterialUniformBlock>>(material_buffer_id, 4);
+        Gfx::create_uniform_buffer<Gfx::ArrayUniformBuffer<Gfx::MaterialUniformBlock>>(material_buffer_id, 5);
     auto material_buffer_writer = Gfx::ArrayUniformBufferWriter{material_buffer};
+
+    auto sphere_impostor_mesh_id = next_mesh_id++;
+    Gfx::create_mesh<1>(
+        sphere_impostor_mesh_id,
+        std::function<void(Gfx::MeshBuffers &, std::span<Gfx::DrawCommand, 1>)>{
+            std::bind_front(Gfx::create_null_mesh, 4)
+        }
+    );
+
+    auto sphere_impostor_shader_id = next_shader_id++;
+    Gfx::create_shader<SphereImpostorShader>(
+        sphere_impostor_shader_id, "shaders/sphere_impostor.vert", "shaders/sphere_impostor.frag"
+    );
 
     // Light data
     std::vector<Math::Vector3> point_light_path_1{
@@ -210,7 +227,7 @@ void init_entities()
             }
         );
 
-        Gfx::init_renderer(id);
+        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
     }
 
     // Point light 2
@@ -238,7 +255,7 @@ void init_entities()
             }
         );
 
-        Gfx::init_renderer(id);
+        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
     }
 
     // Point light 3
@@ -266,7 +283,7 @@ void init_entities()
             }
         );
 
-        Gfx::init_renderer(id);
+        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
     }
 
     // Ground
@@ -288,7 +305,9 @@ void init_entities()
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND);
+        Gfx::init_renderer(
+            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
+        );
     }
 
     // Cylinder
@@ -315,7 +334,9 @@ void init_entities()
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND);
+        Gfx::init_renderer(
+            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
+        );
     }
 
     // Cube 1
@@ -340,7 +361,9 @@ void init_entities()
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND);
+        Gfx::init_renderer(
+            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
+        );
     }
 
     // Cube 2
@@ -365,7 +388,33 @@ void init_entities()
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND);
+        Gfx::init_renderer(
+            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
+        );
+    }
+
+    // Impostor sphere
+    {
+        auto material_id = next_material_id++;
+        auto &material = Gfx::create_material<SphereImpostorMaterial>(material_id, sphere_impostor_shader_id);
+        material.sphere_radius = 4.0f;
+        material.diffuse_color = {0.223f, 0.635f, 0.443f, 1.0f};
+
+        material_buffer_writer[4] = {.specular_color{0.0f}, .surface_shininess{1.0f}};
+
+        auto id = Core::create_entity(
+            Core::Transform{
+                .position{8.80000f, 6.10000f, 0.300018f},
+            },
+            Gfx::MaterialRef{material_id},
+            Gfx::UniformBufferRangeBind{material_buffer.get_block(4).get_buffer_range(), MATERIAL_BLOCK_BINDING},
+            Gfx::MeshRef{sphere_impostor_mesh_id},
+            Gfx::Renderer{},
+            SphereImpostorUpdater{camera_id},
+            TransformKeyboardController{}
+        );
+
+        Gfx::init_renderer(id, Gfx::RENDER_WITH_BUFFER_RANGE_BIND);
     }
 
     material_buffer_writer.apply();
@@ -382,5 +431,6 @@ void run_systems()
     process_components(Gfx::calc_spherical_camera_view_matrix);
     process_components(Core::move_along_path);
     process_components(update_sunlight);
+    process_components(update_sphere_impostor);
 }
 } // namespace Game

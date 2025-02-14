@@ -290,19 +290,22 @@ void create_cylinder_mesh(std::size_t side_count, MeshBuffers &mesh_buffers, std
     glBindVertexArray(0);
 
     draw_commands[0] = DrawCommand{
-        .rendering_mode = GL_TRIANGLE_STRIP,
-        .element_count = static_cast<GLsizei>((side_count + 1) * 2),
-        .buffer_offset = 0
+        .type{DrawCommandType::DRAW_ELEMENTS},
+        .rendering_mode{OGL::RenderingMode::TRIANGLE_STRIP},
+        .element_count{static_cast<std::uint32_t>((side_count + 1) * 2)},
+        .offset{0}
     };
     draw_commands[1] = DrawCommand{
-        .rendering_mode = GL_TRIANGLE_FAN,
-        .element_count = static_cast<GLsizei>(side_count + 2),
-        .buffer_offset = (side_count + 1) * 2 * sizeof(GLushort)
+        .type{DrawCommandType::DRAW_ELEMENTS},
+        .rendering_mode{OGL::RenderingMode::TRIANGLE_FAN},
+        .element_count{static_cast<std::uint32_t>(side_count + 2)},
+        .offset{(side_count + 1) * 2 * sizeof(GLushort)}
     };
     draw_commands[2] = DrawCommand{
-        .rendering_mode = GL_TRIANGLE_FAN,
-        .element_count = static_cast<GLsizei>(side_count + 2),
-        .buffer_offset = ((side_count + 1) * 2 + side_count + 2) * sizeof(GLushort)
+        .type{DrawCommandType::DRAW_ELEMENTS},
+        .rendering_mode{OGL::RenderingMode::TRIANGLE_FAN},
+        .element_count{static_cast<std::uint32_t>(side_count + 2)},
+        .offset{((side_count + 1) * 2 + side_count + 2) * sizeof(GLushort)}
     };
 }
 
@@ -311,5 +314,17 @@ void load_primitive_meshes()
     create_mesh<1>(PLANE_MESH_ID, create_plane_mesh);
     create_mesh<1>(CUBE_MESH_ID, create_cube_mesh);
     create_mesh<3>(CYLINDER_MESH_ID, std::bind_front(create_cylinder_mesh, 30));
+}
+
+void create_null_mesh(std::size_t vertex_count, MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands)
+{
+    glGenVertexArrays(1, &mesh_buffers.vertex_array_object);
+
+    draw_commands[0] = DrawCommand{
+        .type{DrawCommandType::DRAW_ARRAYS},
+        .rendering_mode{OGL::RenderingMode::TRIANGLE_STRIP},
+        .element_count{4},
+        .offset{0}
+    };
 }
 } // namespace Age::Gfx

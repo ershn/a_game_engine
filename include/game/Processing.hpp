@@ -19,6 +19,8 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
 
     SUNLIGHT,
 
+    SPHERE_IMPOSTOR_UPDATER,
+
     LAST_VALUE
 };
 
@@ -80,5 +82,18 @@ struct Sunlight
 
 void update_sunlight(
     Sunlight &sunlight, Age::Core::Transform &transform, Age::Gfx::DirectionalLight &directional_light
+);
+
+struct SphereImpostorUpdater
+{
+    static constexpr Age::Core::ComponentType TYPE{ComponentType::SPHERE_IMPOSTOR_UPDATER};
+
+    Age::Core::EntityId camera_id{};
+};
+
+void update_sphere_impostor(
+    const SphereImpostorUpdater &updater,
+    const Age::Core::Transform &transform,
+    const Age::Gfx::MaterialRef &material_ref
 );
 } // namespace Game

@@ -69,7 +69,7 @@ struct RenderState
 
 struct DrawCall
 {
-    const Math::Matrix4 &local_to_view_matrix;
+    const Math::Matrix4 *local_to_view_matrix{};
     const Math::Matrix3 *local_to_view_normal_matrix{};
     const UniformBufferRangeBind *uniform_buffer_range_bind{};
     MaterialId material_id{};
@@ -95,8 +95,9 @@ struct Renderer
 
 void init_rendering_system(GLFWwindow *window);
 
-inline constexpr unsigned int RENDER_WITH_NORMAL_MATRIX{0b1};
-inline constexpr unsigned int RENDER_WITH_BUFFER_RANGE_BIND{0b10};
+inline constexpr unsigned int RENDER_WITH_LV_MATRIX{0b1};
+inline constexpr unsigned int RENDER_WITH_LV_NORMAL_MATRIX{0b10};
+inline constexpr unsigned int RENDER_WITH_BUFFER_RANGE_BIND{0b100};
 
 void init_renderer(Core::EntityId entity_id, unsigned int options = 0);
 

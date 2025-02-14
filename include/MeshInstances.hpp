@@ -19,4 +19,6 @@ enum PrimitiveMesh : MeshId
 };
 
 void load_primitive_meshes();
+
+void create_null_mesh(std::size_t vertex_count, MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands);
 } // namespace Age::Gfx

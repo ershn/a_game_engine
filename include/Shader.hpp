@@ -12,8 +12,9 @@ namespace Age::Gfx
 {
 using ShaderId = std::uint32_t;
 
-inline constexpr unsigned int SHADER_VIEW_NORMAL_MATRIX{0b1};
-inline constexpr unsigned int SHADER_LIGHT_DATA_BLOCK{0b10};
+inline constexpr unsigned int SHADER_VIEW_MATRIX{0b1};
+inline constexpr unsigned int SHADER_VIEW_NORMAL_MATRIX{0b10};
+inline constexpr unsigned int SHADER_LIGHT_DATA_BLOCK{0b100};
 
 struct Shader
 {

@@ -129,7 +129,7 @@ GLuint s_bound_vao{};
 
 void init_renderer(
     Renderer &renderer,
-    const Math::Matrix4 &local_to_view_matrix,
+    const Math::Matrix4 *local_to_view_matrix,
     const Math::Matrix3 *local_to_view_normal_matrix,
     const UniformBufferRangeBind *buffer_range_bind,
     MaterialId material_id,
@@ -203,7 +203,8 @@ void render_entities_to_camera(
             bind_uniform_buffer(*draw_call.uniform_buffer_range_bind);
 
         const Material &material{use_material(draw_call.material_id)};
-        OGL::set_uniform(material.shader.local_to_view_matrix, draw_call.local_to_view_matrix);
+        if (draw_call.local_to_view_matrix != nullptr)
+            OGL::set_uniform(material.shader.local_to_view_matrix, *draw_call.local_to_view_matrix);
         if (draw_call.local_to_view_normal_matrix != nullptr)
             OGL::set_uniform(material.shader.local_to_view_normal_matrix, *draw_call.local_to_view_normal_matrix);
 
@@ -215,7 +216,15 @@ void render_entities_to_camera(
         }
         for (const DrawCommand &draw_command : mesh_draw_commands.draw_commands)
         {
-            OGL::draw_elements(draw_command.rendering_mode, draw_command.element_count, draw_command.buffer_offset);
+            switch (draw_command.type)
+            {
+            case DrawCommandType::DRAW_ARRAYS:
+                OGL::draw_arrays(draw_command.rendering_mode, draw_command.element_count, draw_command.offset);
+                break;
+            case DrawCommandType::DRAW_ELEMENTS:
+                OGL::draw_elements(draw_command.rendering_mode, draw_command.element_count, draw_command.offset);
+                break;
+            }
         }
     }
 }
@@ -260,30 +269,22 @@ void init_rendering_system(GLFWwindow *window)
 
 void init_renderer(Core::EntityId entity_id, unsigned int options)
 {
-    auto [renderer, local_to_view_matrix, material, mesh] =
-        Core::get_entity_components<Renderer, const LocalToViewMatrix, const MaterialRef, const MeshRef>(entity_id);
+    auto [renderer, material, mesh] =
+        Core::get_entity_components<Renderer, const MaterialRef, const MeshRef>(entity_id);
 
-    const Math::Matrix3 *local_to_view_normal_matrix{};
-    if (options & RENDER_WITH_NORMAL_MATRIX)
-    {
-        local_to_view_normal_matrix =
-            &std::get<0>(Core::get_entity_components<const LocalToViewNormalMatrix>(entity_id)).matrix;
-    }
+    const Math::Matrix4 *lv_matrix{};
+    if (options & RENDER_WITH_LV_MATRIX)
+        lv_matrix = &Core::get_entity_component<const LocalToViewMatrix>(entity_id).matrix;
+
+    const Math::Matrix3 *lv_normal_matrix{};
+    if (options & RENDER_WITH_LV_NORMAL_MATRIX)
+        lv_normal_matrix = &Core::get_entity_component<const LocalToViewNormalMatrix>(entity_id).matrix;
 
     const UniformBufferRangeBind *uniform_buffer_range_bind{};
     if (options & RENDER_WITH_BUFFER_RANGE_BIND)
-    {
-        uniform_buffer_range_bind = &std::get<0>(Core::get_entity_components<const UniformBufferRangeBind>(entity_id));
-    }
+        uniform_buffer_range_bind = &Core::get_entity_component<const UniformBufferRangeBind>(entity_id);
 
-    init_renderer(
-        renderer,
-        local_to_view_matrix.matrix,
-        local_to_view_normal_matrix,
-        uniform_buffer_range_bind,
-        material.material_id,
-        mesh.mesh_id
-    );
+    init_renderer(renderer, lv_matrix, lv_normal_matrix, uniform_buffer_range_bind, material.material_id, mesh.mesh_id);
 }
 
 void render()

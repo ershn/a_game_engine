@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "Camera.hpp"
 #include "Input.hpp"
 #include "MainLoop.hpp"
 #include "MaterialInstances.hpp"
@@ -9,6 +10,7 @@
 #include "Transformations.hpp"
 
 #include "game/Processing.hpp"
+#include "game/ShadersAndMaterials.hpp"
 
 namespace Game
 {
@@ -117,14 +119,23 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
     float sun_angle{Math::TAU - Math::TAU * normalized_time - Math::PI * 0.5f};
     transform.position = {std::cos(sun_angle), std::sin(sun_angle), 0.0f};
 
-    auto [render_state] = Core::get_entity_components<Gfx::RenderState>(sunlight.camera_id);
+    auto &render_state = Core::get_entity_component<Gfx::RenderState>(sunlight.camera_id);
     render_state.clear_color =
         Math::lerp(intensity_it_1->sky_color, intensity_it_2->sky_color, segment_normalized_time);
 
-    auto [light_settings] = Core::get_entity_components<Gfx::GlobalLightSettings>(sunlight.light_settings_id);
+    auto &light_settings = Core::get_entity_component<Gfx::GlobalLightSettings>(sunlight.light_settings_id);
     light_settings.max_intensity =
         Math::lerp(intensity_it_1->max_intensity, intensity_it_2->max_intensity, segment_normalized_time);
     light_settings.ambient_light_intensity =
         Math::lerp(intensity_it_1->ambient_intensity, intensity_it_2->ambient_intensity, segment_normalized_time);
+}
+
+void update_sphere_impostor(
+    const SphereImpostorUpdater &updater, const Core::Transform &transform, const Gfx::MaterialRef &material_ref
+)
+{
+    auto &wv_matrix = Core::get_entity_component<const Gfx::WorldToViewMatrix>(updater.camera_id).matrix;
+    auto &material = static_cast<SphereImpostorMaterial &>(Gfx::get_material(material_ref.material_id));
+    material.sphere_view_position = Math::xyz(wv_matrix * Math::Vector4{transform.position, 1.0f});
 }
 } // namespace Game

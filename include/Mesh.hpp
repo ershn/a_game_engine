@@ -18,11 +18,18 @@ struct MeshBuffers
     GLuint index_buffer_object{};
 };
 
+enum struct DrawCommandType : std::uint16_t
+{
+    DRAW_ARRAYS,
+    DRAW_ELEMENTS,
+};
+
 struct DrawCommand
 {
-    GLenum rendering_mode{};
-    GLsizei element_count{};
-    std::size_t buffer_offset{};
+    DrawCommandType type{};
+    OGL::RenderingMode rendering_mode{};
+    std::uint32_t element_count{};
+    std::size_t offset{};
 };
 
 using MeshId = std::uint16_t;

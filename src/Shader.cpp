@@ -78,10 +78,11 @@ GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader)
 
 Shader::Shader(GLuint shader_program, unsigned int options)
     : shader_program{shader_program}
-    , local_to_view_matrix{OGL::get_uniform_location(shader_program, "uLocalToViewMatrix")}
     , gamma_correction_block{OGL::get_uniform_block_index(shader_program, "GammaCorrectionBlock")}
     , projection_block{OGL::get_uniform_block_index(shader_program, "ProjectionBlock")}
 {
+    if (options & SHADER_VIEW_MATRIX)
+        local_to_view_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewMatrix");
     if (options & SHADER_VIEW_NORMAL_MATRIX)
         local_to_view_normal_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewNormalMatrix");
     if (options & SHADER_LIGHT_DATA_BLOCK)

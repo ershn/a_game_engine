@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <string_view>
 
 #include <glad/gl.h>
@@ -9,6 +10,21 @@
 
 namespace Age::Gfx::OGL
 {
+enum struct RenderingMode : std::uint16_t
+{
+    POINTS = GL_POINTS,
+    LINES = GL_LINES,
+    LINE_LOOP = GL_LINE_LOOP,
+    LINE_STRIP = GL_LINE_STRIP,
+    TRIANGLES = GL_TRIANGLES,
+    TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
+    TRIANGLE_FAN = GL_TRIANGLE_FAN,
+    LINES_ADJACENCY = GL_LINES_ADJACENCY,
+    LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
+    TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
+    TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
+};
+
 void set_clear_color(const Math::Vector4 &color);
 void set_clear_depth(float depth);
 
@@ -34,5 +50,6 @@ void bind_uniform_block(GLuint shader_program, GLuint block_index, GLuint block_
 
 void bind_vertex_array_object(GLuint vao);
 
-void draw_elements(GLenum rendering_mode, GLsizei element_count, std::size_t buffer_offset);
+void draw_arrays(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t start_index);
+void draw_elements(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t buffer_offset);
 } // namespace Age::Gfx::OGL

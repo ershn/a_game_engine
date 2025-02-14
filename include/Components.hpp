@@ -4,7 +4,7 @@
 
 namespace Age::Core
 {
-enum class ComponentType : std::uint16_t
+enum struct ComponentType : std::uint16_t
 {
     TRANSFORM,
     LOCAL_TO_VIEW_MATRIX,

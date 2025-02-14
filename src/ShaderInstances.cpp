@@ -3,7 +3,7 @@
 namespace Age::Gfx
 {
 NoLightingShader::NoLightingShader(GLuint shader_program)
-    : Shader{shader_program}
+    : Shader{shader_program, Gfx::SHADER_VIEW_MATRIX}
 {
 }
 
@@ -14,7 +14,7 @@ NoLightingColorShader::NoLightingColorShader(GLuint shader_program)
 }
 
 FragmentLightingShader::FragmentLightingShader(GLuint shader_program)
-    : Shader{shader_program, SHADER_VIEW_NORMAL_MATRIX | SHADER_LIGHT_DATA_BLOCK}
+    : Shader{shader_program, Gfx::SHADER_VIEW_MATRIX | SHADER_VIEW_NORMAL_MATRIX | SHADER_LIGHT_DATA_BLOCK}
     , specular_color{OGL::get_uniform_location(shader_program, "uSpecularColor")}
     , surface_shininess{OGL::get_uniform_location(shader_program, "uSurfaceShininess")}
 {

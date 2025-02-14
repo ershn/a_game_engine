@@ -217,6 +217,8 @@
     <None Include="shaders\fragment_lighting.frag" />
     <None Include="shaders\fragment_lighting.vert" />
     <None Include="shaders\no_lighting_color.vert" />
+    <None Include="shaders\sphere_impostor.frag" />
+    <None Include="shaders\sphere_impostor.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

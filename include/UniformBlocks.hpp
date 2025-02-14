@@ -36,14 +36,14 @@ struct LightsUniformBlock
 struct FragmentPositionDataUniformBlock
 {
     Math::Matrix4 clip_to_view_matrix;
-    int width;
-    int height;
+    int width{};
+    int height{};
 };
 
 struct MaterialUniformBlock
 {
     Math::Vector4 specular_color;
-    float surface_shininess;
+    float surface_shininess{};
     float _padding_[3];
 };
 } // namespace Age::Gfx
