@@ -10,6 +10,8 @@ layout(std140) uniform ProjectionBlock
     mat4 uViewToClipMatrix;
 };
 
+const float squareCorrection = 1.5;
+
 void main()
 {
     vec2 positionOffset;
@@ -17,25 +19,25 @@ void main()
     switch (gl_VertexID)
     {
     case 0:
-		iMapping = vec2(-1.0, 1.0);
+		iMapping = vec2(-1.0, 1.0) * squareCorrection;
         positionOffset = vec2(-uSphereRadius, uSphereRadius);
 		break;
     case 1:
-		iMapping = vec2(1.0, 1.0);
+		iMapping = vec2(1.0, 1.0) * squareCorrection;
         positionOffset = vec2(uSphereRadius, uSphereRadius);
 		break;
     case 2:
-		iMapping = vec2(-1.0, -1.0);
+		iMapping = vec2(-1.0, -1.0) * squareCorrection;
         positionOffset = vec2(-uSphereRadius, -uSphereRadius);
 		break;
     case 3:
-		iMapping = vec2(1.0, -1.0);
+		iMapping = vec2(1.0, -1.0) * squareCorrection;
         positionOffset = vec2(uSphereRadius, -uSphereRadius);
 		break;
     }
 
     vec4 viewPosition = vec4(uSphereViewPosition, 1.0);
-    viewPosition.xy += positionOffset;
+    viewPosition.xy += positionOffset * squareCorrection;
 
     gl_Position = uViewToClipMatrix * viewPosition;
 }

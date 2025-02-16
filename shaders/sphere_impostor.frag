@@ -77,21 +77,29 @@ vec4 calcLighting(in Light light, in vec3 viewPosition, in vec3 viewNormal)
       + Material.specularColor * lightIntensity * gaussianTerm;
 }
 
-void calcSphereValues(out vec3 viewPosition, out vec3 viewNormal)
+float square(float x)
 {
-    float distanceSquared = dot(iMapping, iMapping);
-    if (distanceSquared > 1.0)
+    return x * x;
+}
+
+void rayTraceSphereValues(out vec3 viewPosition, out vec3 viewNormal)
+{
+    vec3 rayDirection = normalize(vec3(iMapping * uSphereRadius, 0.0) + uSphereViewPosition);
+    float ds = dot(rayDirection, uSphereViewPosition);
+    float discriminant = 4.0 * (square(ds) - dot(uSphereViewPosition, uSphereViewPosition) + square(uSphereRadius));
+    if (discriminant < 0.0)
         discard;
 
-    viewNormal = vec3(iMapping, sqrt(1.0 - distanceSquared));
-    viewPosition = viewNormal * uSphereRadius + uSphereViewPosition;
+    float rootTerm = sqrt(discriminant) / 2.0;
+    viewPosition = min(ds + rootTerm, ds - rootTerm) * rayDirection;
+    viewNormal = normalize(viewPosition - uSphereViewPosition);
 }
 
 void main()
 {
     vec3 viewPosition;
     vec3 viewNormal;
-    calcSphereValues(viewPosition, viewNormal);
+    rayTraceSphereValues(viewPosition, viewNormal);
 
     vec4 accumulatedLight = uDiffuseColor * Lights.ambientIntensity;
     for (int index = 0; index < LIGHT_COUNT; ++index)

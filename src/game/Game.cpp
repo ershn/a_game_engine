@@ -397,14 +397,14 @@ void init_entities()
     {
         auto material_id = next_material_id++;
         auto &material = Gfx::create_material<SphereImpostorMaterial>(material_id, sphere_impostor_shader_id);
-        material.sphere_radius = 4.0f;
+        material.sphere_radius = 2.0f;
         material.diffuse_color = {0.223f, 0.635f, 0.443f, 1.0f};
 
         material_buffer_writer[4] = {.specular_color{0.0f}, .surface_shininess{1.0f}};
 
         auto id = Core::create_entity(
             Core::Transform{
-                .position{8.80000f, 6.10000f, 0.300018f},
+                .position{10.80000f, 6.10000f, 0.300018f},
             },
             Gfx::MaterialRef{material_id},
             Gfx::UniformBufferRangeBind{material_buffer.get_block(4).get_buffer_range(), MATERIAL_BLOCK_BINDING},
