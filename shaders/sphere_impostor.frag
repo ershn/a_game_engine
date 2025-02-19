@@ -15,6 +15,11 @@ uniform GammaCorrectionBlock
 	float gammaInverse;
 };
 
+uniform ProjectionBlock
+{
+    mat4 uViewToClipMatrix;
+};
+
 struct Light
 {
     vec4 viewPosition;
@@ -107,5 +112,10 @@ void main()
         accumulatedLight += calcLighting(Lights.lights[index], viewPosition, viewNormal);
     }
 	accumulatedLight /= Lights.maxIntensity;
+
     oColor = pow(accumulatedLight, vec4(vec3(gammaInverse), 1.0));
+
+    vec4 clipPosition = uViewToClipMatrix * vec4(viewPosition, 1.0);
+    float ndcZ = clipPosition.z / clipPosition.w;
+    gl_FragDepth = (ndcZ * gl_DepthRange.diff + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
 }
