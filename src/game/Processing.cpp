@@ -6,9 +6,11 @@
 #include "MainLoop.hpp"
 #include "MaterialInstances.hpp"
 #include "Math.hpp"
+#include "OpenGL.hpp"
 #include "Time.hpp"
 #include "Transformations.hpp"
 
+#include "game/Meshes.hpp"
 #include "game/Processing.hpp"
 #include "game/ShadersAndMaterials.hpp"
 
@@ -130,12 +132,21 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
         Math::lerp(intensity_it_1->ambient_intensity, intensity_it_2->ambient_intensity, segment_normalized_time);
 }
 
-void update_sphere_impostor(
-    const SphereImpostorUpdater &updater, const Core::Transform &transform, const Gfx::MaterialRef &material_ref
-)
+void update_sphere_impostors(const SphereImpostors &sphere_impostors, const Gfx::MeshRef &mesh_ref)
 {
-    auto &wv_matrix = Core::get_entity_component<const Gfx::WorldToViewMatrix>(updater.camera_id).matrix;
-    auto &material = static_cast<SphereImpostorMaterial &>(Gfx::get_material(material_ref.material_id));
-    material.sphere_view_position = Math::xyz(wv_matrix * Math::Vector4{transform.position, 1.0f});
+    auto &wv_matrix = Core::get_entity_component<const Gfx::WorldToViewMatrix>(sphere_impostors.camera_id).matrix;
+    auto vbo = Gfx::get_mesh_buffers(mesh_ref.mesh_id).vertex_buffer_object;
+
+    SphereImpostor buffer_values[4];
+    for (std::size_t index{}; index < sphere_impostors.instance_count; ++index)
+    {
+        auto &instance = sphere_impostors.instances[index];
+        buffer_values[index] = {
+            .viewPosition{Math::Vector3{wv_matrix * Math::Vector4{instance.worldPosition, 1.0f}}},
+            .radius{instance.radius}
+        };
+    }
+
+    Gfx::OGL::write_array_buffer(vbo, buffer_values, sphere_impostors.instance_count * sizeof(SphereImpostor));
 }
 } // namespace Game

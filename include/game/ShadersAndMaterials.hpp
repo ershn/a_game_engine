@@ -2,11 +2,19 @@
 
 #include "Material.hpp"
 #include "Shader.hpp"
+#include "UniformBlocks.hpp"
+#include "UniformBuffer.hpp"
 #include "Vector.hpp"
+
+#include "game/Components.hpp"
 
 namespace Game
 {
-inline constexpr GLuint MATERIAL_BLOCK_BINDING{Age::Gfx::USER_BLOCK_BINDING_START_ID};
+enum BlockBinding : GLuint
+{
+    MATERIAL_BLOCK_BINDING = Age::Gfx::USER_BLOCK_BINDING_START_ID,
+    MATERIALS_BLOCK_BINDING
+};
 
 struct FragmentLightingShader : public Age::Gfx::Shader
 {
@@ -40,20 +48,13 @@ struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 
 struct SphereImpostorShader : public Age::Gfx::Shader
 {
-    GLuint material_block{GL_INVALID_INDEX};
-    GLint sphere_view_position{-1};
-    GLint sphere_radius{-1};
-    GLint diffuse_color{-1};
+    GLuint materials_block{GL_INVALID_INDEX};
 
     SphereImpostorShader(GLuint shader_program);
 };
 
 struct SphereImpostorMaterial : public Age::Gfx::Material
 {
-    Age::Math::Vector3 sphere_view_position{};
-    float sphere_radius{};
-    Age::Math::Vector4 diffuse_color{1.0f};
-
     SphereImpostorMaterial(const Age::Gfx::Shader &shader);
 
     void apply_properties() const override;

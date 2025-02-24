@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -10,6 +11,12 @@
 
 namespace Age::Gfx
 {
+struct ShaderAsset
+{
+    OGL::ShaderType shader_type{};
+    std::string_view file_path;
+};
+
 using ShaderId = std::uint32_t;
 
 inline constexpr unsigned int SHADER_VIEW_MATRIX{0b1};
@@ -41,20 +48,22 @@ extern std::vector<std::unique_ptr<Shader>> g_shaders;
 
 void init_shader_system();
 
-GLuint create_shader_program(std::string_view vertex_shader_path, std::string_view fragment_shader_path);
+GLuint create_shader_program(std::span<const ShaderAsset> shader_assets);
 
 template <typename TShader>
-void create_shader(ShaderId shader_id, std::string_view vertex_shader_path, std::string_view fragment_shader_path)
+void create_shader(ShaderId shader_id, std::span<const ShaderAsset> shader_assets)
 {
     if (shader_id >= g_shaders.size())
         g_shaders.resize(shader_id + 1);
 
-    GLuint shader_program{create_shader_program(vertex_shader_path, fragment_shader_path)};
+    GLuint shader_program{create_shader_program(shader_assets)};
     g_shaders[shader_id] = std::make_unique<TShader>(shader_program);
 
     const Shader &shader{*g_shaders[shader_id]};
-    OGL::bind_uniform_block(shader_program, shader.gamma_correction_block, GAMMA_CORRECTION_BLOCK_BINDING);
-    OGL::bind_uniform_block(shader_program, shader.projection_block, PROJECTION_BLOCK_BINDING);
+    if (shader.gamma_correction_block != GL_INVALID_INDEX)
+        OGL::bind_uniform_block(shader_program, shader.gamma_correction_block, GAMMA_CORRECTION_BLOCK_BINDING);
+    if (shader.projection_block != GL_INVALID_INDEX)
+        OGL::bind_uniform_block(shader_program, shader.projection_block, PROJECTION_BLOCK_BINDING);
     if (shader.light_data_block != GL_INVALID_INDEX)
         OGL::bind_uniform_block(shader_program, shader.light_data_block, LIGHT_DATA_BLOCK_BINDING);
 }

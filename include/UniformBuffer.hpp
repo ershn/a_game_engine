@@ -43,7 +43,7 @@ struct UniformBufferRangeBind
 };
 
 template <typename TBlock>
-struct UniformBufferBlock
+struct UniformBufferBlockRef
 {
     static constexpr auto TYPE{Core::ComponentType::UNIFORM_BUFFER_BLOCK};
 
@@ -77,7 +77,7 @@ struct ScalarUniformBuffer : public UniformBuffer
     {
     }
 
-    UniformBufferBlock<TBlock> get_block() const
+    UniformBufferBlockRef<TBlock> get_block() const
     {
         return {uniform_buffer_object, 0};
     }
@@ -93,7 +93,7 @@ struct ArrayUniformBuffer : public UniformBuffer
     {
     }
 
-    UniformBufferBlock<TBlock> get_block(UniformBlockIndex index) const
+    UniformBufferBlockRef<TBlock> get_block(UniformBlockIndex index) const
     {
         return {uniform_buffer_object, index};
     }
@@ -116,7 +116,8 @@ struct ArrayUniformBufferWriter
     Block &operator[](UniformBlockIndex index)
     {
         return *static_cast<Block *>(
-            static_cast<void *>(&write_buffer[index * get_uniform_block_alignment(sizeof(Block))]));
+            static_cast<void *>(&write_buffer[index * get_uniform_block_alignment(sizeof(Block))])
+        );
     }
 
     void apply() const

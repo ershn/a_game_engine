@@ -48,9 +48,9 @@ void create_elements_mesh(
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<const void *>(attr_array_size));
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(attr_array_size));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<const void *>(attr_array_size * 2));
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(attr_array_size * 2));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
 
     glBindVertexArray(0);
@@ -65,6 +65,12 @@ MeshBuffers &create_mesh_buffers(std::uint16_t &index)
 {
     index = static_cast<std::uint16_t>(s_mesh_buffers.size());
     return s_mesh_buffers.emplace_back();
+}
+
+const MeshBuffers &get_mesh_buffers(MeshId mesh_id)
+{
+    const Mesh &mesh{g_meshes[mesh_id]};
+    return s_mesh_buffers[mesh.mesh_buffers_index];
 }
 
 MeshDrawCommands get_mesh_draw_commands(MeshId mesh_id)

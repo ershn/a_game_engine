@@ -1,29 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include <type_traits>
 #include <vector>
 
-#include "Components.hpp"
 #include "Material.hpp"
 #include "Rendering.hpp"
 #include "Transform.hpp"
 
+#include "game/Components.hpp"
+
 namespace Game
 {
-enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
-{
-    GAME_KEYBOARD_CONTROLLER = Age::Core::ComponentType::LAST_VALUE,
-    MATERIAL_KEYBOARD_CONTROLLER,
-    TRANSFORM_KEYBOARD_CONTROLLER,
-
-    SUNLIGHT,
-
-    SPHERE_IMPOSTOR_UPDATER,
-
-    LAST_VALUE
-};
-
 struct GameKeyboardController
 {
     static constexpr Age::Core::ComponentType TYPE{ComponentType::GAME_KEYBOARD_CONTROLLER};
@@ -84,16 +71,20 @@ void update_sunlight(
     Sunlight &sunlight, Age::Core::Transform &transform, Age::Gfx::DirectionalLight &directional_light
 );
 
-struct SphereImpostorUpdater
+struct SphereImpostors
 {
-    static constexpr Age::Core::ComponentType TYPE{ComponentType::SPHERE_IMPOSTOR_UPDATER};
+    static constexpr Age::Core::ComponentType TYPE{ComponentType::SPHERE_IMPOSTORS};
 
+    struct Instance
+    {
+        Age::Math::Vector3 worldPosition;
+        float radius{};
+    };
+
+    Instance instances[4];
+    std::size_t instance_count{};
     Age::Core::EntityId camera_id{};
 };
 
-void update_sphere_impostor(
-    const SphereImpostorUpdater &updater,
-    const Age::Core::Transform &transform,
-    const Age::Gfx::MaterialRef &material_ref
-);
+void update_sphere_impostors(const SphereImpostors &sphere_impostors, const Age::Gfx::MeshRef &mesh_ref);
 } // namespace Game

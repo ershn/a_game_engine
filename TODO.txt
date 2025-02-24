@@ -14,6 +14,7 @@
 
 # Shader
 - add a diffuse only shader
+- include a diffuse color in the material block
 - add an error shader used in place of a shader that failed to compile
 
 # Mesh

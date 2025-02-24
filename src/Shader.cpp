@@ -17,9 +17,9 @@ std::string read_file(std::string_view path)
     return std::string{std::move(stringstream).str()};
 }
 
-GLuint create_shader(GLenum shader_type, std::string_view source_code)
+GLuint create_shader(OGL::ShaderType shader_type, std::string_view source_code)
 {
-    GLuint shader = glCreateShader(shader_type);
+    GLuint shader{OGL::create_shader(shader_type)};
     if (shader == 0)
         throw std::runtime_error("Shader creation failed");
 
@@ -44,14 +44,14 @@ GLuint create_shader(GLenum shader_type, std::string_view source_code)
     return shader;
 }
 
-GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader)
+GLuint create_shader_program(std::span<const GLuint> shaders)
 {
     GLuint program = glCreateProgram();
     if (program == 0)
         throw std::runtime_error("Program creation failed");
 
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
+    for (GLuint shader : shaders)
+        glAttachShader(program, shader);
 
     glLinkProgram(program);
 
@@ -69,8 +69,8 @@ GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader)
         throw std::runtime_error("Program linking failed");
     }
 
-    glDetachShader(program, vertex_shader);
-    glDetachShader(program, fragment_shader);
+    for (GLuint shader : shaders)
+        glDetachShader(program, shader);
 
     return program;
 }
@@ -96,15 +96,18 @@ void init_shader_system()
     g_shaders.reserve(256);
 }
 
-GLuint create_shader_program(std::string_view vertex_shader_path, std::string_view fragment_shader_path)
+GLuint create_shader_program(std::span<const ShaderAsset> shader_assets)
 {
-    std::string vertex_shader_source{read_file(vertex_shader_path)};
-    std::string fragment_shader_source{read_file(fragment_shader_path)};
-    GLuint vertex_shader{create_shader(GL_VERTEX_SHADER, vertex_shader_source)};
-    GLuint fragment_shader{create_shader(GL_FRAGMENT_SHADER, fragment_shader_source)};
-    GLuint program{create_shader_program(vertex_shader, fragment_shader)};
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
+    auto shaders = std::make_unique<GLuint[]>(shader_assets.size());
+
+    for (std::size_t index{}; index < shader_assets.size(); ++index)
+        shaders[index] = create_shader(shader_assets[index].shader_type, read_file(shader_assets[index].file_path));
+
+    GLuint program{create_shader_program({&shaders[0], shader_assets.size()})};
+
+    for (std::size_t index{}; index < shader_assets.size(); ++index)
+        glDeleteShader(shaders[index]);
+
     return program;
 }
 

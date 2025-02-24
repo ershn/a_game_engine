@@ -42,11 +42,9 @@ void FragmentLightingColorMaterial::apply_properties() const
 
 SphereImpostorShader::SphereImpostorShader(GLuint shader_program)
     : Shader{shader_program, Gfx::SHADER_LIGHT_DATA_BLOCK}
-    , material_block{Gfx::OGL::get_uniform_block_index(shader_program, "MaterialBlock")}
-    , sphere_view_position{Gfx::OGL::get_uniform_location(shader_program, "uSphereViewPosition")}
-    , sphere_radius{Gfx::OGL::get_uniform_location(shader_program, "uSphereRadius")}
-    , diffuse_color{Gfx::OGL::get_uniform_location(shader_program, "uDiffuseColor")}
+    , materials_block{Gfx::OGL::get_uniform_block_index(shader_program, "MaterialsBlock")}
 {
+    Gfx::OGL::bind_uniform_block(shader_program, materials_block, MATERIALS_BLOCK_BINDING);
 }
 
 SphereImpostorMaterial::SphereImpostorMaterial(const Age::Gfx::Shader &shader)
@@ -56,9 +54,5 @@ SphereImpostorMaterial::SphereImpostorMaterial(const Age::Gfx::Shader &shader)
 
 void SphereImpostorMaterial::apply_properties() const
 {
-    auto &shader = static_cast<const SphereImpostorShader &>(this->shader);
-    Gfx::OGL::set_uniform(shader.sphere_view_position, sphere_view_position);
-    Gfx::OGL::set_uniform(shader.sphere_radius, sphere_radius);
-    Gfx::OGL::set_uniform(shader.diffuse_color, diffuse_color);
 }
 } // namespace Game

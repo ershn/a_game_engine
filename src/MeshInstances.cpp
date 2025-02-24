@@ -182,7 +182,7 @@ void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_
     );
 }
 
-void create_cylinder_mesh(std::size_t side_count, MeshBuffers &mesh_buffers, std::span<DrawCommand, 3> draw_commands)
+void create_cylinder_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 3> draw_commands, std::size_t side_count)
 {
     const Vector3 color{1.0f, 1.0f, 1.0f};
 
@@ -282,9 +282,9 @@ void create_cylinder_mesh(std::size_t side_count, MeshBuffers &mesh_buffers, std
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<const GLvoid *>(color_offset * sizeof(Vector3)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(color_offset * sizeof(Vector3)));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<const GLvoid *>(normal_offset * sizeof(Vector3)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(normal_offset * sizeof(Vector3)));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
 
     glBindVertexArray(0);
@@ -311,12 +311,12 @@ void create_cylinder_mesh(std::size_t side_count, MeshBuffers &mesh_buffers, std
 
 void load_primitive_meshes()
 {
-    create_mesh<1>(PLANE_MESH_ID, create_plane_mesh);
-    create_mesh<1>(CUBE_MESH_ID, create_cube_mesh);
-    create_mesh<3>(CYLINDER_MESH_ID, std::bind_front(create_cylinder_mesh, 30));
+    create_mesh<1>(PLANE_MESH_ID, std::function{create_plane_mesh});
+    create_mesh<1>(CUBE_MESH_ID, std::function{create_cube_mesh});
+    create_mesh<3>(CYLINDER_MESH_ID, std::function{create_cylinder_mesh}, 30ULL);
 }
 
-void create_null_mesh(std::size_t vertex_count, MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands)
+void create_null_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands, std::size_t vertex_count)
 {
     glGenVertexArrays(1, &mesh_buffers.vertex_array_object);
 

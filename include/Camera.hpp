@@ -31,11 +31,11 @@ struct Camera
     float vertical_fov{};
 };
 
-struct ProjectionBufferBlock : public UniformBufferBlock<ProjectionUniformBlock>
+struct ProjectionBufferBlockRef : public UniformBufferBlockRef<ProjectionBlock>
 {
     static constexpr auto TYPE{Core::ComponentType::PROJECTION_BUFFER_BLOCK};
 
-    using UniformBufferBlock<ProjectionUniformBlock>::operator=;
+    using UniformBufferBlockRef<ProjectionBlock>::operator=;
 };
 
 void update_cameras_aspect_ratio(float aspect_ratio);

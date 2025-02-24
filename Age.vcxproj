@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\Meshes.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
@@ -177,7 +178,9 @@
     <ClInclude Include="include\Components.hpp" />
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
+    <ClInclude Include="include\game\Components.hpp" />
     <ClInclude Include="include\game\GroundMesh.hpp" />
+    <ClInclude Include="include\game\Meshes.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
     <ClInclude Include="include\game\ShadersAndMaterials.hpp" />
@@ -211,14 +214,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment_lighting_color.vert" />
+    <None Include="shaders\game\sphere_impostor.geom" />
     <None Include="shaders\no_lighting.frag" />
     <None Include="shaders\no_lighting.vert" />
     <None Include="shaders\diffuse_lighting.vert" />
     <None Include="shaders\fragment_lighting.frag" />
     <None Include="shaders\fragment_lighting.vert" />
     <None Include="shaders\no_lighting_color.vert" />
-    <None Include="shaders\sphere_impostor.frag" />
-    <None Include="shaders\sphere_impostor.vert" />
+    <None Include="shaders\game\sphere_impostor.frag" />
+    <None Include="shaders\game\sphere_impostor.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

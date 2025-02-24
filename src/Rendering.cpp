@@ -68,32 +68,30 @@ void calc_local_to_view_normal_matrix(const LocalToViewMatrix &view_matrix, Loca
 }
 
 void set_gamma_correction(
-    GammaCorrectionUniformBlock &gamma_correction_block, const GlobalColorSettings &global_color_settings
+    GammaCorrectionBlock &gamma_correction_block, const GlobalColorSettings &global_color_settings
 )
 {
     gamma_correction_block.gamma_inverse = global_color_settings.gamma_inverse;
 }
 
-void set_global_light_settings(
-    LightsUniformBlock &lights_uniform_block, const GlobalLightSettings &global_light_settings
-)
+void set_global_light_settings(LightsBlock &lights_block, const GlobalLightSettings &global_light_settings)
 {
-    lights_uniform_block.ambient_light_intensity = global_light_settings.ambient_light_intensity;
-    lights_uniform_block.light_attenuation = global_light_settings.light_attenuation;
-    lights_uniform_block.max_intensity = global_light_settings.max_intensity;
+    lights_block.ambient_light_intensity = global_light_settings.ambient_light_intensity;
+    lights_block.light_attenuation = global_light_settings.light_attenuation;
+    lights_block.max_intensity = global_light_settings.max_intensity;
 }
 
 void set_directional_light(
-    LightsUniformBlock &lights_uniform_block,
+    LightsBlock &lights_block,
     std::size_t &light_index,
     const Math::Matrix4 &world_to_view_matrix,
     const Core::Transform &transform,
     const DirectionalLight &directional_light
 )
 {
-    if (light_index < LightsUniformBlock::LIGHT_COUNT)
+    if (light_index < LightsBlock::LIGHT_COUNT)
     {
-        lights_uniform_block.lights[light_index++] = {
+        lights_block.lights[light_index++] = {
             .view_position{world_to_view_matrix * Math::Vector4{transform.position, 0.0f}},
             .intensity{directional_light.light_intensity}
         };
@@ -101,16 +99,16 @@ void set_directional_light(
 }
 
 void set_point_light(
-    LightsUniformBlock &lights_uniform_block,
+    LightsBlock &lights_block,
     std::size_t &light_index,
     const Math::Matrix4 &world_to_view_matrix,
     const Core::Transform &transform,
     const PointLight &point_light
 )
 {
-    if (light_index < LightsUniformBlock::LIGHT_COUNT)
+    if (light_index < LightsBlock::LIGHT_COUNT)
     {
-        lights_uniform_block.lights[light_index++] = {
+        lights_block.lights[light_index++] = {
             .view_position{world_to_view_matrix * Math::Vector4{transform.position, 1.0f}},
             .intensity{point_light.light_intensity}
         };
@@ -154,19 +152,19 @@ void enqueue_draw_calls(const Renderer &renderer)
 void render_entities_to_camera(
     const RenderState &render_state,
     const WorldToViewMatrix &view_matrix,
-    const GammaCorrectionBufferBlock &gamma_correction_buffer_block,
-    const ProjectionBufferBlock &projection_buffer_block,
-    const LightsBufferBlock &lights_buffer_block
+    const GammaCorrectionBufferBlockRef &gamma_correction_buffer_block,
+    const ProjectionBufferBlockRef &projection_buffer_block,
+    const LightsBufferBlockRef &lights_buffer_block
 )
 {
-    GammaCorrectionUniformBlock gamma_correction_block;
+    GammaCorrectionBlock gamma_correction_block;
     Core::process_components(std::function<void(const GlobalColorSettings &)>{
         std::bind_front(set_gamma_correction, std::ref(gamma_correction_block))
     });
     gamma_correction_buffer_block = gamma_correction_block;
 
     {
-        LightsUniformBlock lights_block;
+        LightsBlock lights_block;
         std::size_t light_index{};
 
         Core::process_components(std::function<void(const GlobalLightSettings &)>{

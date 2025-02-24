@@ -14,11 +14,11 @@ struct GlobalColorSettings
     float gamma_inverse{};
 };
 
-struct GammaCorrectionBufferBlock : public UniformBufferBlock<GammaCorrectionUniformBlock>
+struct GammaCorrectionBufferBlockRef : public UniformBufferBlockRef<GammaCorrectionBlock>
 {
     static constexpr auto TYPE{Core::ComponentType::GAMMA_CORRECTION_BUFFER_BLOCK};
 
-    using UniformBufferBlock<GammaCorrectionUniformBlock>::operator=;
+    using UniformBufferBlockRef<GammaCorrectionBlock>::operator=;
 };
 
 Math::Vector4 gamma_correct_color(const Math::Vector4 &color, float gamma_inverse);

@@ -53,11 +53,11 @@ struct PointLight
     Math::Vector4 light_intensity{};
 };
 
-struct LightsBufferBlock : public UniformBufferBlock<LightsUniformBlock>
+struct LightsBufferBlockRef : public UniformBufferBlockRef<LightsBlock>
 {
     static constexpr auto TYPE{Core::ComponentType::LIGHTS_BUFFER_BLOCK};
 
-    using UniformBufferBlock<LightsUniformBlock>::operator=;
+    using UniformBufferBlockRef<LightsBlock>::operator=;
 };
 
 struct RenderState

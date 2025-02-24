@@ -17,6 +17,7 @@
 
 #include "game/Game.hpp"
 #include "game/GroundMesh.hpp"
+#include "game/Meshes.hpp"
 #include "game/Processing.hpp"
 #include "game/ShadersAndMaterials.hpp"
 
@@ -44,55 +45,55 @@ void init_entities()
     Gfx::UniformBufferId next_uniform_buffer_id{0};
 
     auto ground_mesh_id = next_mesh_id++;
-    Gfx::create_mesh<1>(ground_mesh_id, create_ground_mesh);
+    Gfx::create_mesh<1>(ground_mesh_id, std::function{create_ground_mesh});
 
-    Gfx::create_shader<Gfx::NoLightingShader>(
-        NO_LIGHTING_SHADER, "shaders/no_lighting.vert", "shaders/no_lighting.frag"
-    );
-    Gfx::create_shader<Gfx::NoLightingColorShader>(
-        NO_LIGHTING_COLOR_SHADER, "shaders/no_lighting_color.vert", "shaders/no_lighting.frag"
-    );
-    Gfx::create_shader<FragmentLightingShader>(
-        FRAGMENT_LIGHTING_SHADER, "shaders/fragment_lighting.vert", "shaders/fragment_lighting.frag"
-    );
-    Gfx::create_shader<FragmentLightingColorShader>(
-        FRAGMENT_LIGHTING_COLOR_SHADER, "shaders/fragment_lighting_color.vert", "shaders/fragment_lighting.frag"
-    );
+    {
+        Gfx::ShaderAsset shader_assets[] = {
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/no_lighting.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/no_lighting.frag"}
+        };
+        Gfx::create_shader<Gfx::NoLightingShader>(NO_LIGHTING_SHADER, shader_assets);
+    }
+    {
+        Gfx::ShaderAsset shader_assets[] = {
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/no_lighting_color.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/no_lighting.frag"}
+        };
+        Gfx::create_shader<Gfx::NoLightingColorShader>(NO_LIGHTING_COLOR_SHADER, shader_assets);
+    }
+    {
+        Gfx::ShaderAsset shader_assets[] = {
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}
+        };
+        Gfx::create_shader<FragmentLightingShader>(FRAGMENT_LIGHTING_SHADER, shader_assets);
+    }
+    {
+        Gfx::ShaderAsset shader_assets[] = {
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting_color.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}
+        };
+        Gfx::create_shader<FragmentLightingColorShader>(FRAGMENT_LIGHTING_COLOR_SHADER, shader_assets);
+    }
 
     auto &no_lighting_material =
         Gfx::create_material<Gfx::NoLightingMaterial>(NO_LIGHTING_MATERIAL, NO_LIGHTING_SHADER);
 
     auto gamma_correction_buffer_id = next_uniform_buffer_id++;
     auto &gamma_correction_buffer =
-        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::GammaCorrectionUniformBlock>>(
-            gamma_correction_buffer_id
-        );
+        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::GammaCorrectionBlock>>(gamma_correction_buffer_id);
 
     auto projection_buffer_id = next_uniform_buffer_id++;
     auto &projection_buffer =
-        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionUniformBlock>>(projection_buffer_id);
+        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
 
     auto lights_buffer_id = next_uniform_buffer_id++;
-    auto &lights_buffer =
-        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsUniformBlock>>(lights_buffer_id);
+    auto &lights_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsBlock>>(lights_buffer_id);
 
     auto material_buffer_id = next_uniform_buffer_id++;
     auto &material_buffer =
-        Gfx::create_uniform_buffer<Gfx::ArrayUniformBuffer<Gfx::MaterialUniformBlock>>(material_buffer_id, 5);
+        Gfx::create_uniform_buffer<Gfx::ArrayUniformBuffer<Gfx::MaterialBlock>>(material_buffer_id, 4);
     auto material_buffer_writer = Gfx::ArrayUniformBufferWriter{material_buffer};
-
-    auto sphere_impostor_mesh_id = next_mesh_id++;
-    Gfx::create_mesh<1>(
-        sphere_impostor_mesh_id,
-        std::function<void(Gfx::MeshBuffers &, std::span<Gfx::DrawCommand, 1>)>{
-            std::bind_front(Gfx::create_null_mesh, 4)
-        }
-    );
-
-    auto sphere_impostor_shader_id = next_shader_id++;
-    Gfx::create_shader<SphereImpostorShader>(
-        sphere_impostor_shader_id, "shaders/sphere_impostor.vert", "shaders/sphere_impostor.frag"
-    );
 
     // Light data
     std::vector<Math::Vector3> point_light_path_1{
@@ -173,9 +174,9 @@ void init_entities()
                 Math::perspective_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
-            Gfx::GammaCorrectionBufferBlock{gamma_correction_buffer.get_block()},
-            Gfx::ProjectionBufferBlock{projection_buffer.get_block()},
-            Gfx::LightsBufferBlock{lights_buffer.get_block()},
+            Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},
+            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
+            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
                 .origin{0.0f, 2.0f, 0.0f}, .spherical_coord{Math::Vector2{Math::radians(60.0f), 0.0f}, 30.0f}
@@ -393,31 +394,51 @@ void init_entities()
         );
     }
 
-    // Impostor sphere
-    {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SphereImpostorMaterial>(material_id, sphere_impostor_shader_id);
-        material.sphere_radius = 2.0f;
-        material.diffuse_color = {0.223f, 0.635f, 0.443f, 1.0f};
+    material_buffer_writer.apply();
 
-        material_buffer_writer[4] = {.specular_color{0.0f}, .surface_shininess{1.0f}};
+    // Impostor spheres
+    {
+        auto mesh_id = next_mesh_id++;
+        Gfx::create_mesh<1>(mesh_id, std::function{create_sphere_impostors_mesh}, 2ULL);
+
+        Gfx::ShaderAsset shader_assets[] = {
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/sphere_impostor.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::GEOMETRY, "shaders/game/sphere_impostor.geom"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/sphere_impostor.frag"}
+        };
+        auto shader_id = next_shader_id++;
+        Gfx::create_shader<SphereImpostorShader>(shader_id, shader_assets);
+
+        auto material_id = next_material_id++;
+        Gfx::create_material<SphereImpostorMaterial>(material_id, shader_id);
+
+        auto materials_buffer_id = next_uniform_buffer_id++;
+        auto &materials_buffer =
+            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Age::Gfx::MaterialsBlock<4>>>(materials_buffer_id);
+
+        auto block = materials_buffer.get_block();
+        block = {
+            .materials =
+                {{.diffuse_color{0.223f, 0.635f, 0.443f, 1.0f}, .specular_color{0.0f}},
+                 {.diffuse_color{0.968f, 0.141f, 0.019f, 1.0f}, .specular_color{0.0f}}}
+        };
+        Gfx::bind_uniform_buffer(MATERIALS_BLOCK_BINDING, block.get_buffer_range());
 
         auto id = Core::create_entity(
-            Core::Transform{
-                .position{10.80000f, 6.10000f, 0.300018f},
-            },
+            Gfx::MeshRef{mesh_id},
             Gfx::MaterialRef{material_id},
-            Gfx::UniformBufferRangeBind{material_buffer.get_block(4).get_buffer_range(), MATERIAL_BLOCK_BINDING},
-            Gfx::MeshRef{sphere_impostor_mesh_id},
             Gfx::Renderer{},
-            SphereImpostorUpdater{camera_id},
-            TransformKeyboardController{}
+            SphereImpostors{
+                .instances =
+                    {{.worldPosition{10.80000f, 6.10000f, 0.300018f}, .radius{2.0f}},
+                     {.worldPosition{-8.80000f, 3.10000f, 3.300018f}, .radius{1.5f}}},
+                .instance_count{2},
+                .camera_id{camera_id}
+            }
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_BUFFER_RANGE_BIND);
+        Gfx::init_renderer(id);
     }
-
-    material_buffer_writer.apply();
 }
 
 void run_systems()
@@ -431,6 +452,6 @@ void run_systems()
     process_components(Gfx::calc_spherical_camera_view_matrix);
     process_components(Core::move_along_path);
     process_components(update_sunlight);
-    process_components(update_sphere_impostor);
+    process_components(update_sphere_impostors);
 }
 } // namespace Game

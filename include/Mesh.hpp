@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "ECS.hpp"
@@ -82,8 +83,12 @@ std::span<DrawCommand, Count> create_draw_commands(std::uint32_t &offset)
     return std::span<DrawCommand, Count>{g_draw_commands.begin() + offset, Count};
 }
 
-template <std::uint16_t Count>
-void create_mesh(MeshId mesh_id, std::function<void(MeshBuffers &, std::span<DrawCommand, Count>)> mesh_creator)
+template <std::uint16_t Count, typename... TArgs>
+void create_mesh(
+    MeshId mesh_id,
+    std::function<void(MeshBuffers &, std::span<DrawCommand, Count>, TArgs...)> mesh_creator,
+    TArgs &&...mesh_creator_args
+)
 {
     if (mesh_id >= g_meshes.size())
         g_meshes.resize(mesh_id + 1);
@@ -93,8 +98,9 @@ void create_mesh(MeshId mesh_id, std::function<void(MeshBuffers &, std::span<Dra
     std::span<DrawCommand, Count> draw_commands{create_draw_commands<Count>(mesh.draw_command_offset)};
     mesh.draw_command_count = Count;
 
-    mesh_creator(mesh_buffers, draw_commands);
+    mesh_creator(mesh_buffers, draw_commands, std::forward<TArgs>(mesh_creator_args)...);
 }
 
+const MeshBuffers &get_mesh_buffers(MeshId mesh_id);
 MeshDrawCommands get_mesh_draw_commands(MeshId mesh_id);
 } // namespace Age::Gfx
