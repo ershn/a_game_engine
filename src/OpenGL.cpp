@@ -20,6 +20,11 @@ GLint get_uniform_location(GLuint shader_program, std::string_view name)
     return location;
 }
 
+void set_uniform(GLint location, bool value)
+{
+    glUniform1i(location, value);
+}
+
 void set_uniform(GLint location, int value)
 {
     glUniform1i(location, value);
