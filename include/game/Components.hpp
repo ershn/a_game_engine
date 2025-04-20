@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include "Components.hpp"
+#include "../Components.hpp"
 
 namespace Game
 {
@@ -16,6 +16,8 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
 
     SPHERE_IMPOSTOR_MATERIALS_BUFFER_BLOCK,
     SPHERE_IMPOSTORS,
+
+    INFINITY_SYMBOL,
 
     LAST_VALUE
 };

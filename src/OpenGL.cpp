@@ -1,6 +1,5 @@
-#include <iostream>
-
 #include "OpenGL.hpp"
+#include "ErrorHandling.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -17,9 +16,13 @@ void use_program(GLuint shader_program)
 GLint get_uniform_location(GLuint shader_program, std::string_view name)
 {
     GLint location{glGetUniformLocation(shader_program, name.data())};
-    if (location == -1)
-        std::cerr << "Uniform variable not found: " << name << '\n';
+    LOG_ERROR_IF(location == -1, "Uniform variable not found: {}", name);
     return location;
+}
+
+void set_uniform(GLint location, int value)
+{
+    glUniform1i(location, value);
 }
 
 void set_uniform(GLint location, float value)
@@ -50,8 +53,7 @@ void set_uniform(GLint location, const Math::Matrix4 &matrix)
 GLuint get_uniform_block_index(GLuint shader_program, std::string_view name)
 {
     GLuint index{glGetUniformBlockIndex(shader_program, name.data())};
-    if (index == GL_INVALID_INDEX)
-        std::cerr << "Uniform block not found: " << name << '\n';
+    LOG_ERROR_IF(index == GL_INVALID_INDEX, "Uniform block not found: {}", name);
     return index;
 }
 

@@ -34,10 +34,11 @@ std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets{};
 Util::IdGenerator<EntityId> g_entity_id_generator{0};
 std::vector<EntityLocation> g_entity_locations{};
 
-void init_ecs()
+void init_ecs(const App::Definitions &definitions)
 {
-    std::size_t component_type_count{static_cast<std::size_t>(ComponentType::LAST_VALUE) +
-                                     Game::get_component_type_count()};
+    std::size_t component_type_count{
+        static_cast<std::size_t>(ComponentType::LAST_VALUE) + definitions.component_type_count
+    };
 
     g_archetypes.reserve(256);
     s_component_types_to_archetype_ids.reserve(256);
@@ -54,8 +55,9 @@ void init_ecs()
     g_entity_locations.reserve(1ULL << 14);
 }
 
-ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_types,
-                                     std::span<const std::size_t> component_sizes)
+ArchetypeRef get_or_create_archetype(
+    std::span<const ComponentType> component_types, std::span<const std::size_t> component_sizes
+)
 {
     std::size_t hash{std::hash<std::span<const ComponentType>>{}(component_types)};
     ArchetypeId &stored_archetype_id{s_component_types_to_archetype_ids[hash]};
@@ -63,8 +65,9 @@ ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_ty
     {
         ArchetypeId archetype_id{static_cast<ArchetypeId>(g_archetypes.size())};
         stored_archetype_id = archetype_id + 1;
-        return {archetype_id,
-                g_archetypes.emplace_back(create_archetype(archetype_id, component_types, component_sizes))};
+        return {
+            archetype_id, g_archetypes.emplace_back(create_archetype(archetype_id, component_types, component_sizes))
+        };
     }
     else
     {
@@ -73,9 +76,11 @@ ArchetypeRef get_or_create_archetype(std::span<const ComponentType> component_ty
     }
 }
 
-Archetype create_archetype(ArchetypeId archetype_id,
-                           std::span<const ComponentType> component_types,
-                           std::span<const std::size_t> component_sizes)
+Archetype create_archetype(
+    ArchetypeId archetype_id,
+    std::span<const ComponentType> component_types,
+    std::span<const std::size_t> component_sizes
+)
 {
     using Memory::padding_to;
 

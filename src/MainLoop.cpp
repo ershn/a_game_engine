@@ -1,15 +1,12 @@
-#include <iostream>
-
+#include "MainLoop.hpp"
 #include "ECS.hpp"
+#include "ErrorHandling.hpp"
 #include "GLFW.hpp"
 #include "Input.hpp"
-#include "MainLoop.hpp"
+#include "Logging.hpp"
+#include "MeshInstances.hpp"
 #include "Rendering.hpp"
 #include "Time.hpp"
-
-#include "MeshInstances.hpp"
-
-#include "game/Game.hpp"
 
 namespace Age::Core
 {
@@ -19,7 +16,7 @@ bool s_is_exit_requested{};
 
 void error_callback(int error, const char *description)
 {
-    std::cerr << "Error: " << description << std::endl;
+    Core::log_error("{}", std::string_view{description});
 }
 } // namespace
 
@@ -28,8 +25,10 @@ void exit()
     s_is_exit_requested = true;
 }
 
-void run_engine()
+void run_engine(const App::Definitions &definitions, const App::IScene &scene)
 {
+    Core::init_logging();
+
     GLFW::Initializer glfw_initializer{};
     if (glfw_initializer == false)
         return;
@@ -40,35 +39,27 @@ void run_engine()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     GLFWwindow *window{glfwCreateWindow(1280, 720, "Age", nullptr, nullptr)};
-    if (window == nullptr)
-    {
-        std::cerr << "Window/context creation failed" << '\n';
-        return;
-    }
+    BAIL_ERROR_IF(window == nullptr, "Window/context creation failed");
 
     glfwMakeContextCurrent(window);
 
     int version{gladLoadGL(glfwGetProcAddress)};
-    if (version == 0)
-    {
-        std::cerr << "OpenGL loading failed" << '\n';
-        return;
-    }
+    BAIL_ERROR_IF(version == 0, "OpenGL loading failed");
 
-    std::cout << "Loaded OpenGL " << GLAD_VERSION_MAJOR(version) << "." << GLAD_VERSION_MINOR(version) << '\n';
+    Core::log_info("Loaded OpenGL {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-    Core::init_ecs();
+    Core::init_ecs(definitions);
     Input::init_input_system(window);
     Gfx::init_rendering_system(window);
 
     Gfx::load_primitive_meshes();
-    Game::init_entities();
+    scene.init_entities();
 
     Time::init_frame_time();
     while (Input::is_exit_requested() == false && s_is_exit_requested == false)
     {
         Time::update_frame_time();
-        Game::run_systems();
+        scene.run_systems();
         Gfx::render();
         Input::update_input_state();
     }

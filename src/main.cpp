@@ -1,15 +1,19 @@
 #include "MainLoop.hpp"
 
+#include "game/Game.hpp"
+#include "game/InfinitySymbolScene.hpp"
+#include "game/ValleyScene.hpp"
+
 int main()
 {
+    auto scene = Game::InfinitySymbolScene{};
+
 #ifdef _DEBUG
-    Age::Core::run_engine();
-    return 0;
+    Age::Core::run_engine(Game::g_definitions, scene);
 #else
     try
     {
-        Age::Core::run_engine();
-        return 0;
+        Age::Core::run_engine(Game::g_definitions, scene);
     }
     catch (const std::exception &e)
     {

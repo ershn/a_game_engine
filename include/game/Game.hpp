@@ -1,12 +1,8 @@
 #pragma once
 
-#include <cstddef>
+#include "Definitions.hpp"
 
 namespace Game
 {
-std::size_t get_component_type_count();
-
-void init_entities();
-
-void run_systems();
+extern const Age::App::Definitions g_definitions;
 } // namespace Game

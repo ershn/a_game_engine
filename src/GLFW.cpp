@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "ErrorHandling.hpp"
 #include "GLFW.hpp"
 
 namespace Age::GLFW
@@ -7,8 +8,7 @@ namespace Age::GLFW
 Initializer::Initializer()
     : _success{glfwInit() == GLFW_TRUE}
 {
-    if (_success == false)
-        std::cerr << "GLFW initialization failed" << '\n';
+    LOG_ERROR_IF(_success == false, "GLFW initialization failed");
 }
 
 Initializer::~Initializer()

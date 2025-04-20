@@ -137,6 +137,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\InfinitySymbolScene.cpp" />
+    <ClCompile Include="src\game\ValleyScene.cpp" />
+    <ClCompile Include="src\game\InfinitySymbolMesh.cpp" />
+    <ClCompile Include="src\Logging.cpp" />
+    <ClCompile Include="src\DDS.cpp" />
     <ClCompile Include="src\game\Meshes.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
@@ -173,21 +178,28 @@
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Definitions.hpp" />
     <ClInclude Include="include\Camera.hpp" />
     <ClInclude Include="include\Color.hpp" />
     <ClInclude Include="include\Components.hpp" />
+    <ClInclude Include="include\DDS.hpp" />
     <ClInclude Include="include\ECS.hpp" />
+    <ClInclude Include="include\ErrorHandling.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
     <ClInclude Include="include\game\GroundMesh.hpp" />
+    <ClInclude Include="include\game\InfinitySymbolMesh.hpp" />
+    <ClInclude Include="include\game\InfinitySymbolScene.hpp" />
     <ClInclude Include="include\game\Meshes.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
     <ClInclude Include="include\game\ShadersAndMaterials.hpp" />
+    <ClInclude Include="include\game\ValleyScene.hpp" />
     <ClInclude Include="include\GLFW.hpp" />
     <ClInclude Include="include\Hash.hpp" />
     <ClInclude Include="include\IdGenerator.hpp" />
     <ClInclude Include="include\Input.hpp" />
+    <ClInclude Include="include\Logging.hpp" />
     <ClInclude Include="include\MainLoop.hpp" />
     <ClInclude Include="include\Material.hpp" />
     <ClInclude Include="include\MaterialInstances.hpp" />
@@ -201,10 +213,12 @@
     <ClInclude Include="include\Quaternion.hpp" />
     <ClInclude Include="include\Random.hpp" />
     <ClInclude Include="include\Rendering.hpp" />
+    <ClInclude Include="include\Scene.hpp" />
     <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="include\ShaderInstances.hpp" />
     <ClInclude Include="include\SphericalCamera.hpp" />
     <ClInclude Include="include\SphericalCoord.hpp" />
+    <ClInclude Include="include\Texture.hpp" />
     <ClInclude Include="include\Time.hpp" />
     <ClInclude Include="include\Transform.hpp" />
     <ClInclude Include="include\Transformations.hpp" />
@@ -214,6 +228,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment_lighting_color.vert" />
+    <None Include="shaders\game\infinity_symbol.vert" />
+    <None Include="shaders\game\infinity_symbol.frag" />
     <None Include="shaders\game\sphere_impostor.geom" />
     <None Include="shaders\no_lighting.frag" />
     <None Include="shaders\no_lighting.vert" />

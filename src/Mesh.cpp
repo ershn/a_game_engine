@@ -17,6 +17,7 @@ void create_elements_mesh(
     const Math::Vector3 *vertex_positions,
     const Math::Vector3 *vertex_colors,
     const Math::Vector3 *vertex_normals,
+    const Math::Vector2 *vertex_texture_coords,
     std::size_t vertex_count,
     const unsigned short *vertex_indexes,
     std::size_t vertex_index_count,
@@ -24,36 +25,63 @@ void create_elements_mesh(
     DrawCommand &draw_command
 )
 {
-    std::size_t attr_array_size{vertex_count * sizeof(Math::Vector3)};
-
-    glGenBuffers(1, &mesh_buffers.vertex_buffer_object);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffers.vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, attr_array_size * 3, nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, attr_array_size, vertex_positions);
-    glBufferSubData(GL_ARRAY_BUFFER, attr_array_size, attr_array_size, vertex_colors);
-    glBufferSubData(GL_ARRAY_BUFFER, attr_array_size * 2, attr_array_size, vertex_normals);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    std::size_t index_array_size{vertex_index_count * sizeof(unsigned short)};
-
-    glGenBuffers(1, &mesh_buffers.index_buffer_object);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_array_size, vertex_indexes, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
     glGenVertexArrays(1, &mesh_buffers.vertex_array_object);
     glBindVertexArray(mesh_buffers.vertex_array_object);
 
+    std::size_t buffer_size{vertex_count * sizeof(Math::Vector3)};
+    if (vertex_colors != nullptr)
+        buffer_size += vertex_count * sizeof(Math::Vector3);
+    if (vertex_normals != nullptr)
+        buffer_size += vertex_count * sizeof(Math::Vector3);
+    if (vertex_texture_coords != nullptr)
+        buffer_size += vertex_count * sizeof(Math::Vector2);
+
+    glGenBuffers(1, &mesh_buffers.vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, mesh_buffers.vertex_buffer_object);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(attr_array_size));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(attr_array_size * 2));
+    glBufferData(GL_ARRAY_BUFFER, buffer_size, nullptr, GL_STATIC_DRAW);
+
+    GLuint attr_index{0};
+    std::size_t buffer_offset{0};
+
+    glEnableVertexAttribArray(attr_index);
+    glVertexAttribPointer(attr_index, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+    glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector3), vertex_positions);
+    ++attr_index;
+    buffer_offset += vertex_count * sizeof(Math::Vector3);
+
+    if (vertex_colors != nullptr)
+    {
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector3), vertex_colors);
+        ++attr_index;
+        buffer_offset += vertex_count * sizeof(Math::Vector3);
+    }
+    if (vertex_normals != nullptr)
+    {
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector3), vertex_normals);
+        ++attr_index;
+        buffer_offset += vertex_count * sizeof(Math::Vector3);
+    }
+    if (vertex_texture_coords != nullptr)
+    {
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 2, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector2), vertex_texture_coords);
+        ++attr_index;
+        buffer_offset += vertex_count * sizeof(Math::Vector2);
+    }
+
+    glGenBuffers(1, &mesh_buffers.index_buffer_object);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_index_count * sizeof(unsigned short), vertex_indexes, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     draw_command.type = DrawCommandType::DRAW_ELEMENTS;
     draw_command.rendering_mode = OGL::RenderingMode::TRIANGLES;

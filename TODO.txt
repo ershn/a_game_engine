@@ -1,6 +1,5 @@
 # Core
 - remove uses of exceptions
-- add a logging api
 - turn subsystems' global variables to stack objects ?
 
 # ECS

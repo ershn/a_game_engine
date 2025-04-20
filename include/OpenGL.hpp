@@ -14,7 +14,7 @@ enum struct ShaderType : std::uint16_t
 {
     VERTEX = GL_VERTEX_SHADER,
     GEOMETRY = GL_GEOMETRY_SHADER,
-    FRAGMENT = GL_FRAGMENT_SHADER
+    FRAGMENT = GL_FRAGMENT_SHADER,
 };
 
 enum struct RenderingMode : std::uint16_t
@@ -37,6 +37,7 @@ GLuint create_shader(ShaderType shader_type);
 void use_program(GLuint shader_program);
 
 GLint get_uniform_location(GLuint shader_program, std::string_view name);
+void set_uniform(GLint location, int value);
 void set_uniform(GLint location, float value);
 void set_uniform(GLint location, const Math::Vector3 &vector);
 void set_uniform(GLint location, const Math::Vector4 &vector);

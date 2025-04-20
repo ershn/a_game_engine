@@ -18,6 +18,7 @@ enum BlockBinding : GLuint
 
 struct FragmentLightingShader : public Age::Gfx::Shader
 {
+    GLint gaussian_texture{-1};
     GLuint material_block{GL_INVALID_INDEX};
 
     FragmentLightingShader(GLuint shader_program);
@@ -25,6 +26,8 @@ struct FragmentLightingShader : public Age::Gfx::Shader
 
 struct FragmentLightingMaterial : public Age::Gfx::Material
 {
+    int gaussian_texture{};
+
     FragmentLightingMaterial(const Age::Gfx::Shader &shader);
 
     void apply_properties() const override;
