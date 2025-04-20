@@ -82,7 +82,7 @@ vec4 calcLighting(in Light light)
     vec3 viewDirection = normalize(-viewPosition);
     vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
     float halfAngleCos = dot(viewNormal, halfAngleDirection);
-    float gaussianTerm = texture(uGaussianTexture, vec2(halfAngleCos, shininess)).r;
+    float gaussianTerm = texture(uGaussianTexture, vec2(sqrt(halfAngleCos), shininess)).r;
     // float halfAngle = acos(halfAngleCos);
 
     // float gaussianExponent = halfAngle / Material.surfaceShininess;

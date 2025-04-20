@@ -94,24 +94,25 @@ void InfinitySymbolScene::init_entities() const
         Gfx::create_shader<Gfx::NoLightingColorShader>(no_lighting_color_shader_id, shader_assets);
     }
 
-    constexpr std::size_t GAUSSIAN_TEX_COS_RESOLUTION{512};
+    constexpr std::size_t GAUSSIAN_TEX_ANGLE_RESOLUTION{512};
     constexpr std::size_t GAUSSIAN_TEX_SHININESS_RESOLUTION{128};
 
     auto gaussian_terms =
-        std::make_unique_for_overwrite<GLubyte[]>(GAUSSIAN_TEX_COS_RESOLUTION * GAUSSIAN_TEX_SHININESS_RESOLUTION);
+        std::make_unique_for_overwrite<GLubyte[]>(GAUSSIAN_TEX_ANGLE_RESOLUTION * GAUSSIAN_TEX_SHININESS_RESOLUTION);
     for (std::size_t shininess_index{1}; shininess_index <= GAUSSIAN_TEX_SHININESS_RESOLUTION; ++shininess_index)
     {
         float shininess{shininess_index / static_cast<float>(GAUSSIAN_TEX_SHININESS_RESOLUTION)};
-        for (std::size_t cos_index{}; cos_index < GAUSSIAN_TEX_COS_RESOLUTION; ++cos_index)
+        for (std::size_t sqrt_cos_index{}; sqrt_cos_index < GAUSSIAN_TEX_ANGLE_RESOLUTION; ++sqrt_cos_index)
         {
-            float cos{cos_index / static_cast<float>(GAUSSIAN_TEX_COS_RESOLUTION - 1ULL)};
+            float sqrt_cos{sqrt_cos_index / static_cast<float>(GAUSSIAN_TEX_ANGLE_RESOLUTION - 1ULL)};
+            float cos{sqrt_cos * sqrt_cos};
 
             float half_angle{std::acos(cos)};
             float gaussian_exponent{half_angle / shininess};
             gaussian_exponent = -(gaussian_exponent * gaussian_exponent);
             float gaussian_term{std::exp(gaussian_exponent)};
 
-            gaussian_terms[(shininess_index - 1) * GAUSSIAN_TEX_COS_RESOLUTION + cos_index] =
+            gaussian_terms[(shininess_index - 1) * GAUSSIAN_TEX_ANGLE_RESOLUTION + sqrt_cos_index] =
                 static_cast<GLubyte>(gaussian_term * 255.0f);
         }
     }
@@ -123,7 +124,7 @@ void InfinitySymbolScene::init_entities() const
         GL_TEXTURE_2D,
         0,
         GL_R8,
-        GAUSSIAN_TEX_COS_RESOLUTION,
+        GAUSSIAN_TEX_ANGLE_RESOLUTION,
         GAUSSIAN_TEX_SHININESS_RESOLUTION,
         0,
         GL_RED,
