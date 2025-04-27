@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "Math.hpp"
 #include "Transformations.hpp"
 
 namespace Age::Math
@@ -31,6 +32,64 @@ TMatrix rotation_matrix(const Quaternion &quat)
     matrix[2].z = 1.0f - 2.0f * quat.x * quat.x - 2.0f * quat.y * quat.y;
     return matrix;
 }
+
+template <typename TMatrix>
+TMatrix x_rotation_matrix(float angle)
+{
+    TMatrix matrix{1.0f};
+    float cosine{std::cos(angle)};
+    float sinus{std::sin(angle)};
+    matrix[1].y = cosine;
+    matrix[1].z = sinus;
+    matrix[2].y = -sinus;
+    matrix[2].z = cosine;
+    return matrix;
+}
+
+template <typename TMatrix>
+TMatrix y_rotation_matrix(float angle)
+{
+    TMatrix matrix{1.0f};
+    float cosine{std::cos(angle)};
+    float sinus{std::sin(angle)};
+    matrix[0].x = cosine;
+    matrix[0].z = -sinus;
+    matrix[2].x = sinus;
+    matrix[2].z = cosine;
+    return matrix;
+}
+
+template <typename TMatrix>
+TMatrix z_rotation_matrix(float angle)
+{
+    TMatrix matrix{1.0f};
+    float cosine{std::cos(angle)};
+    float sinus{std::sin(angle)};
+    matrix[0].x = cosine;
+    matrix[0].y = sinus;
+    matrix[1].x = -sinus;
+    matrix[1].y = cosine;
+    return matrix;
+}
+
+template <typename TMatrix>
+TMatrix yx_rotation_matrix(float y_angle, float x_angle)
+{
+    TMatrix matrix{1.0f};
+    float cos_y{std::cos(y_angle)};
+    float sin_y{std::sin(y_angle)};
+    float cos_x{std::cos(x_angle)};
+    float sin_x{std::sin(x_angle)};
+    matrix[0].x = cos_y;
+    matrix[0].z = -sin_y;
+    matrix[1].x = sin_y * sin_x;
+    matrix[1].y = cos_x;
+    matrix[1].z = cos_y * sin_x;
+    matrix[2].x = sin_y * cos_x;
+    matrix[2].y = -sin_x;
+    matrix[2].z = cos_y * cos_x;
+    return matrix;
+}
 } // namespace
 
 Quaternion axis_angle_quaternion(const Vector3 &axis, float angle)
@@ -39,8 +98,9 @@ Quaternion axis_angle_quaternion(const Vector3 &axis, float angle)
     float half_angle{angle / 2.0f};
     float sin_half_angle{std::sin(half_angle)};
 
-    return Quaternion{std::cos(half_angle), sin_half_angle * unit_axis.x, sin_half_angle * unit_axis.y,
-                      sin_half_angle * unit_axis.z};
+    return Quaternion{
+        std::cos(half_angle), sin_half_angle * unit_axis.x, sin_half_angle * unit_axis.y, sin_half_angle * unit_axis.z
+    };
 }
 
 Matrix3 scaling_matrix(const Vector3 &scaling)
@@ -70,14 +130,12 @@ Matrix4 affine_rotation_matrix(const Quaternion &quat)
 // +-->y
 Matrix3 x_rotation_matrix(float angle)
 {
-    Matrix3 matrix{1.0f};
-    float cosine = std::cos(angle);
-    float sinus = std::sin(angle);
-    matrix[1].y = cosine;
-    matrix[1].z = sinus;
-    matrix[2].y = -sinus;
-    matrix[2].z = cosine;
-    return matrix;
+    return x_rotation_matrix<Matrix3>(angle);
+}
+
+Matrix4 affine_x_rotation_matrix(float angle)
+{
+    return x_rotation_matrix<Matrix4>(angle);
 }
 
 // z to x positive angle
@@ -87,14 +145,12 @@ Matrix3 x_rotation_matrix(float angle)
 // +-->z
 Matrix3 y_rotation_matrix(float angle)
 {
-    Matrix3 matrix{1.0f};
-    float cosine = std::cos(angle);
-    float sinus = std::sin(angle);
-    matrix[0].x = cosine;
-    matrix[0].z = -sinus;
-    matrix[2].x = sinus;
-    matrix[2].z = cosine;
-    return matrix;
+    return y_rotation_matrix<Matrix3>(angle);
+}
+
+Matrix4 affine_y_rotation_matrix(float angle)
+{
+    return y_rotation_matrix<Matrix4>(angle);
 }
 
 // x to y positive angle
@@ -104,14 +160,24 @@ Matrix3 y_rotation_matrix(float angle)
 // +-->x
 Matrix3 z_rotation_matrix(float angle)
 {
-    Matrix3 matrix{1.0f};
-    float cosine = std::cos(angle);
-    float sinus = std::sin(angle);
-    matrix[0].x = cosine;
-    matrix[0].y = sinus;
-    matrix[1].x = -sinus;
-    matrix[1].y = cosine;
-    return matrix;
+    return z_rotation_matrix<Matrix3>(angle);
+}
+
+Matrix4 affine_z_rotation_matrix(float angle)
+{
+    return z_rotation_matrix<Matrix4>(angle);
+}
+
+// y_rotation(y_angle) * x_rotation(x_angle)
+Matrix3 yx_rotation_matrix(float y_angle, float x_angle)
+{
+    return yx_rotation_matrix<Matrix3>(y_angle, x_angle);
+}
+
+// y_rotation(y_angle) * x_rotation(x_angle)
+Matrix4 affine_yx_rotation_matrix(float y_angle, float x_angle)
+{
+    return yx_rotation_matrix<Matrix4>(y_angle, x_angle);
 }
 
 Matrix4 translation_matrix(const Vector3 &pos)
@@ -150,7 +216,7 @@ void update_fov(Matrix4 &perspective_matrix, float aspect_ratio, float vertical_
     perspective_matrix[1].y = zoom.y;
 }
 
-Matrix4 view_matrix(const Vector3 &camera_pos, const Vector3 &target_pos, const Vector3 &world_up)
+Matrix4 look_at_matrix(const Vector3 &target_pos, const Vector3 &camera_pos, const Vector3 &world_up)
 {
     Matrix4 matrix{1.0f};
 
@@ -159,23 +225,25 @@ Matrix4 view_matrix(const Vector3 &camera_pos, const Vector3 &target_pos, const 
     Vector3 up{cross(forward, right)};
 
     matrix[0].x = right.x;
-    matrix[0].y = right.y;
-    matrix[0].z = right.z;
-    matrix[1].x = up.x;
+    matrix[1].x = right.y;
+    matrix[2].x = right.z;
+    matrix[0].y = up.x;
     matrix[1].y = up.y;
-    matrix[1].z = up.z;
-    matrix[2].x = forward.x;
-    matrix[2].y = forward.y;
+    matrix[2].y = up.z;
+    matrix[0].z = forward.x;
+    matrix[1].z = forward.y;
     matrix[2].z = forward.z;
 
+    matrix *= translation_matrix(-camera_pos);
+    return matrix;
+}
+
+Matrix4 look_at_matrix(const Vector3 &target_pos, const SphericalCoord &camera_coord)
+{
+    Matrix4 matrix{affine_yx_rotation_matrix(camera_coord.angles.y, camera_coord.angles.x - PI * 0.5f)};
+    Vector3 position{target_pos + xyz(matrix[2] * camera_coord.distance)};
     matrix.transpose();
-
-    Matrix4 translation_matrix{1.0f};
-    translation_matrix[3].x = -camera_pos.x;
-    translation_matrix[3].y = -camera_pos.y;
-    translation_matrix[3].z = -camera_pos.z;
-
-    matrix *= translation_matrix;
+    matrix *= translation_matrix(-position);
     return matrix;
 }
 } // namespace Age::Math

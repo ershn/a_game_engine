@@ -137,6 +137,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\BigPlaneMesh.cpp" />
+    <ClCompile Include="src\game\CheckerboardScene.cpp" />
+    <ClCompile Include="src\game\CorridorMesh.cpp" />
     <ClCompile Include="src\game\InfinitySymbolScene.cpp" />
     <ClCompile Include="src\game\ValleyScene.cpp" />
     <ClCompile Include="src\game\InfinitySymbolMesh.cpp" />
@@ -186,7 +189,10 @@
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\ErrorHandling.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
+    <ClInclude Include="include\game\BigPlaneMesh.hpp" />
+    <ClInclude Include="include\game\CheckerboardScene.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
+    <ClInclude Include="include\game\CorridorMesh.hpp" />
     <ClInclude Include="include\game\GroundMesh.hpp" />
     <ClInclude Include="include\game\InfinitySymbolMesh.hpp" />
     <ClInclude Include="include\game\InfinitySymbolScene.hpp" />
@@ -228,6 +234,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment_lighting_color.vert" />
+    <None Include="shaders\game\checkerboard.frag" />
+    <None Include="shaders\game\checkerboard.vert" />
     <None Include="shaders\game\infinity_symbol.vert" />
     <None Include="shaders\game\infinity_symbol.frag" />
     <None Include="shaders\game\sphere_impostor.geom" />

@@ -11,18 +11,18 @@ void move_along_path(Transform &transform, PathFollower &path_follower)
     {
         if (path_follower.target_index == path_follower.path.size() - 1)
         {
-            if (path_follower.repeat_path)
-            {
-                path_follower.target_index = 0;
-                path_follower.target_position = path_follower.path[0];
-            }
-            else
+            if (path_follower.repeat_path == false)
                 return;
+
+            path_follower.target_index = 0;
+            path_follower.target_position = path_follower.path[0];
+            offset_to_target = path_follower.target_position - transform.position;
         }
         else
         {
             ++path_follower.target_index;
             path_follower.target_position = path_follower.path[path_follower.target_index];
+            offset_to_target = path_follower.target_position - transform.position;
         }
     }
 

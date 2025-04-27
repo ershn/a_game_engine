@@ -12,12 +12,14 @@ struct SphericalCamera
 {
     static constexpr auto TYPE{Core::ComponentType::SPHERICAL_CAMERA};
 
-    float min_pitch{Math::radians(0.1f)};
-    float max_pitch{Math::radians(179.9f)};
+    float min_pitch{0.0f};
+    float max_pitch{Math::PI};
+
+    float min_distance{1.0f};
+    float max_distance{100.0f};
 
     Math::Vector3 origin{};
     Math::SphericalCoord spherical_coord{};
-    Math::Vector3 cartesian_coord{};
 };
 
 void update_spherical_camera_via_input(const Input::MouseInput &mouse_input, SphericalCamera &spherical_camera);

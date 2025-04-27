@@ -276,6 +276,15 @@ bool detect_texture_format(const DDS_HEADER &header, TextureData &texture, std::
         {
             if (header.ddspf.flags & DDPF_ALPHAPIXELS) // a
             {
+                if (header.ddspf.rgbBitCount == 32)
+                {
+                    if (header.ddspf.rBitMask == 0x00ff0000 && header.ddspf.gBitMask == 0x0000ff00 &&
+                        header.ddspf.bBitMask == 0x000000ff && header.ddspf.aBitMask == 0xff000000)
+                        texture.format = TextureFormat::B8G8R8A8_UNORM;
+                    else if (header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
+                             header.ddspf.bBitMask == 0x00ff0000 && header.ddspf.aBitMask == 0xff000000)
+                        texture.format = TextureFormat::R8G8B8A8_UNORM;
+                }
             }
             else
             {

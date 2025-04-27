@@ -32,6 +32,6 @@ void FlyCamera::add_rotation(const Math::Vector2 &rotation)
 
 Math::Matrix4 FlyCamera::calc_view_matrix() const
 {
-    return Math::view_matrix(_position, _position - _forward, _world_up);
+    return Math::look_at_matrix(_position - _forward, _position, _world_up);
 }
 } // namespace Age::Gfx
