@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string_view>
 
 namespace Age::Gfx
@@ -151,6 +152,31 @@ struct TextureData
     TextureFormat format{};
     TextureType type{};
 };
+
+struct MipmapLevel
+{
+    std::span<std::byte> bytes;
+    std::uint32_t width{};
+    std::uint32_t height{};
+    std::uint32_t depth{};
+    std::uint32_t pitch{};
+    std::uint32_t level{};
+};
+
+struct MipmapLevelIterator
+{
+    const TextureData &texture;
+    std::uint32_t offset{};
+    std::uint32_t level{};
+};
+
+bool operator==(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2);
+bool operator!=(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2);
+MipmapLevelIterator &operator++(MipmapLevelIterator &it);
+MipmapLevel operator*(const MipmapLevelIterator &it);
+
+MipmapLevelIterator begin(const TextureData &texture);
+MipmapLevelIterator end(const TextureData &texture);
 
 bool load_texture_from_dds_file(std::string_view file_path, TextureData &texture);
 } // namespace Age::Gfx

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <limits>
@@ -392,6 +393,54 @@ void calc_texture_pitch(const DDS_HEADER &header, TextureData &texture)
     }
 }
 } // namespace
+
+bool operator==(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
+{
+    return &it1.texture == &it2.texture && it1.level == it2.level;
+}
+
+bool operator!=(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
+{
+    return !(it1 == it2);
+}
+
+MipmapLevelIterator &operator++(MipmapLevelIterator &it)
+{
+    auto pitch = std::max(1U, it.texture.pitch >> it.level);
+    auto height = std::max(1U, it.texture.height >> it.level);
+    auto depth = std::max(1U, it.texture.depth >> it.level);
+
+    it.offset += pitch * height * depth;
+    ++it.level;
+    return it;
+}
+
+MipmapLevel operator*(const MipmapLevelIterator &it)
+{
+    auto pitch = std::max(1U, it.texture.pitch >> it.level);
+    auto width = std::max(1U, it.texture.width >> it.level);
+    auto height = std::max(1U, it.texture.height >> it.level);
+    auto depth = std::max(1U, it.texture.depth >> it.level);
+
+    return MipmapLevel{
+        .bytes{&it.texture.bytes[it.offset], pitch * height * depth},
+        .width{width},
+        .height{height},
+        .depth{depth},
+        .pitch{pitch},
+        .level{it.level}
+    };
+}
+
+MipmapLevelIterator begin(const TextureData &texture)
+{
+    return MipmapLevelIterator{.texture{texture}, .offset{0}, .level{0}};
+}
+
+MipmapLevelIterator end(const TextureData &texture)
+{
+    return MipmapLevelIterator{.texture{texture}, .offset{}, .level{texture.mipmap_count}};
+}
 
 bool load_texture_from_dds_file(std::string_view file_path, TextureData &texture)
 {

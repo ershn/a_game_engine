@@ -18,6 +18,7 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
     SPHERE_IMPOSTORS,
 
     INFINITY_SYMBOL,
+    SCENE_CONTROLLER,
 
     LAST_VALUE
 };

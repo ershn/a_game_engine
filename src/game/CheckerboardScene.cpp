@@ -7,6 +7,7 @@
 #include "DDS.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Input.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
 #include "Rendering.hpp"
@@ -51,6 +52,61 @@ struct CheckerboardMaterial : public Gfx::Material
     }
 };
 
+struct SceneController
+{
+    static constexpr Core::ComponentType TYPE{SCENE_CONTROLLER};
+
+    GLuint checkerboard_texture;
+    GLuint mipmap_texture;
+};
+
+constexpr int surface_texture_unit{1};
+
+// clang-format off
+const GLubyte MIPMAP_COLORS[] = {
+    0xFF, 0xFF, 0x00,
+    0xFF, 0x00, 0xFF,
+    0x00, 0xFF, 0xFF,
+    0xFF, 0x00, 0x00,
+    0x00, 0xFF, 0x00,
+    0x00, 0x00, 0xFF,
+    0x00, 0x00, 0x00,
+    0xFF, 0xFF, 0xFF,
+};
+// clang-format on
+
+void fill_with_mipmap_color(std::span<GLubyte> buffer, std::size_t mipmap_level)
+{
+    for (std::size_t index{}; index < buffer.size(); index += 3)
+    {
+        buffer[index] = MIPMAP_COLORS[mipmap_level * 3];
+        buffer[index + 1] = MIPMAP_COLORS[mipmap_level * 3 + 1];
+        buffer[index + 2] = MIPMAP_COLORS[mipmap_level * 3 + 2];
+    }
+}
+
+void update_camera(Gfx::WorldToViewMatrix &view_matrix)
+{
+    Math::Vector3 target_pos{std::cos(Time::frame_time()) * 0.25f, std::sin(Time::frame_time()) * 0.25f - 5.0f, 20.0f};
+    Math::Vector3 camera_pos{std::cos(Time::frame_time()) * 0.25f, 0.5f, 40.0f};
+
+    view_matrix.matrix = Math::look_at_matrix(target_pos, camera_pos, Math::Vector3::up);
+}
+
+void control_scene(const SceneController &scene_controller)
+{
+    if (Input::is_key_down(GLFW_KEY_W))
+    {
+        glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
+        glBindTexture(GL_TEXTURE_2D, scene_controller.mipmap_texture);
+    }
+    else if (Input::is_key_down(GLFW_KEY_F))
+    {
+        glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
+        glBindTexture(GL_TEXTURE_2D, scene_controller.checkerboard_texture);
+    }
+}
+
 void CheckerBoardScene::init_entities() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
@@ -58,39 +114,81 @@ void CheckerBoardScene::init_entities() const
     Gfx::MaterialId next_material_id{0};
     Gfx::UniformBufferId next_uniform_buffer_id{0};
 
-    constexpr int checkerboard_texture_unit{1};
-
     Gfx::TextureData checkerboard_texture_data{};
     if (!Gfx::load_texture_from_dds_file("assets/game/textures/checkerboard_texture.dds", checkerboard_texture_data))
         return;
 
-    glActiveTexture(GL_TEXTURE0 + checkerboard_texture_unit);
+    GLuint mipmap_texture;
+    {
+        glGenTextures(1, &mipmap_texture);
+        glBindTexture(GL_TEXTURE_2D, mipmap_texture);
+
+        constexpr std::size_t MIPMAP_SIZE{128};
+        auto buffer = std::make_unique<GLubyte[]>(MIPMAP_SIZE * MIPMAP_SIZE * 3);
+
+        GLint prev_unpack_alignment;
+        glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        std::size_t mipmap_level{0};
+        for (std::size_t mipmap_size{MIPMAP_SIZE}; mipmap_size > 0; mipmap_size >>= 1, ++mipmap_level)
+        {
+            fill_with_mipmap_color({buffer.get(), mipmap_size * mipmap_size * 3}, mipmap_level);
+
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                static_cast<GLint>(mipmap_level),
+                GL_RGB8,
+                static_cast<GLsizei>(mipmap_size),
+                static_cast<GLsizei>(mipmap_size),
+                0,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                buffer.get()
+            );
+        }
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(mipmap_level) - 1);
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
+    }
 
     GLuint checkerboard_texture;
-    glGenTextures(1, &checkerboard_texture);
+    {
+        glGenTextures(1, &checkerboard_texture);
+        glBindTexture(GL_TEXTURE_2D, checkerboard_texture);
+
+        for (const auto &mipmap_level : checkerboard_texture_data)
+        {
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                mipmap_level.level,
+                GL_RGB8,
+                mipmap_level.width,
+                mipmap_level.height,
+                0,
+                GL_BGRA,
+                GL_UNSIGNED_INT_8_8_8_8_REV,
+                mipmap_level.bytes.data()
+            );
+        }
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, checkerboard_texture_data.mipmap_count - 1);
+    }
+
+    glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
     glBindTexture(GL_TEXTURE_2D, checkerboard_texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGB8,
-        checkerboard_texture_data.width,
-        checkerboard_texture_data.height,
-        0,
-        GL_BGRA,
-        GL_UNSIGNED_INT_8_8_8_8_REV,
-        checkerboard_texture_data.bytes.get()
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
     GLuint texture_sampler;
     glGenSamplers(1, &texture_sampler);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glSamplerParameteri(texture_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glSamplerParameteri(texture_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glBindSampler(checkerboard_texture_unit, texture_sampler);
+    glBindSampler(surface_texture_unit, texture_sampler);
 
     // Camera
     Core::EntityId camera_id;
@@ -151,26 +249,19 @@ void CheckerBoardScene::init_entities() const
 
         auto material_id = next_material_id++;
         auto &material = Gfx::create_material<CheckerboardMaterial>(material_id, checkerboard_shader_id);
-        material.texture_unit = checkerboard_texture_unit;
+        material.texture_unit = surface_texture_unit;
 
         auto id = Core::create_entity(
             Core::Transform{},
             Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{big_plane_mesh_id},
-            Gfx::Renderer{}
+            Gfx::Renderer{},
+            SceneController{.checkerboard_texture{checkerboard_texture}, .mipmap_texture{mipmap_texture}}
         );
 
         Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
     }
-}
-
-void update_camera(Gfx::WorldToViewMatrix &view_matrix)
-{
-    Math::Vector3 target_pos{std::cos(Time::frame_time()), std::sin(Time::frame_time()) - 5.0f, 20.0f};
-    Math::Vector3 camera_pos{std::cos(Time::frame_time()), 1.0f, 40.0f};
-
-    view_matrix.matrix = Math::look_at_matrix(target_pos, camera_pos, Math::Vector3::up);
 }
 
 void CheckerBoardScene::run_systems() const
@@ -179,5 +270,6 @@ void CheckerBoardScene::run_systems() const
 
     process_components(control_game_via_keyboard);
     process_components(update_camera);
+    process_components(control_scene);
 }
 } // namespace Game
