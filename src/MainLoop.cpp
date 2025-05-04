@@ -39,14 +39,14 @@ void run_engine(const App::Definitions &definitions, const App::IScene &scene)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     GLFWwindow *window{glfwCreateWindow(1280, 720, "Age", nullptr, nullptr)};
-    BAIL_ERROR_IF(window == nullptr, "Window/context creation failed");
+    BAIL_ERROR_IF(window == nullptr, "window/context creation failed");
 
     glfwMakeContextCurrent(window);
 
-    int version{gladLoadGL(glfwGetProcAddress)};
-    BAIL_ERROR_IF(version == 0, "OpenGL loading failed");
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        BAIL_ERROR("OpenGL loading failed");
 
-    Core::log_info("Loaded OpenGL {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+    Core::log_info("loaded OpenGL {}.{}", GLVersion.major, GLVersion.minor);
 
     Core::init_ecs(definitions);
     Input::init_input_system(window);

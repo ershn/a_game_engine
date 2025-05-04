@@ -58,6 +58,7 @@ struct SceneController
 
     GLuint checkerboard_texture;
     GLuint mipmap_texture;
+    GLuint texture_sampler;
 };
 
 constexpr int surface_texture_unit{1};
@@ -105,6 +106,15 @@ void control_scene(const SceneController &scene_controller)
         glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
         glBindTexture(GL_TEXTURE_2D, scene_controller.checkerboard_texture);
     }
+
+    if (Input::is_key_down(GLFW_KEY_S))
+    {
+        glSamplerParameteri(scene_controller.texture_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+    }
+    else if (Input::is_key_down(GLFW_KEY_T))
+    {
+        glSamplerParameteri(scene_controller.texture_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    }
 }
 
 void CheckerBoardScene::init_entities() const
@@ -113,6 +123,10 @@ void CheckerBoardScene::init_entities() const
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
     Gfx::UniformBufferId next_uniform_buffer_id{0};
+
+    GLfloat max_anisotropy;
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
+    Core::log_info("max anisotropy: {}", max_anisotropy);
 
     Gfx::TextureData checkerboard_texture_data{};
     if (!Gfx::load_texture_from_dds_file("assets/game/textures/checkerboard_texture.dds", checkerboard_texture_data))
@@ -185,6 +199,7 @@ void CheckerBoardScene::init_entities() const
     glGenSamplers(1, &texture_sampler);
     glSamplerParameteri(texture_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glSamplerParameteri(texture_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glSamplerParameterf(texture_sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_anisotropy);
     glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -257,7 +272,11 @@ void CheckerBoardScene::init_entities() const
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{big_plane_mesh_id},
             Gfx::Renderer{},
-            SceneController{.checkerboard_texture{checkerboard_texture}, .mipmap_texture{mipmap_texture}}
+            SceneController{
+                .checkerboard_texture{checkerboard_texture},
+                .mipmap_texture{mipmap_texture},
+                .texture_sampler{texture_sampler}
+            }
         );
 
         Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);

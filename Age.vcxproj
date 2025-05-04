@@ -149,6 +149,7 @@
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
+    <ClCompile Include="src\third_parties\glad.c" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\ECS.cpp" />
@@ -174,7 +175,6 @@
     <ClCompile Include="src\ShaderInstances.cpp" />
     <ClCompile Include="src\SphericalCamera.cpp" />
     <ClCompile Include="src\SphericalCoord.cpp" />
-    <ClCompile Include="src\third_parties\gl.c" />
     <ClCompile Include="src\Time.cpp" />
     <ClCompile Include="src\Transformations.cpp" />
     <ClCompile Include="src\UniformBuffer.cpp" />

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string_view>
 
-#include <glad/gl.h>
+#include <glad/glad.h>
 
 #include "Matrix.hpp"
 
