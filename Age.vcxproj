@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\GammaAndTexturesScene.cpp" />
     <ClCompile Include="src\game\BigPlaneMesh.cpp" />
     <ClCompile Include="src\game\CheckerboardScene.cpp" />
     <ClCompile Include="src\game\CorridorMesh.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="include\game\CheckerboardScene.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
     <ClInclude Include="include\game\CorridorMesh.hpp" />
+    <ClInclude Include="include\game\GammaAndTexturesScene.hpp" />
     <ClInclude Include="include\game\GroundMesh.hpp" />
     <ClInclude Include="include\game\InfinitySymbolMesh.hpp" />
     <ClInclude Include="include\game\InfinitySymbolScene.hpp" />
@@ -236,6 +238,8 @@
     <None Include="shaders\fragment_lighting_color.vert" />
     <None Include="shaders\game\checkerboard.frag" />
     <None Include="shaders\game\checkerboard.vert" />
+    <None Include="shaders\game\gamma_and_textures.frag" />
+    <None Include="shaders\game\gamma_and_textures.vert" />
     <None Include="shaders\game\infinity_symbol.vert" />
     <None Include="shaders\game\infinity_symbol.frag" />
     <None Include="shaders\game\sphere_impostor.geom" />

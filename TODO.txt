@@ -1,5 +1,6 @@
 # Core
 - remove uses of exceptions
+- allow to end game initialization with an error
 - turn subsystems' global variables to stack objects ?
 
 # ECS
@@ -27,4 +28,4 @@
 - make the matrix methods free functions
 
 # Performance improvement
-- pass ranges of components to system functions instead of individual components ?
+- pass ranges of components to system functions instead of individual components

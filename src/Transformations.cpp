@@ -187,17 +187,15 @@ Matrix4 translation_matrix(const Vector3 &pos)
     return matrix;
 }
 
-static Vector2 calc_zoom_values(float aspect_ratio, float vertical_fov)
+static Vector2 calc_perspective_proj_zoom(float aspect_ratio, float vertical_fov)
 {
-    Vector2 zoom;
-    zoom.y = 1.0f / tan(vertical_fov / 2.0f);
-    zoom.x = zoom.y * (1.0f / aspect_ratio);
-    return zoom;
+    float proj_plane_vertical_size{tan(vertical_fov * 0.5f)};
+    return Vector2{1.0f / (proj_plane_vertical_size * aspect_ratio), 1.0f / proj_plane_vertical_size};
 }
 
-Matrix4 perspective_matrix(float z_near, float z_far, float aspect_ratio, float vertical_fov)
+Matrix4 perspective_proj_matrix(float z_near, float z_far, float aspect_ratio, float vertical_fov)
 {
-    Vector2 zoom{calc_zoom_values(aspect_ratio, vertical_fov)};
+    Vector2 zoom{calc_perspective_proj_zoom(aspect_ratio, vertical_fov)};
 
     Matrix4 matrix{};
     matrix[0].x = zoom.x;
@@ -208,12 +206,38 @@ Matrix4 perspective_matrix(float z_near, float z_far, float aspect_ratio, float 
     return matrix;
 }
 
-void update_fov(Matrix4 &perspective_matrix, float aspect_ratio, float vertical_fov)
+void update_perspective_proj_zoom(Matrix4 &perspective_matrix, float aspect_ratio, float vertical_fov)
 {
-    Vector2 zoom{calc_zoom_values(aspect_ratio, vertical_fov)};
+    Vector2 zoom{calc_perspective_proj_zoom(aspect_ratio, vertical_fov)};
 
     perspective_matrix[0].x = zoom.x;
     perspective_matrix[1].y = zoom.y;
+}
+
+static Vector2 calc_orthographic_proj_size(float aspect_ratio, float vertical_size)
+{
+    return Vector2{1.0f / (vertical_size * 0.5f * aspect_ratio), 1.0f / (vertical_size * 0.5f)};
+}
+
+Matrix4 orthographic_proj_matrix(float z_near, float z_far, float aspect_ratio, float vertical_size)
+{
+    Vector2 orthographic_size{calc_orthographic_proj_size(aspect_ratio, vertical_size)};
+
+    Matrix4 matrix{};
+    matrix[0].x = orthographic_size.x;
+    matrix[1].y = orthographic_size.y;
+    matrix[2].z = 2.0f / (z_near - z_far);
+    matrix[3].z = 2.0f * z_near / (z_near - z_far) - 1.0f;
+    matrix[3].w = 1.0f;
+    return matrix;
+}
+
+void update_orthographic_proj_size(Matrix4 &orthographic_matrix, float aspect_ratio, float vertical_size)
+{
+    Vector2 orthographic_size{calc_orthographic_proj_size(aspect_ratio, vertical_size)};
+
+    orthographic_matrix[0].x = orthographic_size.x;
+    orthographic_matrix[1].y = orthographic_size.y;
 }
 
 Matrix4 look_at_matrix(const Vector3 &target_pos, const Vector3 &camera_pos, const Vector3 &world_up)

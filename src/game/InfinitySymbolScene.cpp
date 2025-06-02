@@ -136,7 +136,7 @@ void InfinitySymbolScene::init_entities() const
     glBindTexture(GL_TEXTURE_2D, 0);
 
     Gfx::TextureData texture{};
-    if (!Gfx::load_texture_from_dds_file("assets/game/textures/shininess_texture.dds", texture))
+    if (!Gfx::load_texture_from_dds_file("assets/game/textures/shininess.dds", texture))
         return;
 
     GLuint shininess_texture;
@@ -171,7 +171,7 @@ void InfinitySymbolScene::init_entities() const
     // Camera
     Core::EntityId camera_id;
     {
-        Gfx::Camera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
+        Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
         auto gamma_correction_buffer_id = next_uniform_buffer_id++;
         auto &gamma_correction_buffer =
@@ -188,7 +188,7 @@ void InfinitySymbolScene::init_entities() const
             camera,
             Gfx::WorldToViewMatrix{},
             Gfx::ViewToClipMatrix{
-                Math::perspective_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
+                Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
             Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},

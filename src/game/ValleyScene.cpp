@@ -199,13 +199,13 @@ void ValleyScene::init_entities() const
     // Camera
     Core::EntityId camera_id;
     {
-        Gfx::Camera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
+        Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
         camera_id = Core::create_entity(
             camera,
             Gfx::WorldToViewMatrix{},
             Gfx::ViewToClipMatrix{
-                Math::perspective_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
+                Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
             Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},

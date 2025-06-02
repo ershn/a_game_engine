@@ -147,7 +147,7 @@ struct TextureData
     std::uint32_t height{};
     std::uint32_t depth{};
     std::uint32_t pitch{};
-    std::uint32_t mipmap_count{};
+    std::uint32_t mipmap_level_count{};
     std::uint32_t count{};
     TextureFormat format{};
     TextureType type{};

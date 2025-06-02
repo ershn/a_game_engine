@@ -2,12 +2,13 @@
 
 #include "game/CheckerboardScene.hpp"
 #include "game/Game.hpp"
+#include "game/GammaAndTexturesScene.hpp"
 #include "game/InfinitySymbolScene.hpp"
 #include "game/ValleyScene.hpp"
 
 int main()
 {
-    auto scene = Game::CheckerBoardScene{};
+    auto scene = Game::GammaAndTexturesScene{};
 
 #ifdef _DEBUG
     Age::Core::run_engine(Game::g_definitions, scene);

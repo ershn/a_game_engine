@@ -209,7 +209,37 @@ struct DDS_HEADER_DXT10
 // TODO: handle endianness
 // TODO: handle invalid input
 
-bool read_dds_header(std::ifstream &fstream, DDS_HEADER &header, std::size_t &texture_size, std::string_view file_path)
+bool is_extended_header_format(const DDS_HEADER &header)
+{
+    return header.ddspf.flags & DDPF_FOURCC && header.ddspf.fourCC == DDS_DX10;
+}
+
+unsigned int get_bit_count_per_texel(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension)
+{
+    if (is_extended_header_format(header) == false)
+        return header.ddspf.rgbBitCount;
+
+    switch (header_extension.dxgiFormat)
+    {
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+    case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+    case DXGI_FORMAT_B8G8R8A8_UNORM:
+    case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+        return 32;
+    case DXGI_FORMAT_R8_UNORM:
+        return 8;
+    default:
+        return 0;
+    }
+}
+
+bool read_dds_header(
+    std::ifstream &fstream,
+    DDS_HEADER &header,
+    DDS_HEADER_DXT10 &header_extension,
+    std::size_t &texture_size,
+    std::string_view file_path
+)
 {
     fstream.seekg(0, std::ios_base::end);
     VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
@@ -226,7 +256,7 @@ bool read_dds_header(std::ifstream &fstream, DDS_HEADER &header, std::size_t &te
     file_size -= sizeof(DDS_MAGIC_NUMBER) - 1 + sizeof(DDS_HEADER);
 
     char magic_number[4];
-    fstream.read(reinterpret_cast<char *>(&magic_number), sizeof(magic_number));
+    fstream.read(magic_number, sizeof(magic_number));
     VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
 
     bool is_dds_file = std::strncmp(magic_number, DDS_MAGIC_NUMBER, sizeof(magic_number)) == 0;
@@ -235,17 +265,13 @@ bool read_dds_header(std::ifstream &fstream, DDS_HEADER &header, std::size_t &te
     fstream.read(reinterpret_cast<char *>(&header), sizeof(header));
     VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
 
-    if (header.ddspf.flags & DDPF_FOURCC && header.ddspf.fourCC == DDS_DX10)
+    if (is_extended_header_format(header))
     {
-        // NOTE: unconditional return for the time being
-        VBAIL_ERROR(false, "dds files with an extended header are not supported: {}", file_path);
-
         VBAIL_ERROR_IF(file_size < sizeof(DDS_HEADER_DXT10), false, "invalid file size: {}", file_path);
 
         file_size -= sizeof(DDS_HEADER_DXT10);
 
-        DDS_HEADER_DXT10 dds_header_extension;
-        fstream.read(reinterpret_cast<char *>(&dds_header_extension), sizeof(dds_header_extension));
+        fstream.read(reinterpret_cast<char *>(&header_extension), sizeof(header_extension));
         VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
     }
 
@@ -265,11 +291,20 @@ bool read_texture_bytes(
     return true;
 }
 
-bool detect_texture_format(const DDS_HEADER &header, TextureData &texture, std::string_view file_path)
+bool detect_texture_format(
+    const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture, std::string_view file_path
+)
 {
     // TODO: detect other formats when needs come
     if (header.ddspf.flags & DDPF_FOURCC) // block compressed or custom texture format
     {
+        if (header.ddspf.fourCC == DDS_DX10)
+        {
+            texture.format = static_cast<TextureFormat>(header_extension.dxgiFormat);
+        }
+        else
+        {
+        }
     }
     else
     {
@@ -360,24 +395,30 @@ bool detect_texture_dimensions(const DDS_HEADER &header, TextureData &texture, s
     return true;
 }
 
-void detect_texture_count(const DDS_HEADER &header, TextureData &texture)
+void detect_texture_count(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture)
 {
     if (header.caps & DDSCAPS_MIPMAP) // mipmap texture
     {
-        texture.mipmap_count = header.mipMapCount;
+        texture.mipmap_level_count = header.mipMapCount;
     }
     else
     {
-        texture.mipmap_count = 1;
+        texture.mipmap_level_count = 1;
     }
 
-    // TODO: handle array textures
-    texture.count = 1;
+    if (is_extended_header_format(header) && texture.type != TextureType::TEXTURE_3D)
+    {
+        texture.count = header_extension.arraySize;
+    }
+    else
+    {
+        texture.count = 1;
+    }
 }
 
-void calc_texture_pitch(const DDS_HEADER &header, TextureData &texture)
+void calc_texture_pitch(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture)
 {
-    // TODO: handle block compressed formats and cases where rgbBitCount isn't set
+    // TODO: handle block compressed formats
     switch (texture.format)
     {
     case TextureFormat::R8G8_B8G8_UNORM:
@@ -388,7 +429,7 @@ void calc_texture_pitch(const DDS_HEADER &header, TextureData &texture)
         texture.pitch = ((header.width + 1) >> 1) * 4;
         break;
     default:
-        texture.pitch = (header.width * header.ddspf.rgbBitCount + 7) / 8;
+        texture.pitch = (header.width * get_bit_count_per_texel(header, header_extension) + 7) / 8;
         break;
     }
 }
@@ -439,7 +480,7 @@ MipmapLevelIterator begin(const TextureData &texture)
 
 MipmapLevelIterator end(const TextureData &texture)
 {
-    return MipmapLevelIterator{.texture{texture}, .offset{}, .level{texture.mipmap_count}};
+    return MipmapLevelIterator{.texture{texture}, .offset{}, .level{texture.mipmap_level_count}};
 }
 
 bool load_texture_from_dds_file(std::string_view file_path, TextureData &texture)
@@ -448,20 +489,21 @@ bool load_texture_from_dds_file(std::string_view file_path, TextureData &texture
     VBAIL_ERROR_IF(fstream.fail(), false, "failed to open file: {}", file_path);
 
     DDS_HEADER dds_header;
+    DDS_HEADER_DXT10 dds_header_extension;
     std::size_t texture_size;
 
-    if (!read_dds_header(fstream, dds_header, texture_size, file_path))
+    if (!read_dds_header(fstream, dds_header, dds_header_extension, texture_size, file_path))
         return false;
 
-    if (!detect_texture_format(dds_header, texture, file_path))
+    if (!detect_texture_format(dds_header, dds_header_extension, texture, file_path))
         return false;
 
     if (!detect_texture_dimensions(dds_header, texture, file_path))
         return false;
 
-    detect_texture_count(dds_header, texture);
+    detect_texture_count(dds_header, dds_header_extension, texture);
 
-    calc_texture_pitch(dds_header, texture);
+    calc_texture_pitch(dds_header, dds_header_extension, texture);
 
     return read_texture_bytes(fstream, texture_size, texture, file_path);
 }

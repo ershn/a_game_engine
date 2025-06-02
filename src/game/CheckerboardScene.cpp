@@ -129,7 +129,7 @@ void CheckerBoardScene::init_entities() const
     Core::log_info("max anisotropy: {}", max_anisotropy);
 
     Gfx::TextureData checkerboard_texture_data{};
-    if (!Gfx::load_texture_from_dds_file("assets/game/textures/checkerboard_texture.dds", checkerboard_texture_data))
+    if (!Gfx::load_texture_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
         return;
 
     GLuint mipmap_texture;
@@ -189,7 +189,7 @@ void CheckerBoardScene::init_entities() const
         }
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, checkerboard_texture_data.mipmap_count - 1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, checkerboard_texture_data.mipmap_level_count - 1);
     }
 
     glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
@@ -208,7 +208,7 @@ void CheckerBoardScene::init_entities() const
     // Camera
     Core::EntityId camera_id;
     {
-        Gfx::Camera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
+        Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
         auto gamma_correction_buffer_id = next_uniform_buffer_id++;
         auto &gamma_correction_buffer =
@@ -225,7 +225,7 @@ void CheckerBoardScene::init_entities() const
             camera,
             Gfx::WorldToViewMatrix{},
             Gfx::ViewToClipMatrix{
-                Math::perspective_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
+                Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
             Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},

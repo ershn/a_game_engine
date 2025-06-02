@@ -5,6 +5,7 @@
 
 namespace Age::Gfx
 {
+using Math::Vector2;
 using Math::Vector3;
 
 namespace
@@ -29,6 +30,13 @@ const Vector3 s_plane_vertex_normals[] = {
     {0.0f, 0.0f, 1.0f},
     {0.0f, 0.0f, 1.0f},
     {0.0f, 0.0f, 1.0f},
+};
+
+const Vector2 s_plane_vertex_texture_coords[] = {
+    {0.0f, 1.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
 };
 
 const GLushort s_plane_vertex_indices[] = {
@@ -160,7 +168,7 @@ void create_plane_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw
         s_plane_vertex_positions,
         s_plane_vertex_colors,
         s_plane_vertex_normals,
-        nullptr,
+        s_plane_vertex_texture_coords,
         sizeof(s_plane_vertex_positions) / sizeof(Vector3),
         s_plane_vertex_indices,
         sizeof(s_plane_vertex_indices) / sizeof(GLushort),

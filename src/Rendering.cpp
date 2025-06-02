@@ -44,9 +44,7 @@ void update_viewport()
 
     s_framebuffer_size_changed = false;
     glViewport(0, 0, s_framebuffer_width, s_framebuffer_height);
-
-    float aspect_ratio{static_cast<float>(s_framebuffer_width) / s_framebuffer_height};
-    update_cameras_aspect_ratio(aspect_ratio);
+    update_camera_projections(s_framebuffer_width, s_framebuffer_height);
 }
 
 ////////////////////////////////////////
