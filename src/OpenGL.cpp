@@ -115,6 +115,14 @@ void bind_vertex_array_object(GLuint vao)
     glBindVertexArray(vao);
 }
 
+void enable_srgb_rendering(bool enable)
+{
+    if (enable)
+        glEnable(GL_FRAMEBUFFER_SRGB);
+    else
+        glDisable(GL_FRAMEBUFFER_SRGB);
+}
+
 void set_clear_color(const Math::Vector4 &color)
 {
     glClearColor(color.x, color.y, color.z, color.w);

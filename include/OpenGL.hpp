@@ -61,6 +61,8 @@ void bind_uniform_buffer_range(
 
 void bind_vertex_array_object(GLuint vao);
 
+void enable_srgb_rendering(bool enable);
+
 void set_clear_color(const Math::Vector4 &color);
 void set_clear_depth(float depth);
 

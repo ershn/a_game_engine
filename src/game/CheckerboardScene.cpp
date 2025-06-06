@@ -210,10 +210,6 @@ void CheckerBoardScene::init_entities() const
     {
         Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
-        auto gamma_correction_buffer_id = next_uniform_buffer_id++;
-        auto &gamma_correction_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::GammaCorrectionBlock>>(gamma_correction_buffer_id);
-
         auto projection_buffer_id = next_uniform_buffer_id++;
         auto &projection_buffer =
             Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
@@ -228,7 +224,6 @@ void CheckerBoardScene::init_entities() const
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
-            Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             GameKeyboardController{}
@@ -238,14 +233,11 @@ void CheckerBoardScene::init_entities() const
     // Global settings
     Core::EntityId global_settings_id;
     {
-        global_settings_id = Core::create_entity(
-            Gfx::GlobalColorSettings{.gamma_inverse{1 / 2.2f}},
-            Gfx::GlobalLightSettings{
-                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-                .light_attenuation{1.0f / (25.0f * 25.0f)},
-                .max_intensity{1.0f}
-            }
-        );
+        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{
+            .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
+            .light_attenuation{1.0f / (25.0f * 25.0f)},
+            .max_intensity{1.0f}
+        });
     }
 
     auto checkerboard_shader_id = next_shader_id++;

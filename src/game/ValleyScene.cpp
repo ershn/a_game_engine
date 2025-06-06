@@ -76,10 +76,6 @@ void ValleyScene::init_entities() const
     auto &no_lighting_material =
         Gfx::create_material<Gfx::NoLightingMaterial>(NO_LIGHTING_MATERIAL, NO_LIGHTING_SHADER);
 
-    auto gamma_correction_buffer_id = next_uniform_buffer_id++;
-    auto &gamma_correction_buffer =
-        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::GammaCorrectionBlock>>(gamma_correction_buffer_id);
-
     auto projection_buffer_id = next_uniform_buffer_id++;
     auto &projection_buffer =
         Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
@@ -208,7 +204,6 @@ void ValleyScene::init_entities() const
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::RenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
-            Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
@@ -222,9 +217,7 @@ void ValleyScene::init_entities() const
     // Global settings
     Core::EntityId global_settings_id;
     {
-        global_settings_id = Core::create_entity(
-            Gfx::GlobalColorSettings{.gamma_inverse{1 / 2.2f}}, Gfx::GlobalLightSettings{.light_attenuation{0.2f}}
-        );
+        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{.light_attenuation{0.2f}});
     }
 
     // Directional light 1

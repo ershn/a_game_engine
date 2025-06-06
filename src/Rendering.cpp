@@ -65,13 +65,6 @@ void calc_local_to_view_normal_matrix(const LocalToViewMatrix &view_matrix, Loca
     view_normal_matrix.matrix = Math::Matrix3{view_matrix.matrix}.invert().transpose();
 }
 
-void set_gamma_correction(
-    GammaCorrectionBlock &gamma_correction_block, const GlobalColorSettings &global_color_settings
-)
-{
-    gamma_correction_block.gamma_inverse = global_color_settings.gamma_inverse;
-}
-
 void set_global_light_settings(LightsBlock &lights_block, const GlobalLightSettings &global_light_settings)
 {
     lights_block.ambient_light_intensity = global_light_settings.ambient_light_intensity;
@@ -150,17 +143,10 @@ void enqueue_draw_calls(const Renderer &renderer)
 void render_entities_to_camera(
     const RenderState &render_state,
     const WorldToViewMatrix &view_matrix,
-    const GammaCorrectionBufferBlockRef &gamma_correction_buffer_block,
     const ProjectionBufferBlockRef &projection_buffer_block,
     const LightsBufferBlockRef &lights_buffer_block
 )
 {
-    GammaCorrectionBlock gamma_correction_block;
-    Core::process_components(std::function<void(const GlobalColorSettings &)>{
-        std::bind_front(set_gamma_correction, std::ref(gamma_correction_block))
-    });
-    gamma_correction_buffer_block = gamma_correction_block;
-
     {
         LightsBlock lights_block;
         std::size_t light_index{};
@@ -178,11 +164,10 @@ void render_entities_to_camera(
         lights_buffer_block = lights_block;
     }
 
-    OGL::set_clear_color(gamma_correct_color(render_state.clear_color, gamma_correction_block.gamma_inverse));
+    OGL::set_clear_color(render_state.clear_color);
     OGL::set_clear_depth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    bind_uniform_buffer(GAMMA_CORRECTION_BLOCK_BINDING, gamma_correction_buffer_block.get_buffer_range());
     bind_uniform_buffer(PROJECTION_BLOCK_BINDING, projection_buffer_block.get_buffer_range());
     bind_uniform_buffer(LIGHT_DATA_BLOCK_BINDING, lights_buffer_block.get_buffer_range());
 

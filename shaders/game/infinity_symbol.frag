@@ -15,11 +15,6 @@ uniform sampler2D uGaussianTexture;
 uniform sampler2D uShininessTexture;
 uniform bool uUseShininessTex;
 
-uniform GammaCorrectionBlock
-{
-	float gammaInverse;
-};
-
 struct Light
 {
     vec4 viewPosition;
@@ -102,5 +97,5 @@ void main()
         accumulatedLight += calcLighting(Lights.lights[index]);
     }
 	accumulatedLight /= Lights.maxIntensity;
-    oColor = pow(accumulatedLight, vec4(vec3(gammaInverse), 1.0));
+    oColor = accumulatedLight;
 }

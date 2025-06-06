@@ -142,10 +142,6 @@ void GammaAndTexturesScene::init_entities() const
     // Camera
     Core::EntityId camera_id;
     {
-        auto gamma_correction_buffer_id = next_uniform_buffer_id++;
-        auto &gamma_correction_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::GammaCorrectionBlock>>(gamma_correction_buffer_id);
-
         auto projection_buffer_id = next_uniform_buffer_id++;
         auto &projection_buffer =
             Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
@@ -158,7 +154,6 @@ void GammaAndTexturesScene::init_entities() const
             Gfx::WorldToViewMatrix{.matrix{1.0f}},
             Gfx::ViewToClipMatrix{Gfx::window_space_orthographic_proj_matrix(1, 1)},
             Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
-            Gfx::GammaCorrectionBufferBlockRef{gamma_correction_buffer.get_block()},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             GameKeyboardController{}
@@ -168,14 +163,11 @@ void GammaAndTexturesScene::init_entities() const
     // Global settings
     Core::EntityId global_settings_id;
     {
-        global_settings_id = Core::create_entity(
-            Gfx::GlobalColorSettings{.gamma_inverse{1 / 2.2f}},
-            Gfx::GlobalLightSettings{
-                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-                .light_attenuation{1.0f / (25.0f * 25.0f)},
-                .max_intensity{1.0f}
-            }
-        );
+        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{
+            .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
+            .light_attenuation{1.0f / (25.0f * 25.0f)},
+            .max_intensity{1.0f}
+        });
     }
 
     auto gamma_and_textures_shader_id = next_shader_id++;

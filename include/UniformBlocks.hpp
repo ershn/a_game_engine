@@ -5,12 +5,6 @@
 
 namespace Age::Gfx
 {
-struct GammaCorrectionBlock
-{
-    float gamma_inverse{};
-    float _padding_[3];
-};
-
 struct ProjectionBlock
 {
     Math::Matrix4 view_to_clip_matrix;

@@ -8,6 +8,8 @@ namespace Age::Gfx
 {
 namespace
 {
+GLuint s_used_shader_program{};
+
 std::string read_file(std::string_view path)
 {
     std::ifstream file{path.data()};
@@ -76,16 +78,16 @@ GLuint create_shader_program(std::span<const GLuint> shaders)
 }
 } // namespace
 
-Shader::Shader(GLuint shader_program, unsigned int options)
-    : shader_program{shader_program}
-    , gamma_correction_block{OGL::get_uniform_block_index(shader_program, "GammaCorrectionBlock")}
+Shader::Shader(GLuint shader_program, unsigned int uniform_options, unsigned int render_state)
+    : render_state{render_state}
+    , shader_program{shader_program}
     , projection_block{OGL::get_uniform_block_index(shader_program, "ProjectionBlock")}
 {
-    if (options & SHADER_LV_MATRIX)
+    if (uniform_options & SHADER_LV_MATRIX)
         local_to_view_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewMatrix");
-    if (options & SHADER_LV_NORMAL_MATRIX)
+    if (uniform_options & SHADER_LV_NORMAL_MATRIX)
         local_to_view_normal_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewNormalMatrix");
-    if (options & SHADER_LIGHT_DATA_BLOCK)
+    if (uniform_options & SHADER_LIGHT_DATA_BLOCK)
         light_data_block = OGL::get_uniform_block_index(shader_program, "LightsBlock");
 }
 
@@ -114,5 +116,15 @@ GLuint create_shader_program(std::span<const ShaderAsset> shader_assets)
 const Shader &get_shader(ShaderId shader_id)
 {
     return *g_shaders[shader_id];
+}
+
+void use_shader(const Shader &shader)
+{
+    if (shader.shader_program != s_used_shader_program)
+    {
+        OGL::enable_srgb_rendering(shader.render_state & SRGB_RENDERING);
+        OGL::use_program(shader.shader_program);
+        s_used_shader_program = shader.shader_program;
+    }
 }
 } // namespace Age::Gfx

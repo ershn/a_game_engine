@@ -10,11 +10,6 @@ in FragmentData {
 
 out vec4 outColor;
 
-uniform GammaCorrectionBlock
-{
-	float gammaInverse;
-};
-
 uniform ProjectionBlock
 {
     mat4 viewToClipMatrix;
@@ -121,7 +116,7 @@ void main()
     }
 	accumulatedLight /= Lights.maxIntensity;
 
-    outColor = pow(accumulatedLight, vec4(vec3(gammaInverse), 1.0));
+    outColor = accumulatedLight;
 
     vec4 clipPosition = viewToClipMatrix * vec4(viewPosition, 1.0);
     float ndcZ = clipPosition.z / clipPosition.w;

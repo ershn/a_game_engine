@@ -29,9 +29,6 @@ enum struct ComponentType : std::uint16_t
     POINT_LIGHT,
     LIGHTS_BUFFER_BLOCK,
 
-    GLOBAL_COLOR_SETTINGS,
-    GAMMA_CORRECTION_BUFFER_BLOCK,
-
     RENDER_STATE,
     RENDERER,
 
