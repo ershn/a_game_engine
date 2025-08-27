@@ -40,37 +40,32 @@ void create_elements_mesh(
     glBindBuffer(GL_ARRAY_BUFFER, mesh_buffers.vertex_buffer_object);
     glBufferData(GL_ARRAY_BUFFER, buffer_size, nullptr, GL_STATIC_DRAW);
 
-    GLuint attr_index{0};
     std::size_t buffer_offset{0};
 
-    glEnableVertexAttribArray(attr_index);
-    glVertexAttribPointer(attr_index, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
     glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector3), vertex_positions);
-    ++attr_index;
     buffer_offset += vertex_count * sizeof(Math::Vector3);
 
     if (vertex_colors != nullptr)
     {
-        glEnableVertexAttribArray(attr_index);
-        glVertexAttribPointer(attr_index, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
         glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector3), vertex_colors);
-        ++attr_index;
         buffer_offset += vertex_count * sizeof(Math::Vector3);
     }
     if (vertex_normals != nullptr)
     {
-        glEnableVertexAttribArray(attr_index);
-        glVertexAttribPointer(attr_index, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
         glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector3), vertex_normals);
-        ++attr_index;
         buffer_offset += vertex_count * sizeof(Math::Vector3);
     }
     if (vertex_texture_coords != nullptr)
     {
-        glEnableVertexAttribArray(attr_index);
-        glVertexAttribPointer(attr_index, 2, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 2, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
         glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(Math::Vector2), vertex_texture_coords);
-        ++attr_index;
         buffer_offset += vertex_count * sizeof(Math::Vector2);
     }
 

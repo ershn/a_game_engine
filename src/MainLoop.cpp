@@ -1,10 +1,10 @@
 #include "MainLoop.hpp"
+#include "DefaultMeshes.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
 #include "GLFW.hpp"
 #include "Input.hpp"
 #include "Logging.hpp"
-#include "MeshInstances.hpp"
 #include "Rendering.hpp"
 #include "Time.hpp"
 
@@ -54,15 +54,24 @@ void run_engine(const App::Definitions &definitions, const App::IScene &scene)
     Gfx::init_rendering_system(window);
 
     Gfx::load_primitive_meshes();
-    scene.init_entities();
+    scene.init();
 
+    glfwPollEvents();
+
+    Input::init_input_state();
     Time::init_frame_time();
     while (Input::is_exit_requested() == false && s_is_exit_requested == false)
     {
         Time::update_frame_time();
-        scene.run_systems();
+
+        scene.update();
+
         Gfx::render();
+
+        glfwPollEvents();
+
         Input::update_input_state();
+        Gfx::update_render_state();
     }
 
     glfwDestroyWindow(window);

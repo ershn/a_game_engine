@@ -20,7 +20,7 @@ struct ShaderAsset
 using ShaderId = std::uint32_t;
 
 inline constexpr unsigned int SRGB_RENDERING{0b1};
-inline constexpr unsigned int DEFAULT_RENDER_STATE{SRGB_RENDERING};
+inline constexpr unsigned int DEFAULT_SHADER_RENDER_STATE{SRGB_RENDERING};
 
 inline constexpr unsigned int SHADER_LV_MATRIX{0b1};
 inline constexpr unsigned int SHADER_LV_NORMAL_MATRIX{0b10};
@@ -35,7 +35,9 @@ struct Shader
     GLuint projection_block{GL_INVALID_INDEX};
     GLuint light_data_block{GL_INVALID_INDEX};
 
-    Shader(GLuint shader_program, unsigned int uniform_options = 0, unsigned int render_state = DEFAULT_RENDER_STATE);
+    Shader(
+        GLuint shader_program, unsigned int uniform_options = 0, unsigned int render_state = DEFAULT_SHADER_RENDER_STATE
+    );
 };
 
 enum BlockBinding : GLuint

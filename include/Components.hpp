@@ -29,7 +29,7 @@ enum struct ComponentType : std::uint16_t
     POINT_LIGHT,
     LIGHTS_BUFFER_BLOCK,
 
-    RENDER_STATE,
+    CAMERA_RENDER_STATE,
     RENDERER,
 
     SPHERICAL_CAMERA,

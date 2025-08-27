@@ -1,7 +1,7 @@
 #include <functional>
 
+#include "DefaultMeshes.hpp"
 #include "Math.hpp"
-#include "MeshInstances.hpp"
 
 namespace Age::Gfx
 {
@@ -140,6 +140,38 @@ const Vector3 s_cube_vertex_normals[] = {
     {-1.0f,  0.0f,  0.0f},
 };
 
+const Vector2 s_cube_vertex_texture_coords[] = {
+    {0.0f, 1.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+
+    {1.0f, 1.0f},
+    {0.0f, 1.0f},
+    {1.0f, 0.0f},
+    {0.0f, 0.0f},
+
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {0.0f, 1.0f},
+    {1.0f, 1.0f},
+
+    {0.0f, 1.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+
+    {0.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {1.0f, 0.0f},
+
+    {1.0f, 1.0f},
+    {1.0f, 0.0f},
+    {0.0f, 1.0f},
+    {0.0f, 0.0f},
+};
+
 const GLushort s_cube_vertex_indices[] = {
     0, 1, 3,
     0, 3, 2,
@@ -183,7 +215,7 @@ void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_
         s_cube_vertex_positions,
         s_cube_vertex_colors,
         s_cube_vertex_normals,
-        nullptr,
+        s_cube_vertex_texture_coords,
         sizeof(s_cube_vertex_positions) / sizeof(Vector3),
         s_cube_vertex_indices,
         sizeof(s_cube_vertex_indices) / sizeof(GLushort),

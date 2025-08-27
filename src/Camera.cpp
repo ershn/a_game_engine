@@ -1,54 +1,8 @@
-#include <functional>
-
 #include "Camera.hpp"
 #include "Transformations.hpp"
 
 namespace Age::Gfx
 {
-namespace
-{
-void update_perspective_camera_aspect_ratio(
-    float aspect_ratio,
-    PerspectiveCamera &camera,
-    ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
-)
-{
-    camera.aspect_ratio = aspect_ratio;
-    Math::update_perspective_proj_zoom(view_to_clip_matrix.matrix, aspect_ratio, camera.vertical_fov);
-
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
-}
-
-void update_orthographic_camera_aspect_ratio(
-    float aspect_ratio,
-    OrthographicCamera &camera,
-    ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
-)
-{
-    camera.aspect_ratio = aspect_ratio;
-    Math::update_orthographic_proj_size(view_to_clip_matrix.matrix, aspect_ratio, camera.vertical_size);
-
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
-}
-
-void update_window_space_camera(
-    int viewport_width,
-    int viewport_height,
-    WindowSpaceCamera &camera,
-    ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
-)
-{
-    camera.viewport_width = viewport_width;
-    camera.viewport_height = viewport_height;
-    update_window_space_orthographic_proj_size(view_to_clip_matrix.matrix, viewport_width, viewport_height);
-
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
-}
-} // namespace
-
 Math::Matrix4 window_space_orthographic_proj_matrix(int viewport_width, int viewport_height)
 {
     Math::Matrix4 matrix{};
@@ -69,30 +23,59 @@ void update_window_space_orthographic_proj_size(
     orthographic_matrix[1].y = -2.0f / viewport_height;
 }
 
+void update_perspective_camera_matrix(
+    const CameraRenderState &camera_render_state,
+    PerspectiveCamera &camera,
+    ViewToClipMatrix &view_to_clip_matrix,
+    const ProjectionBufferBlockRef &projection_buffer_block
+)
+{
+    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
+    float aspect_ratio{static_cast<float>(viewport.width) / viewport.height};
+
+    camera.aspect_ratio = aspect_ratio;
+    view_to_clip_matrix.matrix =
+        Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, aspect_ratio, camera.vertical_fov);
+
+    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+}
+
+void update_orthographic_camera_matrix(
+    const CameraRenderState &camera_render_state,
+    OrthographicCamera &camera,
+    ViewToClipMatrix &view_to_clip_matrix,
+    const ProjectionBufferBlockRef &projection_buffer_block
+)
+{
+    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
+    float aspect_ratio{static_cast<float>(viewport.width) / viewport.height};
+
+    camera.aspect_ratio = aspect_ratio;
+    view_to_clip_matrix.matrix =
+        Math::orthographic_proj_matrix(camera.near_plane_z, camera.far_plane_z, aspect_ratio, camera.vertical_size);
+
+    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+}
+
+void update_window_space_camera_matrix(
+    const CameraRenderState &camera_render_state,
+    WindowSpaceCamera &camera,
+    ViewToClipMatrix &view_to_clip_matrix,
+    const ProjectionBufferBlockRef &projection_buffer_block
+)
+{
+    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
+
+    camera.viewport_width = viewport.width;
+    camera.viewport_height = viewport.height;
+    view_to_clip_matrix.matrix = window_space_orthographic_proj_matrix(viewport.width, viewport.height);
+
+    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+}
+
 void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix)
 {
     view_matrix.matrix = Math::affine_rotation_matrix(camera_transform.orientation).transpose() *
                          Math::translation_matrix(-camera_transform.position);
-}
-
-void update_camera_projections(int viewport_width, int viewport_height)
-{
-    float aspect_ratio{static_cast<float>(viewport_width) / viewport_height};
-
-    Core::process_components(
-        std::function<void(PerspectiveCamera &, ViewToClipMatrix &, const ProjectionBufferBlockRef &)>{
-            std::bind_front(update_perspective_camera_aspect_ratio, aspect_ratio)
-        }
-    );
-    Core::process_components(
-        std::function<void(OrthographicCamera &, ViewToClipMatrix &, const ProjectionBufferBlockRef &)>{
-            std::bind_front(update_orthographic_camera_aspect_ratio, aspect_ratio)
-        }
-    );
-    Core::process_components(
-        std::function<void(WindowSpaceCamera &, ViewToClipMatrix &, const ProjectionBufferBlockRef &)>{
-            std::bind_front(update_window_space_camera, viewport_width, viewport_height)
-        }
-    );
 }
 } // namespace Age::Gfx

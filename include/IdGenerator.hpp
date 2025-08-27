@@ -4,7 +4,8 @@
 
 namespace Age::Util
 {
-template <typename T> class IdGenerator
+template <typename T>
+class IdGenerator
 {
     T _next_id{};
     std::vector<T> _free_ids{};

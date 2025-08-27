@@ -5,6 +5,7 @@
 #include "Transform.hpp"
 #include "UniformBlocks.hpp"
 #include "UniformBuffer.hpp"
+#include "Viewport.hpp"
 
 namespace Age::Gfx
 {
@@ -20,6 +21,21 @@ struct ViewToClipMatrix
     static constexpr auto TYPE{Core::ComponentType::VIEW_TO_CLIP_MATRIX};
 
     Math::Matrix4 matrix{};
+};
+
+inline constexpr unsigned int CLEAR_COLOR_BUFFER{0b1};
+inline constexpr unsigned int CLEAR_DEPTH_BUFFER{0b10};
+inline constexpr unsigned int DEPTH_CLAMPING{0b100};
+inline constexpr unsigned int DEFAULT_CAMERA_FLAGS{CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER};
+
+struct CameraRenderState
+{
+    static constexpr auto TYPE{Core::ComponentType::CAMERA_RENDER_STATE};
+
+    unsigned int flags{DEFAULT_CAMERA_FLAGS};
+    Math::Vector4 clear_color{};
+    float clear_depth{1.0f};
+    ViewportId viewport_id{FULL_VIEWPORT_ID};
 };
 
 struct PerspectiveCamera
@@ -62,7 +78,26 @@ void update_window_space_orthographic_proj_size(
     Math::Matrix4 &orthographic_matrix, int viewport_width, int viewport_height
 );
 
-void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix);
+void update_perspective_camera_matrix(
+    const CameraRenderState &camera_render_state,
+    PerspectiveCamera &camera,
+    ViewToClipMatrix &view_to_clip_matrix,
+    const ProjectionBufferBlockRef &projection_buffer_block
+);
 
-void update_camera_projections(int viewport_width, int viewport_height);
+void update_orthographic_camera_matrix(
+    const CameraRenderState &camera_render_state,
+    OrthographicCamera &camera,
+    ViewToClipMatrix &view_to_clip_matrix,
+    const ProjectionBufferBlockRef &projection_buffer_block
+);
+
+void update_window_space_camera_matrix(
+    const CameraRenderState &camera_render_state,
+    WindowSpaceCamera &camera,
+    ViewToClipMatrix &view_to_clip_matrix,
+    const ProjectionBufferBlockRef &projection_buffer_block
+);
+
+void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix);
 } // namespace Age::Gfx

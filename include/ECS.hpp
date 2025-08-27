@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <span>
 #include <tuple>
 #include <utility>
@@ -22,6 +23,8 @@ inline constexpr std::uint16_t ARCHETYPE_CHUNK_SIZE{1U << 14};
 using EntityId = std::uint64_t;
 using ArchetypeId = std::uint16_t;
 using ComponentOffset = std::uint16_t;
+
+inline constexpr EntityId NULL_ENTITY_ID{std::numeric_limits<EntityId>::max()};
 
 struct EntityLocation
 {
@@ -91,8 +94,9 @@ consteval SortedComponentAttrs<sizeof...(TComponents)> get_sorted_component_attr
 }
 
 template <typename... TComponents, std::size_t... IS>
-EntityId
-add_entity_to_archetype(ArchetypeId archetype_id, Archetype &archetype, const TComponents &...components, std::index_sequence<IS...>)
+EntityId add_entity_to_archetype(
+    ArchetypeId archetype_id, Archetype &archetype, const TComponents &...components, std::index_sequence<IS...>
+)
 {
     EntityId entity_id{g_entity_id_generator.generate()};
     std::uint32_t entity_index{archetype.entity_count % archetype.entity_count_per_chunk};
@@ -158,7 +162,8 @@ TComponent &get_entity_component(EntityId entity_id)
         std::find(cmpt_archetype_ids.cbegin(), cmpt_archetype_ids.cend(), entity_location.archetype_id) -
         cmpt_archetype_ids.cbegin()
     };
-    std::size_t cmpt_offset{g_component_archetype_offsets[static_cast<std::size_t>(TComponent::TYPE)][cmpt_array_offset]
+    std::size_t cmpt_offset{
+        g_component_archetype_offsets[static_cast<std::size_t>(TComponent::TYPE)][cmpt_array_offset]
     };
 
     return static_cast<TComponent *>(static_cast<void *>(chunk_ptr + cmpt_offset))[chunk_entity_index];
@@ -184,7 +189,8 @@ std::tuple<TComponents &...> get_entity_components_impl(EntityId entity_id, std:
         g_component_archetype_offsets[static_cast<std::size_t>(TComponents::TYPE)][cmpt_array_offsets[IS]]...
     };
 
-    return std::tie(static_cast<TComponents *>(static_cast<void *>(chunk_ptr + cmpt_offsets[IS]))[chunk_entity_index]...
+    return std::tie(
+        static_cast<TComponents *>(static_cast<void *>(chunk_ptr + cmpt_offsets[IS]))[chunk_entity_index]...
     );
 }
 
@@ -195,7 +201,9 @@ std::tuple<TComponents &...> get_entity_components(EntityId entity_id)
 }
 
 template <typename... TComponents, std::size_t... ISLess1, std::size_t... IS>
-void process_components_impl(std::function<void(TComponents &...)> system_function, std::index_sequence<ISLess1...>, std::index_sequence<IS...>)
+void process_components_impl(
+    std::function<void(TComponents &...)> system_function, std::index_sequence<ISLess1...>, std::index_sequence<IS...>
+)
 {
     std::array<const std::vector<ArchetypeId> *, sizeof...(TComponents)> component_archetype_ids{
         &g_component_archetype_ids[static_cast<std::size_t>(TComponents::TYPE)]...
@@ -206,8 +214,9 @@ void process_components_impl(std::function<void(TComponents &...)> system_functi
 
     while (((component_archetype_indexes[IS] < component_archetype_counts[IS]) && ...))
     {
-        std::array<ArchetypeId, sizeof...(TComponents)> archetype_ids{(*component_archetype_ids[IS]
-        )[component_archetype_indexes[IS]]...};
+        std::array<ArchetypeId, sizeof...(TComponents)> archetype_ids{
+            (*component_archetype_ids[IS])[component_archetype_indexes[IS]]...
+        };
 
         if (((archetype_ids[0] == archetype_ids[ISLess1 + 1]) && ...))
         {
@@ -227,8 +236,11 @@ void process_components_impl(std::function<void(TComponents &...)> system_functi
                      chunk_entity_index < archetype.entity_count_per_chunk && entity_index < archetype.entity_count;
                      ++chunk_entity_index, ++entity_index)
                 {
-                    system_function(static_cast<TComponents *>(static_cast<void *>(chunk_ptr + component_offsets[IS])
-                    )[chunk_entity_index]...);
+                    system_function(
+                        static_cast<TComponents *>(
+                            static_cast<void *>(chunk_ptr + component_offsets[IS])
+                        )[chunk_entity_index]...
+                    );
                 }
             }
 
@@ -265,7 +277,11 @@ void process_components(void (*system_function)(TComponents &...))
 }
 
 template <typename... TComponents, std::size_t... ISLess1, std::size_t... IS>
-void process_components_impl(std::function<void(EntityId, TComponents &...)> system_function, std::index_sequence<ISLess1...>, std::index_sequence<IS...>)
+void process_components_impl(
+    std::function<void(EntityId, TComponents &...)> system_function,
+    std::index_sequence<ISLess1...>,
+    std::index_sequence<IS...>
+)
 {
     std::array<const std::vector<ArchetypeId> *, sizeof...(TComponents)> component_archetype_ids{
         &g_component_archetype_ids[static_cast<std::size_t>(TComponents::TYPE)]...
@@ -276,8 +292,9 @@ void process_components_impl(std::function<void(EntityId, TComponents &...)> sys
 
     while (((component_archetype_indexes[IS] < component_archetype_counts[IS]) && ...))
     {
-        std::array<ArchetypeId, sizeof...(TComponents)> archetype_ids{(*component_archetype_ids[IS]
-        )[component_archetype_indexes[IS]]...};
+        std::array<ArchetypeId, sizeof...(TComponents)> archetype_ids{
+            (*component_archetype_ids[IS])[component_archetype_indexes[IS]]...
+        };
 
         if (((archetype_ids[0] == archetype_ids[ISLess1 + 1]) && ...))
         {
@@ -299,7 +316,8 @@ void process_components_impl(std::function<void(EntityId, TComponents &...)> sys
                 {
                     system_function(
                         static_cast<const EntityId *>(static_cast<const void *>(chunk_ptr))[chunk_entity_index],
-                        static_cast<TComponents *>(static_cast<void *>(chunk_ptr + component_offsets[IS])
+                        static_cast<TComponents *>(
+                            static_cast<void *>(chunk_ptr + component_offsets[IS])
                         )[chunk_entity_index]...
                     );
                 }

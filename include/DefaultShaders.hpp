@@ -4,16 +4,23 @@
 
 namespace Age::Gfx
 {
-struct NoLightingShader : public Shader
+struct UnlitShader : public Shader
 {
-    NoLightingShader(GLuint shader_program);
+    UnlitShader(GLuint shader_program);
 };
 
-struct NoLightingColorShader : public NoLightingShader
+struct UnlitColorShader : public UnlitShader
 {
     GLint color{-1};
 
-    NoLightingColorShader(GLuint shader_program);
+    UnlitColorShader(GLuint shader_program);
+};
+
+struct LitDiffuseTextureShader : public Shader
+{
+    GLint texture_unit{-1};
+
+    LitDiffuseTextureShader(GLuint shader_program);
 };
 
 struct FragmentLightingShader : public Shader

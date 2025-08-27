@@ -1,8 +1,5 @@
 #version 330
 
-const float PI = 3.14159f;
-const float TAU = 2.0f * PI;
-
 layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec3 aNormal;
 

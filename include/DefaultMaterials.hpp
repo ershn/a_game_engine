@@ -4,18 +4,27 @@
 
 namespace Age::Gfx
 {
-struct NoLightingMaterial : public Material
+struct UnlitMaterial : public Material
 {
-    NoLightingMaterial(const Shader &shader);
+    UnlitMaterial(const Shader &shader);
 
     void apply_properties() const override;
 };
 
-struct NoLightingColorMaterial : public NoLightingMaterial
+struct UnlitColorMaterial : public UnlitMaterial
 {
     Math::Vector4 color{1.0f};
 
-    NoLightingColorMaterial(const Shader &shader);
+    UnlitColorMaterial(const Shader &shader);
+
+    void apply_properties() const override;
+};
+
+struct LitDiffuseTextureMaterial : public Material
+{
+    int texture_unit{};
+
+    LitDiffuseTextureMaterial(const Shader &shader);
 
     void apply_properties() const override;
 };

@@ -6,9 +6,6 @@ smooth in vec4 iViewPosition;
 smooth in vec4 iDiffuseColor;
 smooth in vec3 iViewNormal;
 
-uniform vec4 uSpecularColor;
-uniform float uSurfaceShininess;
-
 uniform sampler1D uGaussianTexture;
 
 struct Light
@@ -55,9 +52,9 @@ vec3 viewPositionFromFragmentCoord()
     return (uClipToViewMatrix * clipPosition).xyz;
 }
 
-float attenuatedLightIntensity(in vec3 viewPosition, in vec3 viewLightPosition, out vec3 directionToLight)
+float lightAttenuation(in vec3 viewPosition, in vec3 lightViewPosition, out vec3 directionToLight)
 {
-    vec3 differenceToLight = viewLightPosition - viewPosition;
+    vec3 differenceToLight = lightViewPosition - viewPosition;
     float distanceToLightSquare = dot(differenceToLight, differenceToLight);
     directionToLight = differenceToLight * inversesqrt(distanceToLightSquare);
     return 1.0 / (1.0 + Lights.attenuation * distanceToLightSquare);
@@ -77,7 +74,7 @@ vec4 calcLighting(in Light light)
     }
     else
     {
-        lightIntensity = light.intensity * attenuatedLightIntensity(viewPosition, light.viewPosition.xyz, directionToLight);
+        lightIntensity = light.intensity * lightAttenuation(viewPosition, light.viewPosition.xyz, directionToLight);
     }
 
     // Diffuse lighting

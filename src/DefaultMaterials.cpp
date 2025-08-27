@@ -1,27 +1,38 @@
-#include "MaterialInstances.hpp"
-#include "ShaderInstances.hpp"
+#include "DefaultMaterials.hpp"
+#include "DefaultShaders.hpp"
 
 namespace Age::Gfx
 {
-NoLightingMaterial::NoLightingMaterial(const Shader &shader)
+UnlitMaterial::UnlitMaterial(const Shader &shader)
     : Material{shader}
 {
 }
 
-void NoLightingMaterial::apply_properties() const
+void UnlitMaterial::apply_properties() const
 {
 }
 
-NoLightingColorMaterial::NoLightingColorMaterial(const Shader &shader)
-    : NoLightingMaterial{shader}
+UnlitColorMaterial::UnlitColorMaterial(const Shader &shader)
+    : UnlitMaterial{shader}
 {
 }
 
-void NoLightingColorMaterial::apply_properties() const
+void UnlitColorMaterial::apply_properties() const
 {
-    NoLightingMaterial::apply_properties();
-    const auto &shader = static_cast<const NoLightingColorShader &>(this->shader);
+    UnlitMaterial::apply_properties();
+    const auto &shader = static_cast<const UnlitColorShader &>(this->shader);
     OGL::set_uniform(shader.color, color);
+}
+
+LitDiffuseTextureMaterial::LitDiffuseTextureMaterial(const Shader &shader)
+    : Material{shader}
+{
+}
+
+void LitDiffuseTextureMaterial::apply_properties() const
+{
+    const auto &shader = static_cast<const LitDiffuseTextureShader &>(this->shader);
+    OGL::set_uniform(shader.texture_unit, texture_unit);
 }
 
 FragmentLightingMaterial::FragmentLightingMaterial(const Shader &shader)

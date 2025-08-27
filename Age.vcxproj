@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\DoubleProjectionScene.cpp" />
     <ClCompile Include="src\game\GammaAndTexturesScene.cpp" />
     <ClCompile Include="src\game\BigPlaneMesh.cpp" />
     <ClCompile Include="src\game\CheckerboardScene.cpp" />
@@ -164,23 +165,24 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MainLoop.cpp" />
     <ClCompile Include="src\Material.cpp" />
-    <ClCompile Include="src\MaterialInstances.cpp" />
+    <ClCompile Include="src\DefaultMaterials.cpp" />
     <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\MeshInstances.cpp" />
+    <ClCompile Include="src\DefaultMeshes.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\OpenGL.cpp" />
     <ClCompile Include="src\Quaternion.cpp" />
     <ClCompile Include="src\Random.cpp" />
     <ClCompile Include="src\Rendering.cpp" />
     <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\ShaderInstances.cpp" />
+    <ClCompile Include="src\DefaultShaders.cpp" />
     <ClCompile Include="src\SphericalCamera.cpp" />
     <ClCompile Include="src\SphericalCoord.cpp" />
     <ClCompile Include="src\Time.cpp" />
     <ClCompile Include="src\Transformations.cpp" />
     <ClCompile Include="src\UniformBuffer.cpp" />
     <ClCompile Include="src\Vector.cpp" />
+    <ClCompile Include="src\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Definitions.hpp" />
@@ -195,6 +197,7 @@
     <ClInclude Include="include\game\CheckerboardScene.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
     <ClInclude Include="include\game\CorridorMesh.hpp" />
+    <ClInclude Include="include\game\DoubleProjectionScene.hpp" />
     <ClInclude Include="include\game\GammaAndTexturesScene.hpp" />
     <ClInclude Include="include\game\GroundMesh.hpp" />
     <ClInclude Include="include\game\InfinitySymbolMesh.hpp" />
@@ -211,12 +214,12 @@
     <ClInclude Include="include\Logging.hpp" />
     <ClInclude Include="include\MainLoop.hpp" />
     <ClInclude Include="include\Material.hpp" />
-    <ClInclude Include="include\MaterialInstances.hpp" />
+    <ClInclude Include="include\DefaultMaterials.hpp" />
     <ClInclude Include="include\Math.hpp" />
     <ClInclude Include="include\Matrix.hpp" />
     <ClInclude Include="include\Memory.hpp" />
     <ClInclude Include="include\Mesh.hpp" />
-    <ClInclude Include="include\MeshInstances.hpp" />
+    <ClInclude Include="include\DefaultMeshes.hpp" />
     <ClInclude Include="include\OpenGL.hpp" />
     <ClInclude Include="include\Path.hpp" />
     <ClInclude Include="include\Quaternion.hpp" />
@@ -224,7 +227,7 @@
     <ClInclude Include="include\Rendering.hpp" />
     <ClInclude Include="include\Scene.hpp" />
     <ClInclude Include="include\Shader.hpp" />
-    <ClInclude Include="include\ShaderInstances.hpp" />
+    <ClInclude Include="include\DefaultShaders.hpp" />
     <ClInclude Include="include\SphericalCamera.hpp" />
     <ClInclude Include="include\SphericalCoord.hpp" />
     <ClInclude Include="include\Texture.hpp" />
@@ -234,6 +237,7 @@
     <ClInclude Include="include\UniformBuffer.hpp" />
     <ClInclude Include="include\UniformBlocks.hpp" />
     <ClInclude Include="include\Vector.hpp" />
+    <ClInclude Include="include\Viewport.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment_lighting_color.vert" />
@@ -244,12 +248,14 @@
     <None Include="shaders\game\infinity_symbol.vert" />
     <None Include="shaders\game\infinity_symbol.frag" />
     <None Include="shaders\game\sphere_impostor.geom" />
-    <None Include="shaders\no_lighting.frag" />
-    <None Include="shaders\no_lighting.vert" />
+    <None Include="shaders\lit_diffuse_texture.frag" />
+    <None Include="shaders\lit_diffuse_texture.vert" />
+    <None Include="shaders\unlit.frag" />
+    <None Include="shaders\unlit.vert" />
     <None Include="shaders\diffuse_lighting.vert" />
     <None Include="shaders\fragment_lighting.frag" />
     <None Include="shaders\fragment_lighting.vert" />
-    <None Include="shaders\no_lighting_color.vert" />
+    <None Include="shaders\unlit_color.vert" />
     <None Include="shaders\game\sphere_impostor.frag" />
     <None Include="shaders\game\sphere_impostor.vert" />
   </ItemGroup>

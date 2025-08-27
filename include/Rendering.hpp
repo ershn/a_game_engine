@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <limits>
 
-#include "ECS.hpp"
 #include "GLFW.hpp"
 #include "Material.hpp"
 #include "Matrix.hpp"
@@ -28,6 +27,32 @@ struct LocalToViewNormalMatrix
     static constexpr auto TYPE{Core::ComponentType::LOCAL_TO_VIEW_NORMAL_MATRIX};
 
     Math::Matrix3 matrix{};
+};
+
+struct DrawCall
+{
+    const Math::Matrix4 *local_to_view_matrix{};
+    const Math::Matrix3 *local_to_view_normal_matrix{};
+    const UniformBufferRangeBind *uniform_buffer_range_bind{};
+    MaterialId material_id{};
+    MeshId mesh_id{};
+};
+
+using DrawCallIndex = std::uint32_t;
+using DrawCallSortKey = std::uint32_t;
+
+struct DrawCallKey
+{
+    DrawCallIndex index{std::numeric_limits<DrawCallIndex>::max()};
+    DrawCallSortKey sort_key{std::numeric_limits<DrawCallSortKey>::max()};
+};
+
+struct Renderer
+{
+    static constexpr auto TYPE{Core::ComponentType::RENDERER};
+
+    DrawCallKey draw_call_key{};
+    bool is_active{};
 };
 
 struct GlobalLightSettings
@@ -60,39 +85,6 @@ struct LightsBufferBlockRef : public UniformBufferBlockRef<LightsBlock>
     using UniformBufferBlockRef<LightsBlock>::operator=;
 };
 
-struct RenderState
-{
-    static constexpr auto TYPE{Core::ComponentType::RENDER_STATE};
-
-    Math::Vector4 clear_color;
-};
-
-struct DrawCall
-{
-    const Math::Matrix4 *local_to_view_matrix{};
-    const Math::Matrix3 *local_to_view_normal_matrix{};
-    const UniformBufferRangeBind *uniform_buffer_range_bind{};
-    MaterialId material_id{};
-    MeshId mesh_id{};
-};
-
-using DrawCallIndex = std::uint32_t;
-using DrawCallSortKey = std::uint32_t;
-
-struct DrawCallKey
-{
-    DrawCallIndex index{std::numeric_limits<DrawCallIndex>::max()};
-    DrawCallSortKey sort_key{std::numeric_limits<DrawCallSortKey>::max()};
-};
-
-struct Renderer
-{
-    static constexpr auto TYPE{Core::ComponentType::RENDERER};
-
-    DrawCallKey draw_call_key{};
-    bool is_active{};
-};
-
 void init_rendering_system(GLFWwindow *window);
 
 inline constexpr unsigned int RENDER_WITH_LV_MATRIX{0b1};
@@ -102,4 +94,5 @@ inline constexpr unsigned int RENDER_WITH_BUFFER_RANGE_BIND{0b100};
 void init_renderer(Core::EntityId entity_id, unsigned int options = 0);
 
 void render();
+void update_render_state();
 } // namespace Age::Gfx

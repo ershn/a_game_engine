@@ -1,5 +1,7 @@
 #version 330
 
+layout(std140) uniform;
+
 layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec4 aColor;
 layout(location = 2) in vec3 aNormal;
@@ -7,7 +9,7 @@ layout(location = 2) in vec3 aNormal;
 uniform mat4 uLocalToViewMatrix;
 uniform mat3 uLocalToViewNormalMatrix;
 
-layout(std140) uniform ProjectionBlock
+uniform ProjectionBlock
 {
     mat4 uViewToClipMatrix;
 };

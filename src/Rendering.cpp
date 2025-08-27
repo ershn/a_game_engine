@@ -6,48 +6,17 @@
 
 #include "Camera.hpp"
 #include "Color.hpp"
+#include "ECS.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
 #include "Transformations.hpp"
+#include "Viewport.hpp"
 
 namespace Age::Gfx
 {
 namespace
 {
 GLFWwindow *s_window{};
-
-////////////////////////////////////////
-
-bool s_framebuffer_size_changed{};
-int s_framebuffer_width{};
-int s_framebuffer_height{};
-
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-{
-    s_framebuffer_width = width;
-    s_framebuffer_height = height;
-    s_framebuffer_size_changed = true;
-}
-
-void init_viewport()
-{
-    glfwGetFramebufferSize(s_window, &s_framebuffer_width, &s_framebuffer_height);
-    s_framebuffer_size_changed = true;
-
-    glfwSetFramebufferSizeCallback(s_window, framebuffer_size_callback);
-}
-
-void update_viewport()
-{
-    if (s_framebuffer_size_changed == false)
-        return;
-
-    s_framebuffer_size_changed = false;
-    glViewport(0, 0, s_framebuffer_width, s_framebuffer_height);
-    update_camera_projections(s_framebuffer_width, s_framebuffer_height);
-}
-
-////////////////////////////////////////
 
 void calc_local_to_view_matrix(
     const Math::Matrix4 &world_to_view_matrix, const Core::Transform &transform, LocalToViewMatrix &local_to_view_matrix
@@ -106,8 +75,6 @@ void set_point_light(
     }
 }
 
-////////////////////////////////////////
-
 constexpr unsigned int MATERIAL_ID_SHIFT_COUNT{16U};
 constexpr unsigned int MESH_ID_SHIFT_COUNT{0U};
 
@@ -140,8 +107,17 @@ void enqueue_draw_calls(const Renderer &renderer)
         s_draw_call_keys.emplace_back(renderer.draw_call_key);
 }
 
+void sort_draw_calls()
+{
+    s_draw_call_keys.clear();
+    Core::process_components(enqueue_draw_calls);
+    std::sort(s_draw_call_keys.begin(), s_draw_call_keys.end(), [](const DrawCallKey &lhs, const DrawCallKey &rhs) {
+        return lhs.sort_key < rhs.sort_key;
+    });
+}
+
 void render_entities_to_camera(
-    const RenderState &render_state,
+    const CameraRenderState &camera_render_state,
     const WorldToViewMatrix &view_matrix,
     const ProjectionBufferBlockRef &projection_buffer_block,
     const LightsBufferBlockRef &lights_buffer_block
@@ -151,29 +127,64 @@ void render_entities_to_camera(
         LightsBlock lights_block;
         std::size_t light_index{};
 
-        Core::process_components(std::function<void(const GlobalLightSettings &)>{
-            std::bind_front(set_global_light_settings, std::ref(lights_block))
-        });
-        Core::process_components(std::function<void(const Core::Transform &, const DirectionalLight &)>{std::bind_front(
-            set_directional_light, std::ref(lights_block), std::ref(light_index), std::cref(view_matrix.matrix)
-        )});
-        Core::process_components(std::function<void(const Core::Transform &, const PointLight &)>{std::bind_front(
-            set_point_light, std::ref(lights_block), std::ref(light_index), std::cref(view_matrix.matrix)
-        )});
+        Core::process_components(
+            std::function<void(const GlobalLightSettings &)>{
+                std::bind_front(set_global_light_settings, std::ref(lights_block))
+            }
+        );
+        Core::process_components(
+            std::function<void(const Core::Transform &, const DirectionalLight &)>{std::bind_front(
+                set_directional_light, std::ref(lights_block), std::ref(light_index), std::cref(view_matrix.matrix)
+            )}
+        );
+        Core::process_components(
+            std::function<void(const Core::Transform &, const PointLight &)>{std::bind_front(
+                set_point_light, std::ref(lights_block), std::ref(light_index), std::cref(view_matrix.matrix)
+            )}
+        );
 
         lights_buffer_block = lights_block;
     }
 
-    OGL::set_clear_color(render_state.clear_color);
-    OGL::set_clear_depth(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    {
+        const Viewport &viewport{use_viewport(camera_render_state.viewport_id)};
+
+        bool is_custom_viewport{camera_render_state.viewport_id != FULL_VIEWPORT_ID};
+        if (is_custom_viewport)
+        {
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(viewport.origin_x, viewport.origin_y, viewport.width, viewport.height);
+        }
+
+        GLbitfield cleared_buffers{};
+        if (camera_render_state.flags & CLEAR_COLOR_BUFFER)
+        {
+            cleared_buffers |= GL_COLOR_BUFFER_BIT;
+            OGL::set_clear_color(camera_render_state.clear_color);
+        }
+        if (camera_render_state.flags & CLEAR_DEPTH_BUFFER)
+        {
+            cleared_buffers |= GL_DEPTH_BUFFER_BIT;
+            OGL::set_clear_depth(camera_render_state.clear_depth);
+        }
+        if (cleared_buffers)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (is_custom_viewport)
+            glDisable(GL_SCISSOR_TEST);
+    }
+
+    if (camera_render_state.flags & DEPTH_CLAMPING)
+        glEnable(GL_DEPTH_CLAMP);
 
     bind_uniform_buffer(PROJECTION_BLOCK_BINDING, projection_buffer_block.get_buffer_range());
     bind_uniform_buffer(LIGHT_DATA_BLOCK_BINDING, lights_buffer_block.get_buffer_range());
 
-    Core::process_components(std::function<void(const Core::Transform &, LocalToViewMatrix &)>{
-        std::bind_front(calc_local_to_view_matrix, std::cref(view_matrix.matrix))
-    });
+    Core::process_components(
+        std::function<void(const Core::Transform &, LocalToViewMatrix &)>{
+            std::bind_front(calc_local_to_view_matrix, std::cref(view_matrix.matrix))
+        }
+    );
     Core::process_components(calc_local_to_view_normal_matrix);
 
     for (DrawCallKey draw_call_key : s_draw_call_keys)
@@ -208,17 +219,9 @@ void render_entities_to_camera(
             }
         }
     }
-}
 
-void render_entities()
-{
-    s_draw_call_keys.clear();
-    Core::process_components(enqueue_draw_calls);
-    std::sort(s_draw_call_keys.begin(), s_draw_call_keys.end(), [](const DrawCallKey &lhs, const DrawCallKey &rhs) {
-        return lhs.sort_key < rhs.sort_key;
-    });
-
-    Core::process_components(render_entities_to_camera);
+    if (camera_render_state.flags & DEPTH_CLAMPING)
+        glDisable(GL_DEPTH_CLAMP);
 }
 } // namespace
 
@@ -229,12 +232,11 @@ void init_rendering_system(GLFWwindow *window)
     s_draw_calls.reserve(2048);
     s_draw_call_keys.reserve(2048);
 
+    init_viewport_system(window);
     init_mesh_system();
     init_shader_system();
     init_material_system();
     init_uniform_buffer_system();
-
-    init_viewport();
 
     glfwSwapInterval(1);
 
@@ -270,10 +272,16 @@ void init_renderer(Core::EntityId entity_id, unsigned int options)
 
 void render()
 {
-    update_viewport();
+    end_viewports_update();
 
-    render_entities();
+    sort_draw_calls();
+    Core::process_components(render_entities_to_camera);
 
     glfwSwapBuffers(s_window);
+}
+
+void update_render_state()
+{
+    start_viewports_update();
 }
 } // namespace Age::Gfx

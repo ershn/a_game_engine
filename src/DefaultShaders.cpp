@@ -1,15 +1,21 @@
-#include "ShaderInstances.hpp"
+#include "DefaultShaders.hpp"
 
 namespace Age::Gfx
 {
-NoLightingShader::NoLightingShader(GLuint shader_program)
+UnlitShader::UnlitShader(GLuint shader_program)
     : Shader{shader_program, Gfx::SHADER_LV_MATRIX}
 {
 }
 
-NoLightingColorShader::NoLightingColorShader(GLuint shader_program)
-    : NoLightingShader{shader_program}
+UnlitColorShader::UnlitColorShader(GLuint shader_program)
+    : UnlitShader{shader_program}
     , color{OGL::get_uniform_location(shader_program, "uColor")}
+{
+}
+
+LitDiffuseTextureShader::LitDiffuseTextureShader(GLuint shader_program)
+    : Shader{shader_program, Gfx::SHADER_LV_MATRIX | SHADER_LV_NORMAL_MATRIX | SHADER_LIGHT_DATA_BLOCK}
+    , texture_unit{OGL::get_uniform_location(shader_program, "_texture")}
 {
 }
 

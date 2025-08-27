@@ -265,7 +265,7 @@ Matrix4 look_at_matrix(const Vector3 &target_pos, const Vector3 &camera_pos, con
 Matrix4 look_at_matrix(const Vector3 &target_pos, const SphericalCoord &camera_coord)
 {
     Matrix4 matrix{affine_yx_rotation_matrix(camera_coord.angles.y, camera_coord.angles.x - PI * 0.5f)};
-    Vector3 position{target_pos + xyz(matrix[2] * camera_coord.distance)};
+    Vector3 position{target_pos + xyz(matrix[2]) * camera_coord.distance};
     matrix.transpose();
     matrix *= translation_matrix(-position);
     return matrix;

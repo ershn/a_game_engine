@@ -2,9 +2,9 @@
 #include <cmath>
 
 #include "Camera.hpp"
+#include "DefaultMaterials.hpp"
 #include "Input.hpp"
 #include "MainLoop.hpp"
-#include "MaterialInstances.hpp"
 #include "Math.hpp"
 #include "OpenGL.hpp"
 #include "Time.hpp"
@@ -106,9 +106,9 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
 
     float normalized_time{sunlight.time / sunlight.day_length};
     auto intensity_it_2 = std::find_if(
-        sunlight.light_intensities.cbegin(),
-        sunlight.light_intensities.cend(),
-        [=](const auto &light_intensity) { return normalized_time < light_intensity.normalized_time; }
+        sunlight.light_intensities.cbegin(), sunlight.light_intensities.cend(), [=](const auto &light_intensity) {
+            return normalized_time < light_intensity.normalized_time;
+        }
     );
     auto intensity_it_1 = intensity_it_2 - 1;
 
@@ -121,8 +121,8 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
     float sun_angle{Math::TAU - Math::TAU * normalized_time - Math::PI * 0.5f};
     transform.position = {std::cos(sun_angle), std::sin(sun_angle), 0.0f};
 
-    auto &render_state = Core::get_entity_component<Gfx::RenderState>(sunlight.camera_id);
-    render_state.clear_color =
+    auto &camera_render_state = Core::get_entity_component<Gfx::CameraRenderState>(sunlight.camera_id);
+    camera_render_state.clear_color =
         Math::lerp(intensity_it_1->sky_color, intensity_it_2->sky_color, segment_normalized_time);
 
     auto &light_settings = Core::get_entity_component<Gfx::GlobalLightSettings>(sunlight.light_settings_id);

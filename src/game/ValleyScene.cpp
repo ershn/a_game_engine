@@ -5,14 +5,14 @@
 
 #include "Color.hpp"
 #include "DDS.hpp"
+#include "DefaultMaterials.hpp"
+#include "DefaultMeshes.hpp"
+#include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
-#include "MaterialInstances.hpp"
-#include "MeshInstances.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
 #include "Rendering.hpp"
-#include "ShaderInstances.hpp"
 #include "SphericalCamera.hpp"
 #include "Transformations.hpp"
 #include "UniformBlocks.hpp"
@@ -27,14 +27,14 @@ namespace Game
 {
 using namespace Age;
 
-constexpr Gfx::ShaderId NO_LIGHTING_SHADER{0};
-constexpr Gfx::ShaderId NO_LIGHTING_COLOR_SHADER{1};
+constexpr Gfx::ShaderId UNLIT_SHADER{0};
+constexpr Gfx::ShaderId UNLIT_COLOR_SHADER{1};
 constexpr Gfx::ShaderId FRAGMENT_LIGHTING_SHADER{2};
 constexpr Gfx::ShaderId FRAGMENT_LIGHTING_COLOR_SHADER{3};
 
-constexpr Gfx::MaterialId NO_LIGHTING_MATERIAL{0};
+constexpr Gfx::MaterialId UNLIT_MATERIAL{0};
 
-void ValleyScene::init_entities() const
+void ValleyScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{100};
@@ -46,17 +46,17 @@ void ValleyScene::init_entities() const
 
     {
         Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/no_lighting.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/no_lighting.frag"}
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
         };
-        Gfx::create_shader<Gfx::NoLightingShader>(NO_LIGHTING_SHADER, shader_assets);
+        Gfx::create_shader<Gfx::UnlitShader>(UNLIT_SHADER, shader_assets);
     }
     {
         Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/no_lighting_color.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/no_lighting.frag"}
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
         };
-        Gfx::create_shader<Gfx::NoLightingColorShader>(NO_LIGHTING_COLOR_SHADER, shader_assets);
+        Gfx::create_shader<Gfx::UnlitColorShader>(UNLIT_COLOR_SHADER, shader_assets);
     }
     {
         Gfx::ShaderAsset shader_assets[] = {
@@ -73,8 +73,7 @@ void ValleyScene::init_entities() const
         Gfx::create_shader<FragmentLightingColorShader>(FRAGMENT_LIGHTING_COLOR_SHADER, shader_assets);
     }
 
-    auto &no_lighting_material =
-        Gfx::create_material<Gfx::NoLightingMaterial>(NO_LIGHTING_MATERIAL, NO_LIGHTING_SHADER);
+    auto &unlit_material = Gfx::create_material<Gfx::UnlitMaterial>(UNLIT_MATERIAL, UNLIT_SHADER);
 
     auto projection_buffer_id = next_uniform_buffer_id++;
     auto &projection_buffer =
@@ -203,7 +202,7 @@ void ValleyScene::init_entities() const
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::RenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
+            Gfx::CameraRenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
@@ -238,7 +237,7 @@ void ValleyScene::init_entities() const
     // Point light 1
     {
         auto material_id = next_material_id++;
-        Gfx::create_material<Gfx::NoLightingColorMaterial>(material_id, NO_LIGHTING_COLOR_SHADER);
+        Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, UNLIT_COLOR_SHADER);
 
         auto id = Core::create_entity(
             Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}},
@@ -261,7 +260,7 @@ void ValleyScene::init_entities() const
     // Point light 2
     {
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::NoLightingColorMaterial>(material_id, NO_LIGHTING_COLOR_SHADER);
+        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, UNLIT_COLOR_SHADER);
         material.color = {0.0f, 0.0f, 1.0f, 1.0f};
 
         auto id = Core::create_entity(
@@ -289,7 +288,7 @@ void ValleyScene::init_entities() const
     // Point light 3
     {
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::NoLightingColorMaterial>(material_id, NO_LIGHTING_COLOR_SHADER);
+        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, UNLIT_COLOR_SHADER);
         material.color = {1.0f, 0.0f, 0.0f, 1.0f};
 
         auto id = Core::create_entity(
@@ -449,9 +448,10 @@ void ValleyScene::init_entities() const
 
         auto block = materials_buffer.get_block();
         block = {
-            .materials =
-                {{.diffuse_color{0.223f, 0.635f, 0.443f, 1.0f}, .specular_color{0.0f}},
-                 {.diffuse_color{0.968f, 0.141f, 0.019f, 1.0f}, .specular_color{0.0f}}}
+            .materials = {
+                {.diffuse_color{0.223f, 0.635f, 0.443f, 1.0f}, .specular_color{0.0f}},
+                {.diffuse_color{0.968f, 0.141f, 0.019f, 1.0f}, .specular_color{0.0f}}
+            }
         };
         Gfx::bind_uniform_buffer(MATERIALS_BLOCK_BINDING, block.get_buffer_range());
 
@@ -472,7 +472,7 @@ void ValleyScene::init_entities() const
     }
 }
 
-void ValleyScene::run_systems() const
+void ValleyScene::update() const
 {
     using Core::process_components;
 
@@ -484,5 +484,8 @@ void ValleyScene::run_systems() const
     process_components(Core::move_along_path);
     process_components(update_sunlight);
     process_components(update_sphere_impostors);
+
+    if (Gfx::has_framebuffer_size_changed())
+        process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

@@ -26,9 +26,13 @@ bool is_key_pressed(int key, PressedKeys &pressed_keys);
 Math::Vector2 get_cursor_position_delta(const MouseInput &mouse_input);
 Math::Vector2 get_scroll_delta(const MouseInput &mouse_input);
 
+bool is_mouse_button_up(int button);
+bool is_mouse_button_down(int button);
+
 bool is_exit_requested();
 
 void init_input_system(GLFWwindow *window);
 
+void init_input_state();
 void update_input_state();
 } // namespace Age::Input

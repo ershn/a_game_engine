@@ -1,6 +1,7 @@
 #include "MainLoop.hpp"
 
 #include "game/CheckerboardScene.hpp"
+#include "game/DoubleProjectionScene.hpp"
 #include "game/Game.hpp"
 #include "game/GammaAndTexturesScene.hpp"
 #include "game/InfinitySymbolScene.hpp"
@@ -8,7 +9,7 @@
 
 int main()
 {
-    auto scene = Game::GammaAndTexturesScene{};
+    auto scene = Game::DoubleProjectionScene{};
 
 #ifdef _DEBUG
     Age::Core::run_engine(Game::g_definitions, scene);

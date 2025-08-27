@@ -5,14 +5,14 @@
 
 #include "Color.hpp"
 #include "DDS.hpp"
+#include "DefaultMaterials.hpp"
+#include "DefaultMeshes.hpp"
+#include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
-#include "MaterialInstances.hpp"
-#include "MeshInstances.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
 #include "Rendering.hpp"
-#include "ShaderInstances.hpp"
 #include "SphericalCamera.hpp"
 #include "Transformations.hpp"
 #include "UniformBlocks.hpp"
@@ -78,20 +78,20 @@ struct MaterialBlock
     float _padding_[3];
 };
 
-void InfinitySymbolScene::init_entities() const
+void InfinitySymbolScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
     Gfx::UniformBufferId next_uniform_buffer_id{0};
 
-    auto no_lighting_color_shader_id = next_shader_id++;
+    auto unlit_color_shader_id = next_shader_id++;
     {
         Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/no_lighting_color.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/no_lighting.frag"}
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
+            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
         };
-        Gfx::create_shader<Gfx::NoLightingColorShader>(no_lighting_color_shader_id, shader_assets);
+        Gfx::create_shader<Gfx::UnlitColorShader>(unlit_color_shader_id, shader_assets);
     }
 
     constexpr std::size_t GAUSSIAN_TEX_ANGLE_RESOLUTION{512};
@@ -186,7 +186,7 @@ void InfinitySymbolScene::init_entities() const
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
+            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
@@ -200,11 +200,13 @@ void InfinitySymbolScene::init_entities() const
     // Global settings
     Core::EntityId global_settings_id;
     {
-        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{
-            .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-            .light_attenuation{1.0f / (25.0f * 25.0f)},
-            .max_intensity{1.0f}
-        });
+        global_settings_id = Core::create_entity(
+            Gfx::GlobalLightSettings{
+                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
+                .light_attenuation{1.0f / (25.0f * 25.0f)},
+                .max_intensity{1.0f}
+            }
+        );
     }
 
     // Directional light
@@ -218,7 +220,7 @@ void InfinitySymbolScene::init_entities() const
     // Point light
     {
         auto material_id = next_material_id++;
-        Gfx::create_material<Gfx::NoLightingColorMaterial>(material_id, no_lighting_color_shader_id);
+        Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader_id);
 
         auto id = Core::create_entity(
             Core::Transform{.position{10.0f, 0.0f, 1.0f}, .scale{0.5f}},
@@ -287,7 +289,7 @@ void control_infinity_symbol_material(const InfinitySymbol &, const Gfx::Materia
         material.use_shininess_texture = false;
 }
 
-void InfinitySymbolScene::run_systems() const
+void InfinitySymbolScene::update() const
 {
     using Core::process_components;
 
@@ -296,5 +298,8 @@ void InfinitySymbolScene::run_systems() const
     process_components(control_infinity_symbol_material);
     process_components(Gfx::update_spherical_camera_via_input);
     process_components(Gfx::calc_spherical_camera_view_matrix);
+
+    if (Gfx::has_framebuffer_size_changed())
+        process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

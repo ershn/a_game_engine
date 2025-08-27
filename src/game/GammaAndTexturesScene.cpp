@@ -6,10 +6,10 @@
 #include "Camera.hpp"
 #include "Color.hpp"
 #include "DDS.hpp"
+#include "DefaultMeshes.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
 #include "Input.hpp"
-#include "MeshInstances.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
 #include "Rendering.hpp"
@@ -99,7 +99,7 @@ struct GammaAndTexturesMaterial : public Gfx::Material
 
 constexpr int surface_texture_unit{1};
 
-void GammaAndTexturesScene::init_entities() const
+void GammaAndTexturesScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -153,7 +153,7 @@ void GammaAndTexturesScene::init_entities() const
             Gfx::WindowSpaceCamera{},
             Gfx::WorldToViewMatrix{.matrix{1.0f}},
             Gfx::ViewToClipMatrix{Gfx::window_space_orthographic_proj_matrix(1, 1)},
-            Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
+            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             GameKeyboardController{}
@@ -163,11 +163,13 @@ void GammaAndTexturesScene::init_entities() const
     // Global settings
     Core::EntityId global_settings_id;
     {
-        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{
-            .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-            .light_attenuation{1.0f / (25.0f * 25.0f)},
-            .max_intensity{1.0f}
-        });
+        global_settings_id = Core::create_entity(
+            Gfx::GlobalLightSettings{
+                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
+                .light_attenuation{1.0f / (25.0f * 25.0f)},
+                .max_intensity{1.0f}
+            }
+        );
     }
 
     auto gamma_and_textures_shader_id = next_shader_id++;
@@ -196,10 +198,13 @@ void GammaAndTexturesScene::init_entities() const
     }
 }
 
-void GammaAndTexturesScene::run_systems() const
+void GammaAndTexturesScene::update() const
 {
     using Core::process_components;
 
     process_components(control_game_via_keyboard);
+
+    if (Gfx::has_framebuffer_size_changed())
+        process_components(Gfx::update_window_space_camera_matrix);
 }
 } // namespace Game

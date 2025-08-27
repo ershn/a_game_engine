@@ -6,7 +6,7 @@ namespace Game
 {
 class GammaAndTexturesScene : public Age::App::IScene
 {
-    void init_entities() const override;
-    void run_systems() const override;
+    void init() const override;
+    void update() const override;
 };
 } // namespace Game

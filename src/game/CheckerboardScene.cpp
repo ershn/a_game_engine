@@ -52,9 +52,9 @@ struct CheckerboardMaterial : public Gfx::Material
     }
 };
 
-struct SceneController
+struct CheckerboardSceneController
 {
-    static constexpr Core::ComponentType TYPE{SCENE_CONTROLLER};
+    static constexpr Core::ComponentType TYPE{CHECKERBOARD_SCENE_CONTROLLER};
 
     GLuint checkerboard_texture;
     GLuint mipmap_texture;
@@ -94,7 +94,7 @@ void update_camera(Gfx::WorldToViewMatrix &view_matrix)
     view_matrix.matrix = Math::look_at_matrix(target_pos, camera_pos, Math::Vector3::up);
 }
 
-void control_scene(const SceneController &scene_controller)
+void control_scene(const CheckerboardSceneController &scene_controller)
 {
     if (Input::is_key_down(GLFW_KEY_W))
     {
@@ -117,7 +117,7 @@ void control_scene(const SceneController &scene_controller)
     }
 }
 
-void CheckerBoardScene::init_entities() const
+void CheckerBoardScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -223,7 +223,7 @@ void CheckerBoardScene::init_entities() const
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::RenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
+            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
             Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             GameKeyboardController{}
@@ -233,11 +233,13 @@ void CheckerBoardScene::init_entities() const
     // Global settings
     Core::EntityId global_settings_id;
     {
-        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{
-            .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-            .light_attenuation{1.0f / (25.0f * 25.0f)},
-            .max_intensity{1.0f}
-        });
+        global_settings_id = Core::create_entity(
+            Gfx::GlobalLightSettings{
+                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
+                .light_attenuation{1.0f / (25.0f * 25.0f)},
+                .max_intensity{1.0f}
+            }
+        );
     }
 
     auto checkerboard_shader_id = next_shader_id++;
@@ -264,7 +266,7 @@ void CheckerBoardScene::init_entities() const
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{big_plane_mesh_id},
             Gfx::Renderer{},
-            SceneController{
+            CheckerboardSceneController{
                 .checkerboard_texture{checkerboard_texture},
                 .mipmap_texture{mipmap_texture},
                 .texture_sampler{texture_sampler}
@@ -275,12 +277,15 @@ void CheckerBoardScene::init_entities() const
     }
 }
 
-void CheckerBoardScene::run_systems() const
+void CheckerBoardScene::update() const
 {
     using Core::process_components;
 
     process_components(control_game_via_keyboard);
     process_components(update_camera);
     process_components(control_scene);
+
+    if (Gfx::has_framebuffer_size_changed())
+        process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

@@ -42,6 +42,7 @@ bool is_key_pressed(int key, PressedKeys &pressed_keys)
     auto was_key_pressed{pressed_keys[key]};
     if (is_key_pressed && was_key_pressed)
         return false;
+
     was_key_pressed = is_key_pressed;
     return is_key_pressed;
 }
@@ -56,6 +57,16 @@ Math::Vector2 get_scroll_delta(const MouseInput &mouse_input)
     return s_scroll_delta * mouse_input.scroll_sensitivity;
 }
 
+bool is_mouse_button_up(int button)
+{
+    return glfwGetMouseButton(s_window, button) == GLFW_RELEASE;
+}
+
+bool is_mouse_button_down(int button)
+{
+    return glfwGetMouseButton(s_window, button) == GLFW_PRESS;
+}
+
 bool is_exit_requested()
 {
     return glfwWindowShouldClose(s_window);
@@ -65,12 +76,15 @@ void init_input_system(GLFWwindow *window)
 {
     s_window = window;
 
-    glfwSetInputMode(s_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // TODO: control input settings through a window component
+    // glfwSetInputMode(s_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // TODO: activate sticky keys and sticky mouse buttons ?
 
     glfwSetScrollCallback(s_window, scroll_callback);
+}
 
-    glfwPollEvents();
-
+void init_input_state()
+{
     glfwGetCursorPos(s_window, &s_cursor_position_x, &s_cursor_position_y);
     s_prev_cursor_position_x = s_cursor_position_x;
     s_prev_cursor_position_y = s_cursor_position_y;
@@ -78,8 +92,6 @@ void init_input_system(GLFWwindow *window)
 
 void update_input_state()
 {
-    glfwPollEvents();
-
     glfwGetCursorPos(s_window, &s_cursor_position_x, &s_cursor_position_y);
     s_cursor_position_delta.x = static_cast<float>(s_cursor_position_x - s_prev_cursor_position_x);
     s_cursor_position_delta.y = static_cast<float>(s_cursor_position_y - s_prev_cursor_position_y);
