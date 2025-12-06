@@ -15,7 +15,7 @@ UnlitColorShader::UnlitColorShader(GLuint shader_program)
 
 LitDiffuseTextureShader::LitDiffuseTextureShader(GLuint shader_program)
     : Shader{shader_program, Gfx::SHADER_LV_MATRIX | SHADER_LV_NORMAL_MATRIX | SHADER_LIGHT_DATA_BLOCK}
-    , texture_unit{OGL::get_uniform_location(shader_program, "_texture")}
+    , sampler{.uniform{OGL::get_uniform_location(shader_program, "_texture")}}
 {
 }
 

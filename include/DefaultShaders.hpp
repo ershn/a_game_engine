@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shader.hpp"
+#include "Texture.hpp"
 
 namespace Age::Gfx
 {
@@ -18,7 +19,7 @@ struct UnlitColorShader : public UnlitShader
 
 struct LitDiffuseTextureShader : public Shader
 {
-    GLint texture_unit{-1};
+    SamplerUniform sampler{};
 
     LitDiffuseTextureShader(GLuint shader_program);
 };

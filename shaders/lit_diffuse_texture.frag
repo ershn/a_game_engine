@@ -2,7 +2,7 @@
 
 layout(std140) uniform;
 
-in InterpData
+in Varyings
 {
     vec3 viewPosition;
     vec3 viewNormal;

@@ -6,10 +6,12 @@ namespace Age::Gfx
 {
 namespace
 {
-MaterialId s_used_material_id{std::numeric_limits<MaterialId>::max()};
-}
+constexpr MaterialId NULL_MATERIAL_ID{std::numeric_limits<MaterialId>::max()};
 
-Material::Material(const Shader &shader)
+MaterialId s_used_material_id{NULL_MATERIAL_ID};
+} // namespace
+
+Material::Material(Shader &shader)
     : shader{shader}
 {
 }
@@ -38,5 +40,10 @@ const Material &use_material(MaterialId material_id)
     }
 
     return material;
+}
+
+void release_used_material()
+{
+    s_used_material_id = NULL_MATERIAL_ID;
 }
 } // namespace Age::Gfx

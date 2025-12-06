@@ -28,7 +28,7 @@ struct FragmentLightingMaterial : public Age::Gfx::Material
 {
     int gaussian_texture{};
 
-    FragmentLightingMaterial(const Age::Gfx::Shader &shader);
+    FragmentLightingMaterial(Age::Gfx::Shader &shader);
 
     void apply_properties() const override;
 };
@@ -44,7 +44,7 @@ struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 {
     Age::Math::Vector4 diffuse_color{1.0f};
 
-    FragmentLightingColorMaterial(const Age::Gfx::Shader &shader);
+    FragmentLightingColorMaterial(Age::Gfx::Shader &shader);
 
     void apply_properties() const override;
 };
@@ -58,7 +58,7 @@ struct SphereImpostorShader : public Age::Gfx::Shader
 
 struct SphereImpostorMaterial : public Age::Gfx::Material
 {
-    SphereImpostorMaterial(const Age::Gfx::Shader &shader);
+    SphereImpostorMaterial(Age::Gfx::Shader &shader);
 
     void apply_properties() const override;
 };

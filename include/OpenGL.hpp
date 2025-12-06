@@ -32,6 +32,8 @@ enum struct RenderingMode : std::uint16_t
     TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
 };
 
+GLint get_integer(GLenum param_name);
+
 GLuint create_shader(ShaderType shader_type);
 
 void use_program(GLuint shader_program);

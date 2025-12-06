@@ -9,6 +9,7 @@
 #include "ECS.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
+#include "Texture.hpp"
 #include "Transformations.hpp"
 #include "Viewport.hpp"
 
@@ -168,7 +169,7 @@ void render_entities_to_camera(
             OGL::set_clear_depth(camera_render_state.clear_depth);
         }
         if (cleared_buffers)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(cleared_buffers);
 
         if (is_custom_viewport)
             glDisable(GL_SCISSOR_TEST);
@@ -237,6 +238,7 @@ void init_rendering_system(GLFWwindow *window)
     init_shader_system();
     init_material_system();
     init_uniform_buffer_system();
+    init_texture_system();
 
     glfwSwapInterval(1);
 
@@ -276,6 +278,7 @@ void render()
 
     sort_draw_calls();
     Core::process_components(render_entities_to_camera);
+    release_used_material();
 
     glfwSwapBuffers(s_window);
 }

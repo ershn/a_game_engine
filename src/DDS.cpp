@@ -214,7 +214,7 @@ bool is_extended_header_format(const DDS_HEADER &header)
     return header.ddspf.flags & DDPF_FOURCC && header.ddspf.fourCC == DDS_DX10;
 }
 
-unsigned int get_bit_count_per_texel(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension)
+unsigned int get_bit_count_per_pixel(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension)
 {
     if (is_extended_header_format(header) == false)
         return header.ddspf.rgbBitCount;
@@ -280,30 +280,51 @@ bool read_dds_header(
 }
 
 bool read_texture_bytes(
-    std::ifstream &fstream, std::size_t texture_size, TextureData &texture, std::string_view file_path
+    std::ifstream &fstream, std::size_t texture_size, TextureData &texture_data, std::string_view file_path
 )
 {
     auto texture_bytes = std::make_unique_for_overwrite<std::byte[]>(texture_size);
     fstream.read(reinterpret_cast<char *>(texture_bytes.get()), texture_size);
     VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
 
-    texture.bytes = std::move(texture_bytes);
+    texture_data.bytes = std::move(texture_bytes);
     return true;
 }
 
 bool detect_texture_format(
-    const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture, std::string_view file_path
+    const DDS_HEADER &header,
+    const DDS_HEADER_DXT10 &header_extension,
+    TextureDesc &texture_desc,
+    std::string_view file_path
 )
 {
     // TODO: detect other formats when needs come
     if (header.ddspf.flags & DDPF_FOURCC) // block compressed or custom texture format
     {
-        if (header.ddspf.fourCC == DDS_DX10)
+        switch (header.ddspf.fourCC)
         {
-            texture.format = static_cast<TextureFormat>(header_extension.dxgiFormat);
-        }
-        else
-        {
+        case DDS_DXT1:
+            texture_desc.format = TextureFormat::BC1_UNORM;
+            break;
+        case DDS_DXT2:
+            texture_desc.format = TextureFormat::BC2_UNORM;
+            texture_desc.alpha_type = AlphaType::PREMULTIPLIED;
+            break;
+        case DDS_DXT3:
+            texture_desc.format = TextureFormat::BC2_UNORM;
+            texture_desc.alpha_type = AlphaType::STRAIGHT;
+            break;
+        case DDS_DXT4:
+            texture_desc.format = TextureFormat::BC3_UNORM;
+            texture_desc.alpha_type = AlphaType::PREMULTIPLIED;
+            break;
+        case DDS_DXT5:
+            texture_desc.format = TextureFormat::BC3_UNORM;
+            texture_desc.alpha_type = AlphaType::STRAIGHT;
+            break;
+        case DDS_DX10:
+            texture_desc.format = static_cast<TextureFormat>(header_extension.dxgiFormat);
+            break;
         }
     }
     else
@@ -316,10 +337,16 @@ bool detect_texture_format(
                 {
                     if (header.ddspf.rBitMask == 0x00ff0000 && header.ddspf.gBitMask == 0x0000ff00 &&
                         header.ddspf.bBitMask == 0x000000ff && header.ddspf.aBitMask == 0xff000000)
-                        texture.format = TextureFormat::B8G8R8A8_UNORM;
+                    {
+                        texture_desc.format = TextureFormat::B8G8R8A8_UNORM;
+                        texture_desc.alpha_type = AlphaType::STRAIGHT;
+                    }
                     else if (header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
                              header.ddspf.bBitMask == 0x00ff0000 && header.ddspf.aBitMask == 0xff000000)
-                        texture.format = TextureFormat::R8G8B8A8_UNORM;
+                    {
+                        texture_desc.format = TextureFormat::R8G8B8A8_UNORM;
+                        texture_desc.alpha_type = AlphaType::STRAIGHT;
+                    }
                 }
             }
             else
@@ -345,7 +372,7 @@ bool detect_texture_format(
                 if (header.ddspf.rgbBitCount == 8)
                 {
                     if (header.ddspf.rBitMask == 0xff)
-                        texture.format = TextureFormat::R8_UNORM;
+                        texture_desc.format = TextureFormat::R8_UNORM;
                 }
             }
         }
@@ -354,136 +381,101 @@ bool detect_texture_format(
         }
     }
 
-    VBAIL_ERROR_IF(texture.format == TextureFormat::UNKNOWN, false, "unrecognized texture format: {}", file_path);
+    VBAIL_ERROR_IF(texture_desc.format == TextureFormat::UNKNOWN, false, "unrecognized texture format: {}", file_path);
     return true;
 }
 
-bool detect_texture_dimensions(const DDS_HEADER &header, TextureData &texture, std::string_view file_path)
+bool detect_texture_dimensions(const DDS_HEADER &header, TextureDesc &texture_desc, std::string_view file_path)
 {
     if (header.caps2 & DDSCAPS2_VOLUME) // volume texture
     {
-        texture.type = TextureType::TEXTURE_3D;
-        texture.width = header.width;
-        texture.height = header.height;
-        texture.depth = header.depth;
+        texture_desc.type = TextureType::TEXTURE_3D;
+        texture_desc.width = header.width;
+        texture_desc.height = header.height;
+        texture_desc.depth = header.depth;
     }
     else if (header.caps2 & DDSCAPS2_CUBEMAP) // cubemap texture
     {
         bool is_full_cubemap = (header.caps2 & DDS_CUBEMAP_ALLFACES) != DDS_CUBEMAP_ALLFACES;
         VBAIL_ERROR_IF(!is_full_cubemap, false, "partial cubemap textures are unsupported: {}", file_path);
 
-        texture.type = TextureType::TEXTURE_2D;
-        texture.width = header.width;
-        texture.height = header.height;
-        texture.depth = 1;
+        texture_desc.type = TextureType::TEXTURE_2D;
+        texture_desc.width = header.width;
+        texture_desc.height = header.height;
+        texture_desc.depth = 1;
     }
     else if (header.height > 1) // 2d texture
     {
-        texture.type = TextureType::TEXTURE_2D;
-        texture.width = header.width;
-        texture.height = header.height;
-        texture.depth = 1;
+        texture_desc.type = TextureType::TEXTURE_2D;
+        texture_desc.width = header.width;
+        texture_desc.height = header.height;
+        texture_desc.depth = 1;
     }
     else // 1d texture
     {
-        texture.type = TextureType::TEXTURE_1D;
-        texture.width = header.width;
-        texture.height = 1;
-        texture.depth = 1;
+        texture_desc.type = TextureType::TEXTURE_1D;
+        texture_desc.width = header.width;
+        texture_desc.height = 1;
+        texture_desc.depth = 1;
     }
 
     return true;
 }
 
-void detect_texture_count(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture)
+void detect_texture_count(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureDesc &texture_desc)
 {
     if (header.caps & DDSCAPS_MIPMAP) // mipmap texture
     {
-        texture.mipmap_level_count = header.mipMapCount;
+        texture_desc.mipmap_level_count = header.mipMapCount;
     }
     else
     {
-        texture.mipmap_level_count = 1;
+        texture_desc.mipmap_level_count = 1;
     }
 
-    if (is_extended_header_format(header) && texture.type != TextureType::TEXTURE_3D)
+    if (is_extended_header_format(header) && texture_desc.type != TextureType::TEXTURE_3D)
     {
-        texture.count = header_extension.arraySize;
+        texture_desc.count = header_extension.arraySize;
     }
     else
     {
-        texture.count = 1;
+        texture_desc.count = 1;
     }
 }
 
-void calc_texture_pitch(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture)
+void calc_texture_pitch(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture_data)
 {
     // TODO: handle block compressed formats
-    switch (texture.format)
+    switch (texture_data.desc.format)
     {
+    case TextureFormat::BC1_TYPELESS:
+    case TextureFormat::BC1_UNORM:
+    case TextureFormat::BC1_UNORM_SRGB:
+        texture_data.pitch = std::max(1U, (header.width + 3) / 4) * 8;
+        break;
+    case TextureFormat::BC2_TYPELESS:
+    case TextureFormat::BC2_UNORM:
+    case TextureFormat::BC2_UNORM_SRGB:
+    case TextureFormat::BC3_TYPELESS:
+    case TextureFormat::BC3_UNORM:
+    case TextureFormat::BC3_UNORM_SRGB:
+        texture_data.pitch = std::max(1U, (header.width + 3) / 4) * 16;
+        break;
     case TextureFormat::R8G8_B8G8_UNORM:
     case TextureFormat::G8R8_G8B8_UNORM:
     case TextureFormat::YUY2:
     case TextureFormat::Y210:
     case TextureFormat::Y216:
-        texture.pitch = ((header.width + 1) >> 1) * 4;
+        texture_data.pitch = ((header.width + 1) >> 1) * 4;
         break;
     default:
-        texture.pitch = (header.width * get_bit_count_per_texel(header, header_extension) + 7) / 8;
+        texture_data.pitch = (header.width * get_bit_count_per_pixel(header, header_extension) + 7) / 8;
         break;
     }
 }
 } // namespace
 
-bool operator==(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
-{
-    return &it1.texture == &it2.texture && it1.level == it2.level;
-}
-
-bool operator!=(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
-{
-    return !(it1 == it2);
-}
-
-MipmapLevelIterator &operator++(MipmapLevelIterator &it)
-{
-    auto pitch = std::max(1U, it.texture.pitch >> it.level);
-    auto height = std::max(1U, it.texture.height >> it.level);
-    auto depth = std::max(1U, it.texture.depth >> it.level);
-
-    it.offset += pitch * height * depth;
-    ++it.level;
-    return it;
-}
-
-MipmapLevel operator*(const MipmapLevelIterator &it)
-{
-    auto pitch = std::max(1U, it.texture.pitch >> it.level);
-    auto width = std::max(1U, it.texture.width >> it.level);
-    auto height = std::max(1U, it.texture.height >> it.level);
-    auto depth = std::max(1U, it.texture.depth >> it.level);
-
-    return MipmapLevel{
-        .bytes{&it.texture.bytes[it.offset], pitch * height * depth},
-        .width{width},
-        .height{height},
-        .depth{depth},
-        .pitch{pitch},
-        .level{it.level}
-    };
-}
-
-MipmapLevelIterator begin(const TextureData &texture)
-{
-    return MipmapLevelIterator{.texture{texture}, .offset{0}, .level{0}};
-}
-
-MipmapLevelIterator end(const TextureData &texture)
-{
-    return MipmapLevelIterator{.texture{texture}, .offset{}, .level{texture.mipmap_level_count}};
-}
-
-bool load_texture_from_dds_file(std::string_view file_path, TextureData &texture)
+bool read_texture_data_from_dds_file(std::string_view file_path, TextureData &texture_data)
 {
     std::ifstream fstream{file_path.data(), std::ios_base::binary};
     VBAIL_ERROR_IF(fstream.fail(), false, "failed to open file: {}", file_path);
@@ -495,16 +487,16 @@ bool load_texture_from_dds_file(std::string_view file_path, TextureData &texture
     if (!read_dds_header(fstream, dds_header, dds_header_extension, texture_size, file_path))
         return false;
 
-    if (!detect_texture_format(dds_header, dds_header_extension, texture, file_path))
+    if (!detect_texture_format(dds_header, dds_header_extension, texture_data.desc, file_path))
         return false;
 
-    if (!detect_texture_dimensions(dds_header, texture, file_path))
+    if (!detect_texture_dimensions(dds_header, texture_data.desc, file_path))
         return false;
 
-    detect_texture_count(dds_header, dds_header_extension, texture);
+    detect_texture_count(dds_header, dds_header_extension, texture_data.desc);
 
-    calc_texture_pitch(dds_header, dds_header_extension, texture);
+    calc_texture_pitch(dds_header, dds_header_extension, texture_data);
 
-    return read_texture_bytes(fstream, texture_size, texture, file_path);
+    return read_texture_bytes(fstream, texture_size, texture_data, file_path);
 }
 } // namespace Age::Gfx

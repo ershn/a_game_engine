@@ -56,7 +56,7 @@ struct InfinitySymbolMaterial : public Gfx::Material
     int shininess_texture{};
     bool use_shininess_texture{};
 
-    InfinitySymbolMaterial(const Age::Gfx::Shader &shader)
+    InfinitySymbolMaterial(Age::Gfx::Shader &shader)
         : Material{shader}
     {
     }
@@ -136,14 +136,22 @@ void InfinitySymbolScene::init() const
     glBindTexture(GL_TEXTURE_2D, 0);
 
     Gfx::TextureData texture{};
-    if (!Gfx::load_texture_from_dds_file("assets/game/textures/shininess.dds", texture))
+    if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/shininess.dds", texture))
         return;
 
     GLuint shininess_texture;
     glGenTextures(1, &shininess_texture);
     glBindTexture(GL_TEXTURE_2D, shininess_texture);
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_R8, texture.width, texture.height, 0, GL_RED, GL_UNSIGNED_BYTE, texture.bytes.get()
+        GL_TEXTURE_2D,
+        0,
+        GL_R8,
+        texture.desc.width,
+        texture.desc.height,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        texture.bytes.get()
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -191,7 +199,7 @@ void InfinitySymbolScene::init() const
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
-                .origin{0.0f, 0.0f, 0.0f}, .spherical_coord{Math::Vector2{Math::radians(60.0f), 0.0f}, 30.0f}
+                .origin{0.0f, 0.0f, 0.0f}, .spherical_coord{30.0f, Math::Vector2{Math::radians(60.0f), 0.0f}}
             },
             GameKeyboardController{}
         );

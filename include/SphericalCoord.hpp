@@ -6,11 +6,11 @@ namespace Age::Math
 {
 struct SphericalCoord
 {
-    Vector2 angles{};
     float distance{};
+    Vector2 angles{};
 
     SphericalCoord();
-    SphericalCoord(const Vector2 &angles, float distance);
+    SphericalCoord(float distance, const Vector2 &angles);
 };
 
 Vector3 to_cartesian_coord(const SphericalCoord &spherical_coord);

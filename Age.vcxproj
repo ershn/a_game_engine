@@ -144,6 +144,7 @@
     <ClCompile Include="src\game\CheckerboardScene.cpp" />
     <ClCompile Include="src\game\CorridorMesh.cpp" />
     <ClCompile Include="src\game\InfinitySymbolScene.cpp" />
+    <ClCompile Include="src\game\ProjectedLightScene.cpp" />
     <ClCompile Include="src\game\ValleyScene.cpp" />
     <ClCompile Include="src\game\InfinitySymbolMesh.cpp" />
     <ClCompile Include="src\Logging.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\third_parties\glad.c" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Camera.cpp" />
@@ -205,6 +207,7 @@
     <ClInclude Include="include\game\Meshes.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
+    <ClInclude Include="include\game\ProjectedLightScene.hpp" />
     <ClInclude Include="include\game\ShadersAndMaterials.hpp" />
     <ClInclude Include="include\game\ValleyScene.hpp" />
     <ClInclude Include="include\GLFW.hpp" />
@@ -236,6 +239,7 @@
     <ClInclude Include="include\Transformations.hpp" />
     <ClInclude Include="include\UniformBuffer.hpp" />
     <ClInclude Include="include\UniformBlocks.hpp" />
+    <ClInclude Include="include\Utils.hpp" />
     <ClInclude Include="include\Vector.hpp" />
     <ClInclude Include="include\Viewport.hpp" />
   </ItemGroup>

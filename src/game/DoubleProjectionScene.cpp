@@ -105,6 +105,7 @@ void rotate_in_post_proj_space(
 {
     const Math::Vector2 &rotation_angles{spherical_camera.spherical_coord.angles};
     view_to_clip_matrix.matrix =
+        // Clip space is left-handed so we need to transpose the matrix to keep the same rotation directions
         Math::affine_yx_rotation_matrix(rotation_angles.y, rotation_angles.x - Math::PI * 0.5f).transpose() *
         view_to_clip_matrix.matrix;
 
@@ -118,6 +119,8 @@ void DoubleProjectionScene::init() const
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
     Gfx::UniformBufferId next_uniform_buffer_id{0};
+    Gfx::TextureId next_texture_id{0};
+    Gfx::SamplerId next_sampler_id{0};
 
     auto unlit_shader_id = next_shader_id++;
     {
@@ -138,40 +141,19 @@ void DoubleProjectionScene::init() const
     }
 
     Gfx::TextureData checkerboard_texture_data{};
-    if (!Gfx::load_texture_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
+    if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
         return;
 
-    GLuint checkerboard_texture;
-    glGenTextures(1, &checkerboard_texture);
-    glBindTexture(GL_TEXTURE_2D, checkerboard_texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGB8,
-        checkerboard_texture_data.width,
-        checkerboard_texture_data.height,
-        0,
-        GL_BGRA,
-        GL_UNSIGNED_INT_8_8_8_8_REV,
-        checkerboard_texture_data.bytes.get()
+    Gfx::TextureId checkerboard_texture_id{next_texture_id++};
+    Gfx::load_texture(checkerboard_texture_id, checkerboard_texture_data);
+
+    Gfx::SamplerId linear_sampler_id{next_sampler_id++};
+    Gfx::create_sampler(
+        linear_sampler_id,
+        Gfx::SamplerParams{.flags{
+            .texture_mag_filter{Gfx::TextureMagFilter::LINEAR}, .texture_min_filter{Gfx::TextureMinFilter::LINEAR}
+        }}
     );
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
-    constexpr int checkerboard_texture_unit{1};
-
-    glActiveTexture(GL_TEXTURE0 + checkerboard_texture_unit);
-    glBindTexture(GL_TEXTURE_2D, checkerboard_texture);
-
-    GLuint texture_sampler;
-    glGenSamplers(1, &texture_sampler);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    glBindSampler(checkerboard_texture_unit, texture_sampler);
 
     Gfx::create_viewport(LEFT_VIEWPORT_ID);
     Gfx::create_viewport(RIGHT_VIEWPORT_ID);
@@ -201,7 +183,7 @@ void DoubleProjectionScene::init() const
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_LEFT}},
             Gfx::SphericalCamera{
                 .origin{0.0f, 0.0f, 0.0f},
-                .spherical_coord{Math::Vector2{Math::radians(60.0f), Math::radians(20.0f)}, 5.0f}
+                .spherical_coord{5.0f, Math::Vector2{Math::radians(60.0f), Math::radians(20.0f)}}
             },
             SphericalCameraViewMatrixUpdater{},
             GameKeyboardController{}
@@ -233,11 +215,10 @@ void DoubleProjectionScene::init() const
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_RIGHT}},
             Gfx::SphericalCamera{
                 .origin{0.0f, 0.0f, 0.0f},
-                .spherical_coord{Math::Vector2{Math::radians(60.0f), Math::radians(40.0f)}, 15.0f}
+                .spherical_coord{15.0f, Math::Vector2{Math::radians(90.0f), Math::radians(40.0f)}}
             },
             ViewMatrixReader{.entity_id{left_camera_id}},
-            PostProjectionRotation{},
-            GameKeyboardController{}
+            PostProjectionRotation{}
         );
     }
 
@@ -265,7 +246,8 @@ void DoubleProjectionScene::init() const
         auto material_id = next_material_id++;
         auto &material =
             Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(material_id, lit_diffuse_texture_shader_id);
-        material.texture_unit = checkerboard_texture_unit;
+        material.texture_id = checkerboard_texture_id;
+        material.sampler_id = linear_sampler_id;
 
         auto id = Core::create_entity(
             Core::Transform{},

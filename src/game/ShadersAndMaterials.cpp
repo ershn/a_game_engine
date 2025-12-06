@@ -14,7 +14,7 @@ FragmentLightingShader::FragmentLightingShader(GLuint shader_program)
     Gfx::OGL::bind_uniform_block(shader_program, material_block, MATERIAL_BLOCK_BINDING);
 }
 
-FragmentLightingMaterial::FragmentLightingMaterial(const Gfx::Shader &shader)
+FragmentLightingMaterial::FragmentLightingMaterial(Gfx::Shader &shader)
     : Material{shader}
 {
 }
@@ -31,7 +31,7 @@ FragmentLightingColorShader::FragmentLightingColorShader(GLuint shader_program)
 {
 }
 
-FragmentLightingColorMaterial::FragmentLightingColorMaterial(const Gfx::Shader &shader)
+FragmentLightingColorMaterial::FragmentLightingColorMaterial(Gfx::Shader &shader)
     : FragmentLightingMaterial{shader}
 {
 }
@@ -50,7 +50,7 @@ SphereImpostorShader::SphereImpostorShader(GLuint shader_program)
     Gfx::OGL::bind_uniform_block(shader_program, materials_block, MATERIALS_BLOCK_BINDING);
 }
 
-SphereImpostorMaterial::SphereImpostorMaterial(const Age::Gfx::Shader &shader)
+SphereImpostorMaterial::SphereImpostorMaterial(Age::Gfx::Shader &shader)
     : Material{shader}
 {
 }

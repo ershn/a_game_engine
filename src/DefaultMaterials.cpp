@@ -3,7 +3,7 @@
 
 namespace Age::Gfx
 {
-UnlitMaterial::UnlitMaterial(const Shader &shader)
+UnlitMaterial::UnlitMaterial(Shader &shader)
     : Material{shader}
 {
 }
@@ -12,7 +12,7 @@ void UnlitMaterial::apply_properties() const
 {
 }
 
-UnlitColorMaterial::UnlitColorMaterial(const Shader &shader)
+UnlitColorMaterial::UnlitColorMaterial(Shader &shader)
     : UnlitMaterial{shader}
 {
 }
@@ -24,18 +24,18 @@ void UnlitColorMaterial::apply_properties() const
     OGL::set_uniform(shader.color, color);
 }
 
-LitDiffuseTextureMaterial::LitDiffuseTextureMaterial(const Shader &shader)
+LitDiffuseTextureMaterial::LitDiffuseTextureMaterial(Shader &shader)
     : Material{shader}
 {
 }
 
 void LitDiffuseTextureMaterial::apply_properties() const
 {
-    const auto &shader = static_cast<const LitDiffuseTextureShader &>(this->shader);
-    OGL::set_uniform(shader.texture_unit, texture_unit);
+    auto &shader = static_cast<LitDiffuseTextureShader &>(this->shader);
+    bind_texture_and_sampler(shader.sampler, texture_id, sampler_id);
 }
 
-FragmentLightingMaterial::FragmentLightingMaterial(const Shader &shader)
+FragmentLightingMaterial::FragmentLightingMaterial(Shader &shader)
     : Material{shader}
 {
 }
@@ -47,7 +47,7 @@ void FragmentLightingMaterial::apply_properties() const
     OGL::set_uniform(shader.surface_shininess, surface_shininess);
 }
 
-FragmentLightingColorMaterial::FragmentLightingColorMaterial(const Shader &shader)
+FragmentLightingColorMaterial::FragmentLightingColorMaterial(Shader &shader)
     : FragmentLightingMaterial{shader}
 {
 }

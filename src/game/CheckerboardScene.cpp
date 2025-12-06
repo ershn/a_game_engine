@@ -1,3 +1,4 @@
+#include <bit>
 #include <functional>
 #include <span>
 #include <utility>
@@ -12,6 +13,7 @@
 #include "Path.hpp"
 #include "Rendering.hpp"
 #include "SphericalCamera.hpp"
+#include "Texture.hpp"
 #include "Time.hpp"
 #include "Transformations.hpp"
 #include "UniformBlocks.hpp"
@@ -27,28 +29,29 @@ using namespace Age;
 
 struct CheckerboardShader : public Gfx::Shader
 {
-    GLint texture_unit{};
+    Gfx::SamplerUniform sampler{};
 
     CheckerboardShader(GLuint shader_program)
         : Shader{shader_program, Gfx::SHADER_LV_MATRIX}
-        , texture_unit{Gfx::OGL::get_uniform_location(shader_program, "uTexture")}
+        , sampler{.uniform{Gfx::OGL::get_uniform_location(shader_program, "_texture")}}
     {
     }
 };
 
 struct CheckerboardMaterial : public Gfx::Material
 {
-    int texture_unit{};
+    Gfx::TextureId texture_id{Gfx::NULL_TEXTURE_ID};
+    Gfx::SamplerId sampler_id{Gfx::NULL_SAMPLER_ID};
 
-    CheckerboardMaterial(const Age::Gfx::Shader &shader)
+    CheckerboardMaterial(Gfx::Shader &shader)
         : Material{shader}
     {
     }
 
     void apply_properties() const override
     {
-        auto &shader = static_cast<const CheckerboardShader &>(this->shader);
-        Gfx::OGL::set_uniform(shader.texture_unit, texture_unit);
+        auto &shader = static_cast<CheckerboardShader &>(this->shader);
+        Gfx::bind_texture_and_sampler(shader.sampler, texture_id, sampler_id);
     }
 };
 
@@ -56,12 +59,11 @@ struct CheckerboardSceneController
 {
     static constexpr Core::ComponentType TYPE{CHECKERBOARD_SCENE_CONTROLLER};
 
-    GLuint checkerboard_texture;
-    GLuint mipmap_texture;
-    GLuint texture_sampler;
+    Input::PressedKeys pressed_keys{};
+    Gfx::MaterialId material_id{};
+    Gfx::TextureId checkerboard_texture_id{};
+    Gfx::TextureId mipmap_texture_id{};
 };
-
-constexpr int surface_texture_unit{1};
 
 // clang-format off
 const GLubyte MIPMAP_COLORS[] = {
@@ -76,13 +78,13 @@ const GLubyte MIPMAP_COLORS[] = {
 };
 // clang-format on
 
-void fill_with_mipmap_color(std::span<GLubyte> buffer, std::size_t mipmap_level)
+void fill_with_mipmap_color(std::span<std::byte> buffer, std::size_t mipmap_level)
 {
     for (std::size_t index{}; index < buffer.size(); index += 3)
     {
-        buffer[index] = MIPMAP_COLORS[mipmap_level * 3];
-        buffer[index + 1] = MIPMAP_COLORS[mipmap_level * 3 + 1];
-        buffer[index + 2] = MIPMAP_COLORS[mipmap_level * 3 + 2];
+        buffer[index] = std::byte{MIPMAP_COLORS[mipmap_level * 3]};
+        buffer[index + 1] = std::byte{MIPMAP_COLORS[mipmap_level * 3 + 1]};
+        buffer[index + 2] = std::byte{MIPMAP_COLORS[mipmap_level * 3 + 2]};
     }
 }
 
@@ -94,26 +96,31 @@ void update_camera(Gfx::WorldToViewMatrix &view_matrix)
     view_matrix.matrix = Math::look_at_matrix(target_pos, camera_pos, Math::Vector3::up);
 }
 
-void control_scene(const CheckerboardSceneController &scene_controller)
+void control_scene(CheckerboardSceneController &scene_controller)
 {
-    if (Input::is_key_down(GLFW_KEY_W))
+    auto &material = static_cast<CheckerboardMaterial &>(Gfx::get_material(scene_controller.material_id));
+    Gfx::SamplerParams sampler_params{Gfx::get_sampler_params(material.sampler_id)};
+
+    if (Input::is_key_pressed(GLFW_KEY_W, scene_controller.pressed_keys))
     {
-        glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
-        glBindTexture(GL_TEXTURE_2D, scene_controller.mipmap_texture);
+        material.texture_id = scene_controller.mipmap_texture_id;
+        Core::log_info("Using mipmap texture: id = {}", material.texture_id);
     }
-    else if (Input::is_key_down(GLFW_KEY_F))
+    else if (Input::is_key_pressed(GLFW_KEY_F, scene_controller.pressed_keys))
     {
-        glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
-        glBindTexture(GL_TEXTURE_2D, scene_controller.checkerboard_texture);
+        material.texture_id = scene_controller.checkerboard_texture_id;
+        Core::log_info("Using checkerboard texture: id = {}", material.texture_id);
     }
 
-    if (Input::is_key_down(GLFW_KEY_S))
+    if (Input::is_key_pressed(GLFW_KEY_S, scene_controller.pressed_keys))
     {
-        glSamplerParameteri(scene_controller.texture_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        sampler_params.flags.texture_min_filter = Gfx::TextureMinFilter::NEAREST_MIPMAP_LINEAR;
+        Gfx::set_sampler_params(material.sampler_id, sampler_params);
     }
-    else if (Input::is_key_down(GLFW_KEY_T))
+    else if (Input::is_key_pressed(GLFW_KEY_T, scene_controller.pressed_keys))
     {
-        glSamplerParameteri(scene_controller.texture_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        sampler_params.flags.texture_min_filter = Gfx::TextureMinFilter::LINEAR_MIPMAP_LINEAR;
+        Gfx::set_sampler_params(material.sampler_id, sampler_params);
     }
 }
 
@@ -123,87 +130,65 @@ void CheckerBoardScene::init() const
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
     Gfx::UniformBufferId next_uniform_buffer_id{0};
+    Gfx::TextureId next_texture_id{0};
+    Gfx::SamplerId next_sampler_id{0};
 
-    GLfloat max_anisotropy;
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
+    float max_anisotropy{Gfx::get_texture_filtering_max_max_anisotropy()};
     Core::log_info("max anisotropy: {}", max_anisotropy);
 
     Gfx::TextureData checkerboard_texture_data{};
-    if (!Gfx::load_texture_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
+    if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
         return;
 
-    GLuint mipmap_texture;
+    Gfx::TextureData mipmap_texture_data{};
     {
-        glGenTextures(1, &mipmap_texture);
-        glBindTexture(GL_TEXTURE_2D, mipmap_texture);
+        constexpr std::size_t MIPMAP_BASE_LEVEL_SIZE{128};
 
-        constexpr std::size_t MIPMAP_SIZE{128};
-        auto buffer = std::make_unique<GLubyte[]>(MIPMAP_SIZE * MIPMAP_SIZE * 3);
+        std::size_t buffer_size{};
+        for (std::size_t mipmap_level_size{MIPMAP_BASE_LEVEL_SIZE}; mipmap_level_size > 0; mipmap_level_size >>= 1)
+            buffer_size += mipmap_level_size * mipmap_level_size * 3;
 
-        GLint prev_unpack_alignment;
-        glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        mipmap_texture_data.bytes = std::make_unique_for_overwrite<std::byte[]>(buffer_size);
+        mipmap_texture_data.pitch = MIPMAP_BASE_LEVEL_SIZE * 3;
+        mipmap_texture_data.desc = {
+            .width{MIPMAP_BASE_LEVEL_SIZE},
+            .height{MIPMAP_BASE_LEVEL_SIZE},
+            .depth{1},
+            .mipmap_level_count{static_cast<std::uint32_t>(std::bit_width(MIPMAP_BASE_LEVEL_SIZE))},
+            .count{1},
+            .format{Gfx::TextureFormat::R8G8B8_UNORM},
+            .type{Gfx::TextureType::TEXTURE_2D}
+        };
 
-        std::size_t mipmap_level{0};
-        for (std::size_t mipmap_size{MIPMAP_SIZE}; mipmap_size > 0; mipmap_size >>= 1, ++mipmap_level)
+        std::size_t buffer_offset{0};
+        for (std::size_t mipmap_level{0}; mipmap_level < mipmap_texture_data.desc.mipmap_level_count; ++mipmap_level)
         {
-            fill_with_mipmap_color({buffer.get(), mipmap_size * mipmap_size * 3}, mipmap_level);
-
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                static_cast<GLint>(mipmap_level),
-                GL_RGB8,
-                static_cast<GLsizei>(mipmap_size),
-                static_cast<GLsizei>(mipmap_size),
-                0,
-                GL_RGB,
-                GL_UNSIGNED_BYTE,
-                buffer.get()
-            );
+            std::size_t mipmap_level_size{MIPMAP_BASE_LEVEL_SIZE >> mipmap_level};
+            std::span<std::byte> buffer{
+                &mipmap_texture_data.bytes[buffer_offset], mipmap_level_size * mipmap_level_size * 3
+            };
+            fill_with_mipmap_color(buffer, mipmap_level);
+            buffer_offset += buffer.size();
         }
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(mipmap_level) - 1);
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
     }
 
-    GLuint checkerboard_texture;
-    {
-        glGenTextures(1, &checkerboard_texture);
-        glBindTexture(GL_TEXTURE_2D, checkerboard_texture);
+    Gfx::TextureId checkerboard_texture_id{next_texture_id++};
+    Gfx::load_texture(checkerboard_texture_id, checkerboard_texture_data);
 
-        for (const auto &mipmap_level : checkerboard_texture_data)
-        {
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                mipmap_level.level,
-                GL_RGB8,
-                mipmap_level.width,
-                mipmap_level.height,
-                0,
-                GL_BGRA,
-                GL_UNSIGNED_INT_8_8_8_8_REV,
-                mipmap_level.bytes.data()
-            );
+    Gfx::TextureId mipmap_texture_id{next_texture_id++};
+    Gfx::load_texture(mipmap_texture_id, mipmap_texture_data);
+
+    Gfx::SamplerId mipmap_aniso_sampler_id{next_sampler_id++};
+    Gfx::create_sampler(
+        mipmap_aniso_sampler_id,
+        Gfx::SamplerParams{
+            .max_anisotropy{max_anisotropy},
+            .flags{
+                .texture_mag_filter{Gfx::TextureMagFilter::LINEAR},
+                .texture_min_filter{Gfx::TextureMinFilter::LINEAR_MIPMAP_LINEAR}
+            }
         }
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, checkerboard_texture_data.mipmap_level_count - 1);
-    }
-
-    glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
-    glBindTexture(GL_TEXTURE_2D, checkerboard_texture);
-
-    GLuint texture_sampler;
-    glGenSamplers(1, &texture_sampler);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glSamplerParameterf(texture_sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_anisotropy);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glBindSampler(surface_texture_unit, texture_sampler);
+    );
 
     // Camera
     Core::EntityId camera_id;
@@ -253,23 +238,24 @@ void CheckerBoardScene::init() const
 
     // Plane
     {
-        auto big_plane_mesh_id = next_mesh_id++;
-        Gfx::create_mesh<1>(big_plane_mesh_id, std::function{create_big_plane_mesh});
+        auto mesh_id = next_mesh_id++;
+        Gfx::create_mesh<1>(mesh_id, std::function{create_big_plane_mesh});
 
         auto material_id = next_material_id++;
         auto &material = Gfx::create_material<CheckerboardMaterial>(material_id, checkerboard_shader_id);
-        material.texture_unit = surface_texture_unit;
+        material.texture_id = checkerboard_texture_id;
+        material.sampler_id = mipmap_aniso_sampler_id;
 
         auto id = Core::create_entity(
             Core::Transform{},
             Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::MeshRef{big_plane_mesh_id},
+            Gfx::MeshRef{mesh_id},
             Gfx::Renderer{},
             CheckerboardSceneController{
-                .checkerboard_texture{checkerboard_texture},
-                .mipmap_texture{mipmap_texture},
-                .texture_sampler{texture_sampler}
+                .material_id{material_id},
+                .checkerboard_texture_id{checkerboard_texture_id},
+                .mipmap_texture_id{mipmap_texture_id},
             }
         );
 

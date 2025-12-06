@@ -70,7 +70,7 @@ void create_shader(ShaderId shader_id, std::span<const ShaderAsset> shader_asset
         OGL::bind_uniform_block(shader_program, shader.light_data_block, LIGHT_DATA_BLOCK_BINDING);
 }
 
-const Shader &get_shader(ShaderId shader_id);
+Shader &get_shader(ShaderId shader_id);
 
 void use_shader(const Shader &shader);
 } // namespace Age::Gfx

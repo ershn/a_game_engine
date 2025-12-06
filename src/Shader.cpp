@@ -113,7 +113,7 @@ GLuint create_shader_program(std::span<const ShaderAsset> shader_assets)
     return program;
 }
 
-const Shader &get_shader(ShaderId shader_id)
+Shader &get_shader(ShaderId shader_id)
 {
     return *g_shaders[shader_id];
 }

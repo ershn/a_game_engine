@@ -11,6 +11,8 @@
 - allow to add and remove components from entities on the fly
 
 # Rendering
+- fix the texture origin mismatch between DDS and OpenGL
+- make depth clamping shader specific instead of camera specific
 
 # Shader
 - add a diffuse only shader

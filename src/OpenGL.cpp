@@ -3,6 +3,13 @@
 
 namespace Age::Gfx::OGL
 {
+GLint get_integer(GLenum param_name)
+{
+    GLint value;
+    glGetIntegerv(param_name, &value);
+    return value;
+}
+
 GLuint create_shader(ShaderType shader_type)
 {
     return glCreateShader(static_cast<GLenum>(shader_type));

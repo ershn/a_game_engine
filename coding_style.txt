@@ -1,0 +1,7 @@
+# Shaders
+- vertex attributes, varying variables, fragment output variables and uniform variables use camelCase
+- vertex attributes begin with 'in'
+- varying variables begin with 'var'
+- input/output interface blocks are named 'Varyings' 
+- fragment output variables begin with 'out'
+- uniform variables outside interface blocks or inside interface blocks without an instance name begin with '_'

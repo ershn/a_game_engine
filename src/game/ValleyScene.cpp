@@ -207,7 +207,7 @@ void ValleyScene::init() const
             Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
-                .origin{0.0f, 2.0f, 0.0f}, .spherical_coord{Math::Vector2{Math::radians(60.0f), 0.0f}, 30.0f}
+                .origin{0.0f, 2.0f, 0.0f}, .spherical_coord{30.0f, Math::Vector2{Math::radians(60.0f), 0.0f}}
             },
             GameKeyboardController{}
         );

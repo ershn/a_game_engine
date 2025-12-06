@@ -12,10 +12,10 @@ uniform ProjectionBlock
     mat4 _viewToClipMatrix;
 };
 
-smooth out vec3 interpColor;
+smooth out vec3 varColor;
 
 void main()
 {
     gl_Position = _viewToClipMatrix * (uLocalToViewMatrix * inPosition);
-    interpColor = inDiffuseColor;
+    varColor = inDiffuseColor;
 }

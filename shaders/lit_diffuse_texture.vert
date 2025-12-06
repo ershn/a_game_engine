@@ -14,7 +14,7 @@ uniform ProjectionBlock
     mat4 _viewToClipMatrix;
 };
 
-out InterpData
+out Varyings
 {
     vec3 viewPosition;
     vec3 viewNormal;

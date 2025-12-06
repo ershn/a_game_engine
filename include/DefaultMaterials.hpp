@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Material.hpp"
+#include "Texture.hpp"
 
 namespace Age::Gfx
 {
 struct UnlitMaterial : public Material
 {
-    UnlitMaterial(const Shader &shader);
+    UnlitMaterial(Shader &shader);
 
     void apply_properties() const override;
 };
@@ -15,16 +16,17 @@ struct UnlitColorMaterial : public UnlitMaterial
 {
     Math::Vector4 color{1.0f};
 
-    UnlitColorMaterial(const Shader &shader);
+    UnlitColorMaterial(Shader &shader);
 
     void apply_properties() const override;
 };
 
 struct LitDiffuseTextureMaterial : public Material
 {
-    int texture_unit{};
+    TextureId texture_id{NULL_TEXTURE_ID};
+    SamplerId sampler_id{NULL_SAMPLER_ID};
 
-    LitDiffuseTextureMaterial(const Shader &shader);
+    LitDiffuseTextureMaterial(Shader &shader);
 
     void apply_properties() const override;
 };
@@ -34,7 +36,7 @@ struct FragmentLightingMaterial : public Material
     Math::Vector4 specular_color{1.0f};
     float surface_shininess{0.5f};
 
-    FragmentLightingMaterial(const Shader &shader);
+    FragmentLightingMaterial(Shader &shader);
 
     void apply_properties() const override;
 };
@@ -43,7 +45,7 @@ struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 {
     Math::Vector4 diffuse_color{1.0f};
 
-    FragmentLightingColorMaterial(const Shader &shader);
+    FragmentLightingColorMaterial(Shader &shader);
 
     void apply_properties() const override;
 };

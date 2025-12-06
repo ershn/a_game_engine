@@ -13,9 +13,9 @@ using MaterialId = std::uint32_t;
 
 struct Material
 {
-    const Shader &shader;
+    Shader &shader;
 
-    Material(const Shader &shader);
+    Material(Shader &shader);
 
     virtual void apply_properties() const = 0;
 };
@@ -44,4 +44,5 @@ TMaterial &create_material(MaterialId material_id, ShaderId shader_id)
 Material &get_material(MaterialId material_id);
 
 const Material &use_material(MaterialId material_id);
+void release_used_material();
 } // namespace Age::Gfx

@@ -85,7 +85,7 @@ struct GammaAndTexturesMaterial : public Gfx::Material
 {
     int texture_unit{};
 
-    GammaAndTexturesMaterial(const Age::Gfx::Shader &shader)
+    GammaAndTexturesMaterial(Age::Gfx::Shader &shader)
         : Material{shader}
     {
     }
@@ -107,7 +107,7 @@ void GammaAndTexturesScene::init() const
     Gfx::UniformBufferId next_uniform_buffer_id{0};
 
     Gfx::TextureData gamma_ramp_texture_data{};
-    if (!Gfx::load_texture_from_dds_file("assets/game/textures/gamma_ramp.dds", gamma_ramp_texture_data))
+    if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/gamma_ramp.dds", gamma_ramp_texture_data))
         return;
 
     GLuint gamma_ramp_texture;
@@ -117,8 +117,8 @@ void GammaAndTexturesScene::init() const
         GL_TEXTURE_2D,
         0,
         GL_SRGB8,
-        gamma_ramp_texture_data.width,
-        gamma_ramp_texture_data.height,
+        gamma_ramp_texture_data.desc.width,
+        gamma_ramp_texture_data.desc.height,
         0,
         GL_BGRA,
         GL_UNSIGNED_INT_8_8_8_8_REV,
