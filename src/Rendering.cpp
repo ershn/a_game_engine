@@ -98,7 +98,7 @@ void init_renderer(
     );
 
     renderer.draw_call_key.index = static_cast<DrawCallIndex>(s_draw_calls.size() - 1);
-    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT & mesh_id << MESH_ID_SHIFT_COUNT;
+    renderer.draw_call_key.sort_key = material_id << MATERIAL_ID_SHIFT_COUNT | mesh_id << MESH_ID_SHIFT_COUNT;
     renderer.is_active = true;
 }
 
