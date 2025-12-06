@@ -362,7 +362,7 @@ unsigned int get_row_alignment_from_pitch(std::uint32_t pitch)
 
 std::size_t get_texture_base_image_size(const TextureData &texture_data)
 {
-    return texture_data.pitch * texture_data.desc.height * texture_data.desc.depth;
+    return texture_data.row_pitch * texture_data.row_count * texture_data.desc.depth;
 }
 
 bool is_compressed_texture_format(TextureFormat format)
@@ -386,25 +386,27 @@ bool operator!=(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
 
 MipmapLevelIterator &operator++(MipmapLevelIterator &it)
 {
-    auto pitch = std::max(1U, it.texture.pitch >> it.level);
-    auto height = std::max(1U, it.texture.desc.height >> it.level);
+    auto row_pitch = std::max(1U, it.texture.row_pitch >> it.level);
+    auto row_count = std::max(1U, it.texture.row_count >> it.level);
     auto depth = std::max(1U, it.texture.desc.depth >> it.level);
 
-    it.offset += pitch * height * depth;
+    it.offset += row_pitch * row_count * depth;
     ++it.level;
     return it;
 }
 
 MipmapLevel operator*(const MipmapLevelIterator &it)
 {
-    auto pitch = std::max(1U, it.texture.pitch >> it.level);
+    auto row_pitch = std::max(1U, it.texture.row_pitch >> it.level);
+    auto row_count = std::max(1U, it.texture.row_count >> it.level);
     auto width = std::max(1U, it.texture.desc.width >> it.level);
     auto height = std::max(1U, it.texture.desc.height >> it.level);
     auto depth = std::max(1U, it.texture.desc.depth >> it.level);
 
     return MipmapLevel{
-        .bytes{&it.texture.bytes[it.offset], pitch * height * depth},
-        .pitch{pitch},
+        .bytes{&it.texture.bytes[it.offset], row_pitch * row_count * depth},
+        .row_pitch{row_pitch},
+        .row_count{row_count},
         .width{width},
         .height{height},
         .depth{depth},
@@ -491,7 +493,7 @@ GLuint load_texture_1d(const TextureData &texture_data, TextureUnitId texture_un
     {
         for (const auto &mipmap_level : texture_data)
         {
-            update_pixel_data_unpack_alignment(mipmap_level.pitch, unpack_alignment);
+            update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
 
             glTexImage1D(
                 GL_TEXTURE_1D,
@@ -507,7 +509,7 @@ GLuint load_texture_1d(const TextureData &texture_data, TextureUnitId texture_un
     }
     else
     {
-        update_pixel_data_unpack_alignment(texture_data.pitch, unpack_alignment);
+        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
 
         glTexImage1D(
             GL_TEXTURE_1D,
@@ -546,7 +548,7 @@ GLuint load_texture_2d(const TextureData &texture_data, TextureUnitId texture_un
     {
         for (const auto &mipmap_level : texture_data)
         {
-            update_pixel_data_unpack_alignment(mipmap_level.pitch, unpack_alignment);
+            update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
 
             glTexImage2D(
                 GL_TEXTURE_2D,
@@ -563,7 +565,7 @@ GLuint load_texture_2d(const TextureData &texture_data, TextureUnitId texture_un
     }
     else
     {
-        update_pixel_data_unpack_alignment(texture_data.pitch, unpack_alignment);
+        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
 
         glTexImage2D(
             GL_TEXTURE_2D,
@@ -603,7 +605,7 @@ GLuint load_texture_3d(const TextureData &texture_data, TextureUnitId texture_un
     {
         for (const auto &mipmap_level : texture_data)
         {
-            update_pixel_data_unpack_alignment(mipmap_level.pitch, unpack_alignment);
+            update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
 
             glTexImage3D(
                 GL_TEXTURE_3D,
@@ -621,7 +623,7 @@ GLuint load_texture_3d(const TextureData &texture_data, TextureUnitId texture_un
     }
     else
     {
-        update_pixel_data_unpack_alignment(texture_data.pitch, unpack_alignment);
+        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
 
         glTexImage3D(
             GL_TEXTURE_3D,

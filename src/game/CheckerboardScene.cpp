@@ -149,7 +149,8 @@ void CheckerBoardScene::init() const
             buffer_size += mipmap_level_size * mipmap_level_size * 3;
 
         mipmap_texture_data.bytes = std::make_unique_for_overwrite<std::byte[]>(buffer_size);
-        mipmap_texture_data.pitch = MIPMAP_BASE_LEVEL_SIZE * 3;
+        mipmap_texture_data.row_pitch = MIPMAP_BASE_LEVEL_SIZE * 3;
+        mipmap_texture_data.row_count = MIPMAP_BASE_LEVEL_SIZE;
         mipmap_texture_data.desc = {
             .width{MIPMAP_BASE_LEVEL_SIZE},
             .height{MIPMAP_BASE_LEVEL_SIZE},

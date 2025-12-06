@@ -172,7 +172,8 @@ struct TextureDesc
 struct TextureData
 {
     std::unique_ptr<std::byte[]> bytes;
-    std::uint32_t pitch{};
+    std::uint32_t row_pitch{};
+    std::uint32_t row_count{};
     TextureDesc desc;
 };
 
@@ -183,7 +184,8 @@ bool is_compressed_texture_format(TextureFormat format);
 struct MipmapLevel
 {
     std::span<std::byte> bytes;
-    std::uint32_t pitch{};
+    std::uint32_t row_pitch{};
+    std::uint32_t row_count{};
     std::uint32_t width{};
     std::uint32_t height{};
     std::uint32_t depth{};
