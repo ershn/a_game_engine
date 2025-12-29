@@ -27,7 +27,7 @@ void update_perspective_camera_matrix(
     const CameraRenderState &camera_render_state,
     PerspectiveCamera &camera,
     ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
+    const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
     const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
@@ -37,14 +37,14 @@ void update_perspective_camera_matrix(
     view_to_clip_matrix.matrix =
         Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, aspect_ratio, camera.vertical_fov);
 
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+    projection_uniform_buffer.buffer.update({.view_to_clip_matrix{view_to_clip_matrix.matrix}});
 }
 
 void update_orthographic_camera_matrix(
     const CameraRenderState &camera_render_state,
     OrthographicCamera &camera,
     ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
+    const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
     const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
@@ -54,14 +54,14 @@ void update_orthographic_camera_matrix(
     view_to_clip_matrix.matrix =
         Math::orthographic_proj_matrix(camera.near_plane_z, camera.far_plane_z, aspect_ratio, camera.vertical_size);
 
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+    projection_uniform_buffer.buffer.update({.view_to_clip_matrix{view_to_clip_matrix.matrix}});
 }
 
 void update_window_space_camera_matrix(
     const CameraRenderState &camera_render_state,
     WindowSpaceCamera &camera,
     ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
+    const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
     const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
@@ -70,7 +70,7 @@ void update_window_space_camera_matrix(
     camera.viewport_height = viewport.height;
     view_to_clip_matrix.matrix = window_space_orthographic_proj_matrix(viewport.width, viewport.height);
 
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+    projection_uniform_buffer.buffer.update({.view_to_clip_matrix{view_to_clip_matrix.matrix}});
 }
 
 void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix)

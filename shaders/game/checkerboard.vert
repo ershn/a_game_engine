@@ -5,7 +5,7 @@ layout(std140) uniform;
 layout(location = 0) in vec4 inPosition;
 layout(location = 3) in vec2 inTexCoord;
 
-uniform mat4 uLocalToViewMatrix;
+uniform mat4 _localToViewMatrix;
 
 uniform ProjectionBlock
 {
@@ -19,6 +19,6 @@ out Varyings
 
 void main()
 {
-    gl_Position = _viewToClipMatrix * (uLocalToViewMatrix * inPosition);
+    gl_Position = _viewToClipMatrix * (_localToViewMatrix * inPosition);
     Out.texCoord = inTexCoord;
 }

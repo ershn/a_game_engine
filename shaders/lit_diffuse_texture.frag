@@ -19,7 +19,7 @@ struct Light
 
 const int LIGHT_COUNT = 4;
 
-uniform LightsBlock
+uniform LightBlock
 {
     vec4 ambientIntensity;
     float attenuation;

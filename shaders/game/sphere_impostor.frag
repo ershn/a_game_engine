@@ -8,11 +8,9 @@ in FragmentData {
     vec2 mapping;
 } In;
 
-out vec4 outColor;
-
 uniform ProjectionBlock
 {
-    mat4 viewToClipMatrix;
+    mat4 _viewToClipMatrix;
 };
 
 struct Light
@@ -23,7 +21,7 @@ struct Light
 
 const int LIGHT_COUNT = 4;
 
-uniform LightsBlock
+uniform LightBlock
 {
     vec4 ambientIntensity;
     float attenuation;
@@ -42,6 +40,8 @@ uniform MaterialsBlock
 {
     Material materials[4];
 } Materials;
+
+out vec4 outColor;
 
 float attenuatedLightIntensity(in vec3 viewPosition, in vec3 viewLightPosition, out vec3 directionToLight)
 {
@@ -118,7 +118,7 @@ void main()
 
     outColor = accumulatedLight;
 
-    vec4 clipPosition = viewToClipMatrix * vec4(viewPosition, 1.0);
+    vec4 clipPosition = _viewToClipMatrix * vec4(viewPosition, 1.0);
     float ndcZ = clipPosition.z / clipPosition.w;
     gl_FragDepth = (ndcZ * gl_DepthRange.diff + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
 }

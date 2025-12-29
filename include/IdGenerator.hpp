@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "Utils.hpp"
+
 namespace Age::Util
 {
 template <typename T>
@@ -22,7 +24,16 @@ class IdGenerator
     {
         if (_free_ids.empty())
         {
-            return _next_id++;
+            if constexpr (std::is_enum_v<T>)
+            {
+                T id{_next_id};
+                _next_id = static_cast<T>(to_underlying(_next_id) + 1);
+                return id;
+            }
+            else
+            {
+                return _next_id++;
+            }
         }
         else
         {

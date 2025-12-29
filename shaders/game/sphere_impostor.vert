@@ -1,9 +1,9 @@
 #version 330
 
-layout(location = 0) in vec3 aViewPosition;
-layout(location = 1) in float aRadius;
+layout(location = 0) in vec3 inViewPosition;
+layout(location = 1) in float inRadius;
 
-out VertexData
+out Varyings
 {
     vec3 sphereViewPosition;
     float sphereRadius;
@@ -11,6 +11,6 @@ out VertexData
 
 void main()
 {
-    Out.sphereViewPosition = aViewPosition;
-    Out.sphereRadius = aRadius;
+    Out.sphereViewPosition = inViewPosition;
+    Out.sphereRadius = inRadius;
 }

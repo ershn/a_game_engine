@@ -27,9 +27,11 @@ Matrix4 affine_yx_rotation_matrix(float y_angle, float x_angle);
 
 Matrix4 translation_matrix(const Vector3 &pos);
 
+Matrix4 perspective_proj_matrix(float aspect_ratio, float vertical_fov);
 Matrix4 perspective_proj_matrix(float z_near, float z_far, float aspect_ratio, float vertical_fov);
 void update_perspective_proj_zoom(Matrix4 &perspective_matrix, float aspect_ratio, float vertical_fov);
 
+Matrix4 orthographic_proj_matrix(float aspect_ratio, float vertical_size);
 Matrix4 orthographic_proj_matrix(float z_near, float z_far, float aspect_ratio, float vertical_size);
 void update_orthographic_proj_size(Matrix4 &orthographic_matrix, float aspect_ratio, float vertical_size);
 

@@ -24,8 +24,6 @@ using EntityId = std::uint64_t;
 using ArchetypeId = std::uint16_t;
 using ComponentOffset = std::uint16_t;
 
-inline constexpr EntityId NULL_ENTITY_ID{std::numeric_limits<EntityId>::max()};
-
 struct EntityLocation
 {
     ArchetypeId archetype_id{};
@@ -128,10 +126,10 @@ EntityId add_entity_to_archetype(
 
     ++archetype.entity_count;
 
-    if (entity_id == g_entity_locations.size())
+    if (entity_id - 1 == g_entity_locations.size())
         g_entity_locations.emplace_back(archetype_id, entity_index);
     else
-        g_entity_locations[entity_id] = {archetype_id, entity_index};
+        g_entity_locations[entity_id - 1] = {archetype_id, entity_index};
 
     return entity_id;
 }
@@ -149,7 +147,7 @@ EntityId create_entity(const TComponents &...components)
 template <typename TComponent>
 TComponent &get_entity_component(EntityId entity_id)
 {
-    const EntityLocation &entity_location{g_entity_locations[entity_id]};
+    const EntityLocation &entity_location{g_entity_locations[entity_id - 1]};
     Archetype &archetype{g_archetypes[entity_location.archetype_id]};
     std::size_t chunk_index{entity_location.entity_index / archetype.entity_count_per_chunk};
     std::size_t chunk_entity_index{entity_location.entity_index % archetype.entity_count_per_chunk};
@@ -172,7 +170,7 @@ TComponent &get_entity_component(EntityId entity_id)
 template <typename... TComponents, std::size_t... IS>
 std::tuple<TComponents &...> get_entity_components_impl(EntityId entity_id, std::index_sequence<IS...>)
 {
-    const EntityLocation &entity_location{g_entity_locations[entity_id]};
+    const EntityLocation &entity_location{g_entity_locations[entity_id - 1]};
     Archetype &archetype{g_archetypes[entity_location.archetype_id]};
     std::size_t chunk_index{entity_location.entity_index / archetype.entity_count_per_chunk};
     std::size_t chunk_entity_index{entity_location.entity_index % archetype.entity_count_per_chunk};

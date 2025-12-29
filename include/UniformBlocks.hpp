@@ -5,38 +5,16 @@
 
 namespace Age::Gfx
 {
-struct ProjectionBlock
-{
-    Math::Matrix4 view_to_clip_matrix;
-};
-
-struct LightsBlock
-{
-    static constexpr std::size_t LIGHT_COUNT{4};
-
-    struct Light
-    {
-        Math::Vector4 view_position;
-        Math::Vector4 intensity;
-    };
-
-    Math::Vector4 ambient_light_intensity;
-    float light_attenuation{};
-    float max_intensity{};
-    float _padding_[2];
-    Light lights[LIGHT_COUNT];
-};
-
 struct FragmentPositionDataBlock
 {
-    Math::Matrix4 clip_to_view_matrix;
+    Math::Matrix4 clip_to_view_matrix{};
     int width{};
     int height{};
 };
 
 struct MaterialBlock
 {
-    Math::Vector4 specular_color;
+    Math::Vector4 specular_color{};
     float surface_shininess{1.0f};
     float _padding_[3];
 };
@@ -52,6 +30,6 @@ struct MaterialsBlock
         float _padding_[3];
     };
 
-    Material materials[Count];
+    Material materials[Count]{};
 };
 } // namespace Age::Gfx

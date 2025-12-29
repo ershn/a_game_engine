@@ -2,11 +2,14 @@
 
 layout(std140) uniform;
 
-smooth in vec4 iViewPosition;
-smooth in vec4 iDiffuseColor;
-smooth in vec3 iViewNormal;
+in Varyings
+{
+	vec4 viewPosition;
+	vec4 diffuseColor;
+	vec3 viewNormal;
+} In;
 
-uniform sampler1D uGaussianTexture;
+uniform sampler1D _gaussianTexture;
 
 struct Light
 {
@@ -16,7 +19,7 @@ struct Light
 
 const int LIGHT_COUNT = 4;
 
-uniform LightsBlock
+uniform LightBlock
 {
     vec4 ambientIntensity;
     float attenuation;
@@ -33,23 +36,23 @@ uniform MaterialBlock
 // unused
 uniform FragmentPositionDataBlock
 {
-    mat4 uClipToViewMatrix;
-    ivec2 uViewportDimensions;
+    mat4 _clipToViewMatrix;
+    ivec2 _viewportDimensions;
 };
 
-out vec4 oColor;
+out vec4 outColor;
 
 // unused
 vec3 viewPositionFromFragmentCoord()
 {
     vec4 ndcPosition;
-    ndcPosition.xy = 2.0 * gl_FragCoord.xy / uViewportDimensions - 1.0;
+    ndcPosition.xy = 2.0 * gl_FragCoord.xy / _viewportDimensions - 1.0;
     ndcPosition.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / (gl_DepthRange.far - gl_DepthRange.near);
     ndcPosition.w = 1.0;
 
     vec4 clipPosition = ndcPosition / gl_FragCoord.w;
 
-    return (uClipToViewMatrix * clipPosition).xyz;
+    return (_clipToViewMatrix * clipPosition).xyz;
 }
 
 float lightAttenuation(in vec3 viewPosition, in vec3 lightViewPosition, out vec3 directionToLight)
@@ -62,8 +65,8 @@ float lightAttenuation(in vec3 viewPosition, in vec3 lightViewPosition, out vec3
 
 vec4 calcLighting(in Light light)
 {
-    vec3 viewPosition = vec3(iViewPosition);
-    vec3 viewNormal = normalize(iViewNormal);
+    vec3 viewPosition = vec3(In.viewPosition);
+    vec3 viewNormal = normalize(In.viewNormal);
 
     vec3 directionToLight;
     vec4 lightIntensity;
@@ -85,7 +88,7 @@ vec4 calcLighting(in Light light)
     vec3 viewDirection = normalize(-viewPosition);
     vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
     float halfAngleCos = dot(viewNormal, halfAngleDirection);
-    float gaussianTerm = texture(uGaussianTexture, halfAngleCos).r;
+    float gaussianTerm = texture(_gaussianTexture, halfAngleCos).r;
     // float halfAngle = acos(halfAngleCos);
 
     // float gaussianExponent = halfAngle / Material.surfaceShininess;
@@ -93,17 +96,17 @@ vec4 calcLighting(in Light light)
     // float gaussianTerm = exp(gaussianExponent);
     gaussianTerm = incidenceAngleCos != 0.0 ? gaussianTerm : 0.0;
 
-    return iDiffuseColor * lightIntensity * incidenceAngleCos
+    return In.diffuseColor * lightIntensity * incidenceAngleCos
       + Material.specularColor * lightIntensity * gaussianTerm;
 }
 
 void main()
 {
-    vec4 accumulatedLight = iDiffuseColor * Lights.ambientIntensity;
+    vec4 accumulatedLight = In.diffuseColor * Lights.ambientIntensity;
     for (int index = 0; index < LIGHT_COUNT; ++index)
     {
         accumulatedLight += calcLighting(Lights.lights[index]);
     }
 	accumulatedLight /= Lights.maxIntensity;
-    oColor = accumulatedLight;
+    outColor = accumulatedLight;
 }

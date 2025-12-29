@@ -2,19 +2,19 @@
 
 layout(std140) uniform;
 
-layout(location = 0) in vec4 aPosition;
-layout(location = 1) in vec3 aNormal;
-layout(location = 2) in vec2 aTextureCoord;
+layout(location = 0) in vec4 inPosition;
+layout(location = 2) in vec3 inNormal;
+layout(location = 3) in vec2 inTextureCoord;
 
-uniform mat4 uLocalToViewMatrix;
-uniform mat3 uLocalToViewNormalMatrix;
+uniform mat4 _localToViewMatrix;
+uniform mat3 _localToViewNormalMatrix;
 
 uniform ProjectionBlock
 {
-    mat4 uViewToClipMatrix;
+    mat4 _viewToClipMatrix;
 };
 
-out VertexData
+out Varyings
 {
     vec4 viewPosition;
     vec3 viewNormal;
@@ -23,10 +23,10 @@ out VertexData
 
 void main()
 {
-    vec4 viewPosition = uLocalToViewMatrix * aPosition;
-    gl_Position = uViewToClipMatrix * viewPosition;
+    vec4 viewPosition = _localToViewMatrix * inPosition;
+    gl_Position = _viewToClipMatrix * viewPosition;
 
     Out.viewPosition = viewPosition;
-    Out.viewNormal = uLocalToViewNormalMatrix * aNormal;
-    Out.textureCoord = aTextureCoord;
+    Out.viewNormal = _localToViewNormalMatrix * inNormal;
+    Out.textureCoord = inTextureCoord;
 }

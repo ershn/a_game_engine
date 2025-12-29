@@ -825,8 +825,8 @@ void bind_sampler_uniform(SamplerUniform &sampler_uniform, TextureUnitId texture
     ++texture_unit.sampler_use_count;
 }
 
-// Default OpenGL sampler parameter values.
-static constexpr SamplerParams s_default_sampler_params{
+// Default OpenGL sampler parameter values
+constexpr SamplerParams DEFAULT_SAMPLER_PARAMS{
     .max_anisotropy{1.0f},
     .flags{
         .texture_wrap_s{TextureWrapMode::REPEAT},
@@ -945,7 +945,7 @@ void create_sampler(SamplerId sampler_id, const SamplerParams &sampler_params)
 
     Sampler &sampler{s_samplers[sampler_id]};
     glGenSamplers(1, &sampler.sampler);
-    update_sampler_params(sampler.sampler, sampler_params, s_default_sampler_params);
+    update_sampler_params(sampler.sampler, sampler_params, DEFAULT_SAMPLER_PARAMS);
     s_sampler_params[sampler_id] = sampler_params;
 }
 

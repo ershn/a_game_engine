@@ -3,7 +3,7 @@
 layout(location = 0) in vec4 aPosition;
 layout(location = 1) in vec3 aNormal;
 
-uniform mat4 uLocalToViewMatrix;
+uniform mat4 _localToViewMatrix;
 uniform mat3 uNormalLocalToViewMatrix;
 
 layout(std140) uniform ProjectionBlock
@@ -21,7 +21,7 @@ void main()
 {
     vec4 diffuseColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    vec4 viewPosition = uLocalToViewMatrix * aPosition;
+    vec4 viewPosition = _localToViewMatrix * aPosition;
     gl_Position = uViewToClipMatrix * viewPosition;
     vec3 normal = normalize(uNormalLocalToViewMatrix * aNormal);
 

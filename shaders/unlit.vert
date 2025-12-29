@@ -5,7 +5,7 @@ layout(std140) uniform;
 layout(location = 0) in vec4 inPosition;
 layout(location = 1) in vec3 inDiffuseColor;
 
-uniform mat4 uLocalToViewMatrix;
+uniform mat4 _localToViewMatrix;
 
 uniform ProjectionBlock
 {
@@ -16,6 +16,6 @@ smooth out vec3 varColor;
 
 void main()
 {
-    gl_Position = _viewToClipMatrix * (uLocalToViewMatrix * inPosition);
+    gl_Position = _viewToClipMatrix * (_localToViewMatrix * inPosition);
     varColor = inDiffuseColor;
 }

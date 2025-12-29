@@ -32,6 +32,7 @@ LitDiffuseTextureMaterial::LitDiffuseTextureMaterial(Shader &shader)
 void LitDiffuseTextureMaterial::apply_properties() const
 {
     auto &shader = static_cast<LitDiffuseTextureShader &>(this->shader);
+    bind_uniform_buffer_range(shader.shader_program, shader.light_block, light_buffer_range_id);
     bind_texture_and_sampler(shader.sampler, texture_id, sampler_id);
 }
 

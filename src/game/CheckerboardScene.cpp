@@ -4,23 +4,18 @@
 #include <utility>
 #include <vector>
 
-#include "Color.hpp"
 #include "DDS.hpp"
 #include "ECS.hpp"
-#include "ErrorHandling.hpp"
 #include "Input.hpp"
-#include "OpenGL.hpp"
-#include "Path.hpp"
+#include "Logging.hpp"
 #include "Rendering.hpp"
 #include "SphericalCamera.hpp"
 #include "Texture.hpp"
 #include "Time.hpp"
 #include "Transformations.hpp"
-#include "UniformBlocks.hpp"
 
 #include "game/BigPlaneMesh.hpp"
 #include "game/CheckerboardScene.hpp"
-#include "game/CorridorMesh.hpp"
 #include "game/Processing.hpp"
 
 namespace Game
@@ -32,8 +27,8 @@ struct CheckerboardShader : public Gfx::Shader
     Gfx::SamplerUniform sampler{};
 
     CheckerboardShader(GLuint shader_program)
-        : Shader{shader_program, Gfx::SHADER_LV_MATRIX}
-        , sampler{.uniform{Gfx::OGL::get_uniform_location(shader_program, "_texture")}}
+        : Shader{shader_program}
+        , sampler{Gfx::OGL::get_uniform_location(shader_program, "_texture")}
     {
     }
 };
@@ -129,7 +124,6 @@ void CheckerBoardScene::init() const
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::UniformBufferId next_uniform_buffer_id{0};
     Gfx::TextureId next_texture_id{0};
     Gfx::SamplerId next_sampler_id{0};
 
@@ -196,12 +190,7 @@ void CheckerBoardScene::init() const
     {
         Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
-        auto projection_buffer_id = next_uniform_buffer_id++;
-        auto &projection_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
-
-        auto lights_buffer_id = next_uniform_buffer_id++;
-        auto &lights_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsBlock>>(lights_buffer_id);
+        auto projection_buffer = Gfx::create_uniform_buffer<Gfx::ProjectionBlock>();
 
         camera_id = Core::create_entity(
             camera,
@@ -210,21 +199,8 @@ void CheckerBoardScene::init() const
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
-            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
-            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
+            Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             GameKeyboardController{}
-        );
-    }
-
-    // Global settings
-    Core::EntityId global_settings_id;
-    {
-        global_settings_id = Core::create_entity(
-            Gfx::GlobalLightSettings{
-                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-                .light_attenuation{1.0f / (25.0f * 25.0f)},
-                .max_intensity{1.0f}
-            }
         );
     }
 
@@ -260,7 +236,7 @@ void CheckerBoardScene::init() const
             }
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX);
     }
 }
 

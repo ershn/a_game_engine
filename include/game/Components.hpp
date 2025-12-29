@@ -14,6 +14,7 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
     SPHERICAL_CAMERA_MOUSE_CONTROLLER,
 
     SUNLIGHT,
+    SPOTLIGHT,
 
     SPHERE_IMPOSTOR_MATERIALS_BUFFER_BLOCK,
     SPHERE_IMPOSTORS,
@@ -23,6 +24,8 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
     SPHERICAL_CAMERA_VIEW_MATRIX_UPDATER,
     VIEW_MATRIX_READER,
     POST_PROJECTION_ROTATION,
+    ROTATION_OVER_TIME,
+    PROJECTIVE_TEXTURING_MATRIX,
 
     LAST_VALUE
 };

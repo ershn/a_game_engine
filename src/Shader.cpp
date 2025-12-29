@@ -8,7 +8,10 @@ namespace Age::Gfx
 {
 namespace
 {
-GLuint s_used_shader_program{};
+constexpr ShaderRenderState DEFAULT_SHADER_RENDER_STATE{.srgb_rendering = false};
+
+ShaderRenderState s_current_shader_render_state{DEFAULT_SHADER_RENDER_STATE};
+GLuint s_used_shader_program;
 
 std::string read_file(std::string_view path)
 {
@@ -76,19 +79,27 @@ GLuint create_shader_program(std::span<const GLuint> shaders)
 
     return program;
 }
+
+void update_shader_render_state(ShaderRenderState render_state)
+{
+    ShaderRenderState current_render_state{s_current_shader_render_state};
+
+    if (current_render_state.srgb_rendering != render_state.srgb_rendering)
+        OGL::enable_srgb_rendering(render_state.srgb_rendering);
+
+    s_current_shader_render_state = render_state;
+}
 } // namespace
 
-Shader::Shader(GLuint shader_program, unsigned int uniform_options, unsigned int render_state)
+Shader::Shader(GLuint shader_program, ShaderCommonUniforms common_uniforms, ShaderRenderState render_state)
     : render_state{render_state}
     , shader_program{shader_program}
-    , projection_block{OGL::get_uniform_block_index(shader_program, "ProjectionBlock")}
+    , projection_block{common_uniforms.projection_block ? UniformBlock{OGL::get_uniform_block_index(shader_program, "ProjectionBlock")} : UniformBlock{}}
+    , lv_matrix{common_uniforms.lv_matrix ? OGL::get_uniform_location(shader_program, "_localToViewMatrix") : -1}
+    , lv_normal_matrix{
+          common_uniforms.lv_normal_matrix ? OGL::get_uniform_location(shader_program, "_localToViewNormalMatrix") : -1
+      }
 {
-    if (uniform_options & SHADER_LV_MATRIX)
-        local_to_view_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewMatrix");
-    if (uniform_options & SHADER_LV_NORMAL_MATRIX)
-        local_to_view_normal_matrix = OGL::get_uniform_location(shader_program, "uLocalToViewNormalMatrix");
-    if (uniform_options & SHADER_LIGHT_DATA_BLOCK)
-        light_data_block = OGL::get_uniform_block_index(shader_program, "LightsBlock");
 }
 
 std::vector<std::unique_ptr<Shader>> g_shaders{};
@@ -122,8 +133,8 @@ void use_shader(const Shader &shader)
 {
     if (shader.shader_program != s_used_shader_program)
     {
-        OGL::enable_srgb_rendering(shader.render_state & SRGB_RENDERING);
-        OGL::use_program(shader.shader_program);
+        update_shader_render_state(shader.render_state);
+        OGL::use_shader(shader.shader_program);
         s_used_shader_program = shader.shader_program;
     }
 }

@@ -2,146 +2,198 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <memory>
+#include <type_traits>
 #include <utility>
-#include <vector>
 
-#include "Components.hpp"
 #include "OpenGL.hpp"
 
 namespace Age::Gfx
 {
-std::size_t get_uniform_buffer_alignment();
-std::size_t get_uniform_block_alignment(std::size_t block_size);
+std::size_t get_uniform_block_aligned_size(std::size_t block_size);
 
-using UniformBufferId = std::uint16_t;
-using UniformBlockIndex = std::uint32_t;
-using UniformBlockCount = std::uint32_t;
-
-struct UniformBuffer
+enum struct UniformBufferBinding : GLuint
 {
-    GLuint uniform_buffer_object{};
-    std::size_t size{};
-
-    UniformBuffer(std::size_t size);
 };
+
+enum struct UniformBufferRangeId : std::uint32_t
+{
+};
+
+struct UniformBlock
+{
+    GLuint block_index{GL_INVALID_INDEX};
+    UniformBufferBinding block_binding{};
+};
+
+bool is_uniform_block_defined(UniformBlock uniform_block);
 
 struct UniformBufferRange
 {
-    GLuint uniform_buffer_object{};
+    GLuint buffer_object{};
     std::size_t offset{};
     std::size_t size{};
 };
 
-struct UniformBufferRangeBind
-{
-    static constexpr auto TYPE{Core::ComponentType::UNIFORM_BUFFER_RANGE_BIND};
-
-    UniformBufferRange buffer_range{};
-    GLuint binding_point{};
-};
+UniformBufferRangeId create_uniform_buffer_range(const UniformBufferRange &uniform_buffer_range);
+void destroy_uniform_buffer_range(UniformBufferRangeId uniform_buffer_range_id);
 
 template <typename TBlock>
-struct UniformBufferBlockRef
-{
-    static constexpr auto TYPE{Core::ComponentType::UNIFORM_BUFFER_BLOCK};
-
-    GLuint uniform_buffer_object{};
-    UniformBlockIndex block_index{};
-
-    std::size_t get_buffer_offset() const
-    {
-        return block_index == 0 ? 0 : block_index * get_uniform_block_alignment(sizeof(TBlock));
-    }
-
-    UniformBufferRange get_buffer_range() const
-    {
-        return {.uniform_buffer_object{uniform_buffer_object}, .offset{get_buffer_offset()}, .size{sizeof(TBlock)}};
-    }
-
-    const TBlock &operator=(const TBlock &block) const
-    {
-        OGL::write_uniform_buffer(uniform_buffer_object, get_buffer_offset(), &block, sizeof(TBlock));
-        return block;
-    }
-};
-
-template <typename TBlock>
-struct ScalarUniformBuffer : public UniformBuffer
+struct UniformBuffer
 {
     using Block = TBlock;
 
-    ScalarUniformBuffer()
-        : UniformBuffer{sizeof(TBlock)}
+    GLuint buffer_object{};
+
+    UniformBuffer(GLuint buffer_object)
+        : buffer_object{buffer_object}
     {
+        OGL::allocate_uniform_buffer(buffer_object, buffer_size());
     }
 
-    UniformBufferBlockRef<TBlock> get_block() const
+    static std::size_t block_size()
     {
-        return {uniform_buffer_object, 0};
+        return sizeof(TBlock);
+    }
+
+    static std::size_t buffer_size()
+    {
+        return block_size();
+    }
+
+    UniformBufferRangeId create_range() const
+    {
+        return create_uniform_buffer_range({buffer_object, 0, buffer_size()});
+    }
+
+    void update(const TBlock &block) const
+    {
+        OGL::write_uniform_buffer(buffer_object, &block, sizeof(TBlock));
     }
 };
 
 template <typename TBlock>
-struct ArrayUniformBuffer : public UniformBuffer
+struct UniformBuffer<TBlock[]>
 {
     using Block = TBlock;
 
-    ArrayUniformBuffer(UniformBlockCount block_count)
-        : UniformBuffer{get_uniform_block_alignment(sizeof(TBlock)) * block_count}
+    GLuint buffer_object{};
+    std::size_t size{};
+
+    UniformBuffer(GLuint buffer_object, std::size_t size)
+        : buffer_object{buffer_object}
+        , size{size}
     {
+        OGL::allocate_uniform_buffer(buffer_object, buffer_size());
     }
 
-    UniformBufferBlockRef<TBlock> get_block(UniformBlockIndex index) const
+    static std::size_t block_size()
     {
-        return {uniform_buffer_object, index};
+        return get_uniform_block_aligned_size(sizeof(TBlock));
+    }
+
+    std::size_t buffer_size() const
+    {
+        return block_size() * size;
+    }
+
+    UniformBufferRangeId create_range() const
+    {
+        return create_uniform_buffer_range({buffer_object, 0, buffer_size()});
+    }
+
+    UniformBufferRangeId create_range(std::size_t start_index, std::size_t length) const
+    {
+        std::size_t block_size{this->block_size()};
+        return create_uniform_buffer_range({buffer_object, start_index * block_size, block_size * length});
+    }
+
+    void update(std::size_t index, const TBlock &block) const
+    {
+        OGL::write_uniform_buffer(buffer_object, index * block_size(), &block, sizeof(TBlock));
     }
 };
 
-template <typename TArrayUniformBuffer>
-struct ArrayUniformBufferWriter
+template <typename TBlock, std::size_t N>
+struct UniformBuffer<TBlock[N]>
 {
-    using Block = TArrayUniformBuffer::Block;
+    using Block = TBlock;
 
-    const TArrayUniformBuffer &uniform_buffer;
-    std::unique_ptr<std::byte[]> write_buffer;
+    GLuint buffer_object{};
 
-    ArrayUniformBufferWriter(const TArrayUniformBuffer &uniform_buffer)
+    UniformBuffer(GLuint buffer_object)
+        : buffer_object{buffer_object}
+    {
+        OGL::allocate_uniform_buffer(buffer_object, buffer_size());
+    }
+
+    static std::size_t block_size()
+    {
+        return get_uniform_block_aligned_size(sizeof(TBlock));
+    }
+
+    static std::size_t buffer_size()
+    {
+        return block_size() * N;
+    }
+
+    UniformBufferRangeId create_range() const
+    {
+        return create_uniform_buffer_range({buffer_object, 0, buffer_size()});
+    }
+
+    UniformBufferRangeId create_range(std::size_t start_index, std::size_t length) const
+    {
+        std::size_t block_size{this->block_size()};
+        return create_uniform_buffer_range({buffer_object, start_index * block_size, block_size * length});
+    }
+
+    void update(std::size_t index, const TBlock &block) const
+    {
+        OGL::write_uniform_buffer(buffer_object, index * block_size(), &block, sizeof(TBlock));
+    }
+};
+
+template <typename TParam>
+struct UniformBufferWriter
+{
+};
+
+template <typename TParam>
+struct UniformBufferWriter<UniformBuffer<TParam>>
+{
+    static_assert(std::is_array_v<TParam>, "Not an array UniformBuffer");
+
+    const UniformBuffer<TParam> &uniform_buffer;
+    std::unique_ptr<std::byte[]> write_buffer{};
+
+    UniformBufferWriter(const UniformBuffer<TParam> &uniform_buffer)
         : uniform_buffer{uniform_buffer}
-        , write_buffer{std::make_unique<std::byte[]>(uniform_buffer.size)}
+        , write_buffer{std::make_unique<std::byte[]>(uniform_buffer.buffer_size())}
     {
     }
 
-    Block &operator[](UniformBlockIndex index)
+    UniformBuffer<TParam>::Block &operator[](std::size_t index)
     {
-        return *static_cast<Block *>(
-            static_cast<void *>(&write_buffer[index * get_uniform_block_alignment(sizeof(Block))])
-        );
+        return *reinterpret_cast<UniformBuffer<TParam>::Block *>(&write_buffer[index * uniform_buffer.block_size()]);
     }
 
     void apply() const
     {
-        OGL::write_uniform_buffer(uniform_buffer.uniform_buffer_object, write_buffer.get(), uniform_buffer.size);
+        OGL::write_uniform_buffer(uniform_buffer.buffer_object, write_buffer.get(), uniform_buffer.buffer_size());
     }
 };
 
-extern std::vector<std::unique_ptr<UniformBuffer>> g_uniform_buffers;
+template <typename TBlock, typename... TParams>
+UniformBuffer<TBlock> create_uniform_buffer(TParams &&...params)
+{
+    GLuint buffer_object{OGL::create_uniform_buffer()};
+    return {buffer_object, std::forward<TParams>(params)...};
+}
 
 void init_uniform_buffer_system();
 
-template <typename TUniformBuffer, typename... TArgs>
-TUniformBuffer &create_uniform_buffer(UniformBufferId buffer_id, TArgs &&...buffer_args)
-{
-    if (buffer_id >= g_uniform_buffers.size())
-        g_uniform_buffers.resize(buffer_id + 1);
-
-    g_uniform_buffers[buffer_id] = std::make_unique<TUniformBuffer>(std::forward<TArgs>(buffer_args)...);
-    return static_cast<TUniformBuffer &>(*g_uniform_buffers[buffer_id]);
-}
-
-const UniformBuffer &get_uniform_buffer(UniformBufferId buffer_id);
-
-void bind_uniform_buffer(GLuint binding_point, const UniformBufferRange &buffer_range);
-void bind_uniform_buffer(const UniformBufferRangeBind &buffer_bind);
+void bind_uniform_buffer_range(
+    GLuint shader_program, UniformBlock &uniform_block, UniformBufferRangeId uniform_buffer_range_id
+);
 } // namespace Age::Gfx

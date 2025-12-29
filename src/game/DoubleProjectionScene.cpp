@@ -12,6 +12,7 @@
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
 #include "Input.hpp"
+#include "Lighting.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
 #include "Rendering.hpp"
@@ -83,7 +84,7 @@ struct ViewMatrixReader
 {
     static constexpr Core::ComponentType TYPE{VIEW_MATRIX_READER};
 
-    Core::EntityId entity_id{Core::NULL_ENTITY_ID};
+    Core::EntityId entity_id{};
 };
 
 void read_view_matrix(const ViewMatrixReader &reader, Gfx::WorldToViewMatrix &view_matrix)
@@ -100,7 +101,7 @@ void rotate_in_post_proj_space(
     const PostProjectionRotation &,
     const Gfx::SphericalCamera &spherical_camera,
     Gfx::ViewToClipMatrix &view_to_clip_matrix,
-    const Gfx::ProjectionBufferBlockRef &projection_buffer_block
+    const Gfx::ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
     const Math::Vector2 &rotation_angles{spherical_camera.spherical_coord.angles};
@@ -109,7 +110,7 @@ void rotate_in_post_proj_space(
         Math::affine_yx_rotation_matrix(rotation_angles.y, rotation_angles.x - Math::PI * 0.5f).transpose() *
         view_to_clip_matrix.matrix;
 
-    projection_buffer_block = {.view_to_clip_matrix{view_to_clip_matrix.matrix}};
+    projection_uniform_buffer.buffer.update({view_to_clip_matrix.matrix});
 }
 } // namespace
 
@@ -118,7 +119,6 @@ void DoubleProjectionScene::init() const
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::UniformBufferId next_uniform_buffer_id{0};
     Gfx::TextureId next_texture_id{0};
     Gfx::SamplerId next_sampler_id{0};
 
@@ -158,17 +158,12 @@ void DoubleProjectionScene::init() const
     Gfx::create_viewport(LEFT_VIEWPORT_ID);
     Gfx::create_viewport(RIGHT_VIEWPORT_ID);
 
-    auto lights_buffer_id = next_uniform_buffer_id++;
-    auto &lights_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsBlock>>(lights_buffer_id);
-
     // Left camera
     Core::EntityId left_camera_id;
     {
         Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
-        auto projection_buffer_id = next_uniform_buffer_id++;
-        auto &projection_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
+        auto projection_buffer = Gfx::create_uniform_buffer<Gfx::ProjectionBlock>();
 
         left_camera_id = Core::create_entity(
             camera,
@@ -177,8 +172,7 @@ void DoubleProjectionScene::init() const
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}, .viewport_id{LEFT_VIEWPORT_ID}},
-            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
-            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
+            Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_LEFT}},
             Gfx::SphericalCamera{
@@ -194,9 +188,7 @@ void DoubleProjectionScene::init() const
     {
         Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
-        auto projection_buffer_id = next_uniform_buffer_id++;
-        auto &projection_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
+        auto projection_buffer = Gfx::create_uniform_buffer<Gfx::ProjectionBlock>();
 
         Core::create_entity(
             camera,
@@ -209,8 +201,7 @@ void DoubleProjectionScene::init() const
                 .clear_color{0.75f, 0.75f, 1.0f, 1.0f},
                 .viewport_id{RIGHT_VIEWPORT_ID}
             },
-            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
-            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
+            Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_RIGHT}},
             Gfx::SphericalCamera{
@@ -222,22 +213,32 @@ void DoubleProjectionScene::init() const
         );
     }
 
-    // Global settings
+    auto light_buffer = Gfx::create_uniform_buffer<Gfx::LightBlock>();
+    auto light_buffer_range_id = light_buffer.create_range();
+
+    // Light settings
     {
-        Core::create_entity(
-            Gfx::GlobalLightSettings{
+        auto light_settings_id = Core::create_entity(
+            Gfx::LightSettings{
                 .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
                 .light_attenuation{1.0f / (25.0f * 25.0f)},
                 .max_intensity{1.0f}
             }
         );
-    }
 
-    // Directional light
-    {
-        Core::create_entity(
+        auto directional_light_id = Core::create_entity(
             Core::Transform{.position{Math::normalize(Math::Vector3{1.0f, 1.0f, -1.0f})}},
             Gfx::DirectionalLight{.light_intensity{0.8f, 0.8f, 0.8f, 1.0f}}
+        );
+
+        Core::create_entity(
+            Gfx::LightGroup{
+                .light_settings_id = light_settings_id,
+                .light_ids = {directional_light_id},
+                .light_types = {Core::ComponentType::DIRECTIONAL_LIGHT},
+                .uniform_buffer = light_buffer,
+                .uniform_buffer_range_id = light_buffer_range_id,
+            }
         );
     }
 
@@ -246,6 +247,7 @@ void DoubleProjectionScene::init() const
         auto material_id = next_material_id++;
         auto &material =
             Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(material_id, lit_diffuse_texture_shader_id);
+        material.light_buffer_range_id = light_buffer_range_id;
         material.texture_id = checkerboard_texture_id;
         material.sampler_id = linear_sampler_id;
 
@@ -258,7 +260,7 @@ void DoubleProjectionScene::init() const
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
     }
 
     Core::process_components(Gfx::calc_spherical_camera_view_matrix);

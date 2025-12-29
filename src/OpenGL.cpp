@@ -15,7 +15,7 @@ GLuint create_shader(ShaderType shader_type)
     return glCreateShader(static_cast<GLenum>(shader_type));
 }
 
-void use_program(GLuint shader_program)
+void use_shader(GLuint shader_program)
 {
     glUseProgram(shader_program);
 }
@@ -32,7 +32,7 @@ void set_uniform(GLint location, bool value)
     glUniform1i(location, value);
 }
 
-void set_uniform(GLint location, int value)
+void set_uniform(GLint location, std::int32_t value)
 {
     glUniform1i(location, value);
 }
@@ -85,36 +85,39 @@ void write_array_buffer(GLuint array_buffer_object, std::size_t offset, const vo
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
 
-GLuint create_uniform_buffer(std::size_t size)
+GLuint create_uniform_buffer()
 {
-    GLuint uniform_buffer_object;
+    GLuint uniform_buffer;
+    glGenBuffers(1, &uniform_buffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
+    return uniform_buffer;
+}
 
-    glGenBuffers(1, &uniform_buffer_object);
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
+void allocate_uniform_buffer(GLuint uniform_buffer, std::size_t size)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
     glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-
-    return uniform_buffer_object;
 }
 
-void write_uniform_buffer(GLuint uniform_buffer_object, const void *data, std::size_t size)
+void write_uniform_buffer(GLuint uniform_buffer, const void *data, std::size_t size)
 {
-    write_uniform_buffer(uniform_buffer_object, 0, data, size);
+    write_uniform_buffer(uniform_buffer, 0, data, size);
 }
 
-void write_uniform_buffer(GLuint uniform_buffer_object, std::size_t offset, const void *data, std::size_t size)
+void write_uniform_buffer(GLuint uniform_buffer, std::size_t offset, const void *data, std::size_t size)
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_object);
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
     glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
-void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer_object, std::size_t size)
+void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer, std::size_t size)
 {
-    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer_object, 0, size);
+    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer, 0, size);
 }
 
-void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer_object, std::size_t offset, std::size_t size)
+void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer, std::size_t offset, std::size_t size)
 {
-    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer_object, offset, size);
+    glBindBufferRange(GL_UNIFORM_BUFFER, binding_point, uniform_buffer, offset, size);
 }
 
 void bind_vertex_array_object(GLuint vao)

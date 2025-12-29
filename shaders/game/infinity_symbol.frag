@@ -2,18 +2,16 @@
 
 layout(std140) uniform;
 
-in VertexData
+in Varyings
 {
     vec4 viewPosition;
     vec3 viewNormal;
     vec2 textureCoord;
 } In;
 
-out vec4 oColor;
-
-uniform sampler2D uGaussianTexture;
-uniform sampler2D uShininessTexture;
-uniform bool uUseShininessTex;
+uniform sampler2D _gaussianTexture;
+uniform sampler2D _shininessTexture;
+uniform bool _useShininessTex;
 
 struct Light
 {
@@ -23,7 +21,7 @@ struct Light
 
 const int LIGHT_COUNT = 2;
 
-uniform LightsBlock
+uniform LightBlock
 {
     vec4 ambientIntensity;
     float attenuation;
@@ -37,6 +35,8 @@ uniform MaterialBlock
     vec4 specularColor;
     float surfaceShininess;
 } Material;
+
+out vec4 outColor;
 
 float attenuatedLightIntensity(in vec3 viewPosition, in vec3 viewLightPosition, out vec3 directionToLight)
 {
@@ -69,15 +69,15 @@ vec4 calcLighting(in Light light)
 
     // Specular lighting
     float shininess;
-    if (uUseShininessTex)
-		shininess = texture(uShininessTexture, In.textureCoord).r;
+    if (_useShininessTex)
+		shininess = texture(_shininessTexture, In.textureCoord).r;
 	else
         shininess = Material.surfaceShininess;
 
     vec3 viewDirection = normalize(-viewPosition);
     vec3 halfAngleDirection = normalize(viewDirection + directionToLight);
     float halfAngleCos = dot(viewNormal, halfAngleDirection);
-    float gaussianTerm = texture(uGaussianTexture, vec2(sqrt(halfAngleCos), shininess)).r;
+    float gaussianTerm = texture(_gaussianTexture, vec2(sqrt(halfAngleCos), shininess)).r;
     // float halfAngle = acos(halfAngleCos);
 
     // float gaussianExponent = halfAngle / Material.surfaceShininess;
@@ -97,5 +97,5 @@ void main()
         accumulatedLight += calcLighting(Lights.lights[index]);
     }
 	accumulatedLight /= Lights.maxIntensity;
-    oColor = accumulatedLight;
+    outColor = accumulatedLight;
 }

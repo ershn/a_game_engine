@@ -66,109 +66,73 @@ void create_plane_mesh(Gfx::MeshBuffers &mesh_buffers, std::span<Gfx::DrawComman
     draw_commands[0] = {
         .type{Gfx::DrawCommandType::DRAW_ELEMENTS},
         .rendering_mode{Gfx::OGL::RenderingMode::TRIANGLES},
-        .element_count{sizeof(s_plane_indexes) / sizeof(*s_plane_indexes)},
+        .element_count{std::size(s_plane_indexes)},
     };
 }
 
 struct GammaAndTexturesShader : public Gfx::Shader
 {
-    GLint texture_unit{};
+    Gfx::SamplerUniform sampler{};
 
     GammaAndTexturesShader(GLuint shader_program)
-        : Shader{shader_program, Gfx::SHADER_LV_MATRIX}
-        , texture_unit{Gfx::OGL::get_uniform_location(shader_program, "uTexture")}
+        : Shader{shader_program}
+        , sampler{Gfx::OGL::get_uniform_location(shader_program, "_texture")}
     {
     }
 };
 
 struct GammaAndTexturesMaterial : public Gfx::Material
 {
-    int texture_unit{};
+    Gfx::TextureId texture_id{Gfx::NULL_TEXTURE_ID};
+    Gfx::SamplerId sampler_id{Gfx::NULL_SAMPLER_ID};
 
-    GammaAndTexturesMaterial(Age::Gfx::Shader &shader)
+    GammaAndTexturesMaterial(Gfx::Shader &shader)
         : Material{shader}
     {
     }
 
     void apply_properties() const override
     {
-        auto &shader = static_cast<const GammaAndTexturesShader &>(this->shader);
-        Gfx::OGL::set_uniform(shader.texture_unit, texture_unit);
+        auto &shader = static_cast<GammaAndTexturesShader &>(this->shader);
+        Gfx::bind_texture_and_sampler(shader.sampler, texture_id, sampler_id);
     }
 };
-
-constexpr int surface_texture_unit{1};
 
 void GammaAndTexturesScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::UniformBufferId next_uniform_buffer_id{0};
+    Gfx::TextureId next_texture_id{0};
+    Gfx::SamplerId next_sampler_id{0};
 
     Gfx::TextureData gamma_ramp_texture_data{};
     if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/gamma_ramp.dds", gamma_ramp_texture_data))
         return;
 
-    GLuint gamma_ramp_texture;
-    glGenTextures(1, &gamma_ramp_texture);
-    glBindTexture(GL_TEXTURE_2D, gamma_ramp_texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_SRGB8,
-        gamma_ramp_texture_data.desc.width,
-        gamma_ramp_texture_data.desc.height,
-        0,
-        GL_BGRA,
-        GL_UNSIGNED_INT_8_8_8_8_REV,
-        gamma_ramp_texture_data.bytes.get()
+    Gfx::TextureId gamma_ramp_texture_id{next_texture_id++};
+    Gfx::load_texture(gamma_ramp_texture_id, gamma_ramp_texture_data);
+
+    Gfx::SamplerId nearest_clamp_sampler_id{next_sampler_id++};
+    Gfx::create_sampler(
+        nearest_clamp_sampler_id,
+        Gfx::SamplerParams{.flags{
+            .texture_wrap_s = Gfx::TextureWrapMode::CLAMP_TO_EDGE, .texture_wrap_t = Gfx::TextureWrapMode::CLAMP_TO_EDGE
+        }}
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
-    glActiveTexture(GL_TEXTURE0 + surface_texture_unit);
-    glBindTexture(GL_TEXTURE_2D, gamma_ramp_texture);
-
-    GLuint texture_sampler;
-    glGenSamplers(1, &texture_sampler);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(texture_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glBindSampler(surface_texture_unit, texture_sampler);
 
     // Camera
     Core::EntityId camera_id;
     {
-        auto projection_buffer_id = next_uniform_buffer_id++;
-        auto &projection_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
-
-        auto lights_buffer_id = next_uniform_buffer_id++;
-        auto &lights_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsBlock>>(lights_buffer_id);
+        auto projection_buffer = Gfx::create_uniform_buffer<Gfx::ProjectionBlock>();
 
         camera_id = Core::create_entity(
             Gfx::WindowSpaceCamera{},
             Gfx::WorldToViewMatrix{.matrix{1.0f}},
             Gfx::ViewToClipMatrix{Gfx::window_space_orthographic_proj_matrix(1, 1)},
             Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
-            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
-            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
+            Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             GameKeyboardController{}
-        );
-    }
-
-    // Global settings
-    Core::EntityId global_settings_id;
-    {
-        global_settings_id = Core::create_entity(
-            Gfx::GlobalLightSettings{
-                .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
-                .light_attenuation{1.0f / (25.0f * 25.0f)},
-                .max_intensity{1.0f}
-            }
         );
     }
 
@@ -188,13 +152,14 @@ void GammaAndTexturesScene::init() const
 
         auto material_id = next_material_id++;
         auto &material = Gfx::create_material<GammaAndTexturesMaterial>(material_id, gamma_and_textures_shader_id);
-        material.texture_unit = surface_texture_unit;
+        material.texture_id = gamma_ramp_texture_id;
+        material.sampler_id = nearest_clamp_sampler_id;
 
         auto id = Core::create_entity(
             Gfx::LocalToViewMatrix{.matrix{1.0f}}, Gfx::MaterialRef{material_id}, Gfx::MeshRef{mesh_id}, Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX);
     }
 }
 

@@ -8,10 +8,7 @@
 #include "Material.hpp"
 #include "Matrix.hpp"
 #include "Mesh.hpp"
-#include "Shader.hpp"
 #include "Transform.hpp"
-#include "UniformBlocks.hpp"
-#include "UniformBuffer.hpp"
 
 namespace Age::Gfx
 {
@@ -31,9 +28,8 @@ struct LocalToViewNormalMatrix
 
 struct DrawCall
 {
-    const Math::Matrix4 *local_to_view_matrix{};
-    const Math::Matrix3 *local_to_view_normal_matrix{};
-    const UniformBufferRangeBind *uniform_buffer_range_bind{};
+    const Math::Matrix4 *lv_matrix{};
+    const Math::Matrix3 *lv_normal_matrix{};
     MaterialId material_id{};
     MeshId mesh_id{};
 };
@@ -52,44 +48,13 @@ struct Renderer
     static constexpr auto TYPE{Core::ComponentType::RENDERER};
 
     DrawCallKey draw_call_key{};
-    bool is_active{};
-};
-
-struct GlobalLightSettings
-{
-    static constexpr auto TYPE{Core::ComponentType::GLOBAL_LIGHT_SETTINGS};
-
-    Math::Vector4 ambient_light_intensity{};
-    float light_attenuation{};
-    float max_intensity{};
-};
-
-struct DirectionalLight
-{
-    static constexpr auto TYPE{Core::ComponentType::DIRECTIONAL_LIGHT};
-
-    Math::Vector4 light_intensity{};
-};
-
-struct PointLight
-{
-    static constexpr auto TYPE{Core::ComponentType::POINT_LIGHT};
-
-    Math::Vector4 light_intensity{};
-};
-
-struct LightsBufferBlockRef : public UniformBufferBlockRef<LightsBlock>
-{
-    static constexpr auto TYPE{Core::ComponentType::LIGHTS_BUFFER_BLOCK};
-
-    using UniformBufferBlockRef<LightsBlock>::operator=;
+    bool is_active{true};
 };
 
 void init_rendering_system(GLFWwindow *window);
 
-inline constexpr unsigned int RENDER_WITH_LV_MATRIX{0b1};
-inline constexpr unsigned int RENDER_WITH_LV_NORMAL_MATRIX{0b10};
-inline constexpr unsigned int RENDER_WITH_BUFFER_RANGE_BIND{0b100};
+inline constexpr unsigned int WITH_LV_MATRIX{0b1};
+inline constexpr unsigned int WITH_LV_NORMAL_MATRIX{0b10};
 
 void init_renderer(Core::EntityId entity_id, unsigned int options = 0);
 

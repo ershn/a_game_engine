@@ -3,17 +3,18 @@
 #include <utility>
 #include <vector>
 
-#include "Color.hpp"
 #include "DDS.hpp"
 #include "DefaultMaterials.hpp"
 #include "DefaultMeshes.hpp"
 #include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Lighting.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
 #include "Rendering.hpp"
 #include "SphericalCamera.hpp"
+#include "Time.hpp"
 #include "Transformations.hpp"
 #include "UniformBlocks.hpp"
 
@@ -27,65 +28,183 @@ namespace Game
 {
 using namespace Age;
 
-constexpr Gfx::ShaderId UNLIT_SHADER{0};
-constexpr Gfx::ShaderId UNLIT_COLOR_SHADER{1};
-constexpr Gfx::ShaderId FRAGMENT_LIGHTING_SHADER{2};
-constexpr Gfx::ShaderId FRAGMENT_LIGHTING_COLOR_SHADER{3};
+struct SphereImpostorShader : public Age::Gfx::Shader
+{
+    Gfx::UniformBlock light_block{};
+    Gfx::UniformBlock materials_block{};
 
-constexpr Gfx::MaterialId UNLIT_MATERIAL{0};
+    SphereImpostorShader(GLuint shader_program)
+        : Shader{shader_program, {.lv_matrix = false}}
+        , light_block{Gfx::OGL::get_uniform_block_index(shader_program, "LightBlock")}
+        , materials_block{Gfx::OGL::get_uniform_block_index(shader_program, "MaterialsBlock")}
+    {
+    }
+};
+
+struct SphereImpostorMaterial : public Age::Gfx::Material
+{
+    Gfx::UniformBufferRangeId light_buffer_range_id{};
+    Gfx::UniformBufferRangeId materials_buffer_range_id{};
+
+    SphereImpostorMaterial(Age::Gfx::Shader &shader)
+        : Material{shader}
+    {
+    }
+
+    void apply_properties() const override
+    {
+        auto &shader = static_cast<SphereImpostorShader &>(this->shader);
+        Gfx::bind_uniform_buffer_range(shader.shader_program, shader.light_block, light_buffer_range_id);
+        Gfx::bind_uniform_buffer_range(shader.shader_program, shader.materials_block, materials_buffer_range_id);
+    }
+};
+
+struct Sunlight
+{
+    static constexpr Age::Core::ComponentType TYPE{ComponentType::SUNLIGHT};
+
+    struct LightIntensity
+    {
+        float normalized_time{};
+        float max_intensity{};
+        Age::Math::Vector4 intensity;
+        Age::Math::Vector4 ambient_intensity;
+        Age::Math::Vector4 sky_color;
+    };
+
+    std::vector<LightIntensity> light_intensities;
+    float day_length{};
+    float time{};
+    Age::Core::EntityId camera_id{};
+    Age::Core::EntityId light_settings_id{};
+};
+
+void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::DirectionalLight &directional_light)
+{
+    sunlight.time += Time::delta_time();
+    if (sunlight.time >= sunlight.day_length)
+        sunlight.time -= sunlight.day_length;
+
+    float normalized_time{sunlight.time / sunlight.day_length};
+    auto intensity_it_2 = std::find_if(
+        sunlight.light_intensities.cbegin(), sunlight.light_intensities.cend(), [=](const auto &light_intensity) {
+            return normalized_time < light_intensity.normalized_time;
+        }
+    );
+    auto intensity_it_1 = intensity_it_2 - 1;
+
+    float segment_normalized_time{
+        Math::inverse_lerp(intensity_it_1->normalized_time, intensity_it_2->normalized_time, normalized_time)
+    };
+    directional_light.light_intensity =
+        Math::lerp(intensity_it_1->intensity, intensity_it_2->intensity, segment_normalized_time);
+
+    float sun_angle{Math::TAU - Math::TAU * normalized_time - Math::PI * 0.5f};
+    transform.position = {std::cos(sun_angle), std::sin(sun_angle), 0.0f};
+
+    auto &camera_render_state = Core::get_entity_component<Gfx::CameraRenderState>(sunlight.camera_id);
+    camera_render_state.clear_color =
+        Math::lerp(intensity_it_1->sky_color, intensity_it_2->sky_color, segment_normalized_time);
+
+    auto &light_settings = Core::get_entity_component<Gfx::LightSettings>(sunlight.light_settings_id);
+    light_settings.max_intensity =
+        Math::lerp(intensity_it_1->max_intensity, intensity_it_2->max_intensity, segment_normalized_time);
+    light_settings.ambient_light_intensity =
+        Math::lerp(intensity_it_1->ambient_intensity, intensity_it_2->ambient_intensity, segment_normalized_time);
+}
+
+struct SphereImpostors
+{
+    static constexpr Age::Core::ComponentType TYPE{ComponentType::SPHERE_IMPOSTORS};
+
+    struct Instance
+    {
+        Age::Math::Vector3 worldPosition;
+        float radius{};
+    };
+
+    Instance instances[4];
+    std::size_t instance_count{};
+    Age::Core::EntityId camera_id{};
+};
+
+void update_sphere_impostors(const SphereImpostors &sphere_impostors, const Gfx::MeshRef &mesh_ref)
+{
+    auto &wv_matrix = Core::get_entity_component<const Gfx::WorldToViewMatrix>(sphere_impostors.camera_id).matrix;
+    auto vbo = Gfx::get_mesh_buffers(mesh_ref.mesh_id).vertex_buffer_object;
+
+    SphereImpostor buffer_values[4];
+    for (std::size_t index{}; index < sphere_impostors.instance_count; ++index)
+    {
+        auto &instance = sphere_impostors.instances[index];
+        buffer_values[index] = {
+            .viewPosition{Math::Vector3{wv_matrix * Math::Vector4{instance.worldPosition, 1.0f}}},
+            .radius{instance.radius}
+        };
+    }
+
+    Gfx::OGL::write_array_buffer(vbo, buffer_values, sphere_impostors.instance_count * sizeof(SphereImpostor));
+}
+
+struct MaterialKeyboardController
+{
+    static constexpr Age::Core::ComponentType TYPE{ComponentType::MATERIAL_KEYBOARD_CONTROLLER};
+};
+
+void control_material_via_keyboard(const MaterialKeyboardController &, const Gfx::MaterialRef &material_ref)
+{
+    auto &material = static_cast<Gfx::FragmentLightingColorMaterial &>(Gfx::get_material(material_ref.material_id));
+
+    if (Input::is_key_down(GLFW_KEY_B))
+        material.surface_shininess = std::clamp(material.surface_shininess + 0.01f, 0.01f, 1.0f);
+    else if (Input::is_key_down(GLFW_KEY_G))
+        material.surface_shininess = std::clamp(material.surface_shininess - 0.01f, 0.01f, 1.0f);
+}
 
 void ValleyScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{100};
-    Gfx::MaterialId next_material_id{100};
-    Gfx::UniformBufferId next_uniform_buffer_id{0};
+    Gfx::ShaderId next_shader_id{0};
+    Gfx::MaterialId next_material_id{0};
 
     auto ground_mesh_id = next_mesh_id++;
     Gfx::create_mesh<1>(ground_mesh_id, std::function{create_ground_mesh});
 
+    Gfx::ShaderId unlit_shader{next_shader_id++};
     {
         Gfx::ShaderAsset shader_assets[] = {
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
         };
-        Gfx::create_shader<Gfx::UnlitShader>(UNLIT_SHADER, shader_assets);
+        Gfx::create_shader<Gfx::UnlitShader>(unlit_shader, shader_assets);
     }
+    Gfx::ShaderId unlit_color_shader{next_shader_id++};
     {
         Gfx::ShaderAsset shader_assets[] = {
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
         };
-        Gfx::create_shader<Gfx::UnlitColorShader>(UNLIT_COLOR_SHADER, shader_assets);
+        Gfx::create_shader<Gfx::UnlitColorShader>(unlit_color_shader, shader_assets);
     }
+    Gfx::ShaderId fragment_lighting_shader{next_shader_id++};
     {
         Gfx::ShaderAsset shader_assets[] = {
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting.vert"},
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}
         };
-        Gfx::create_shader<FragmentLightingShader>(FRAGMENT_LIGHTING_SHADER, shader_assets);
+        Gfx::create_shader<FragmentLightingShader>(fragment_lighting_shader, shader_assets);
     }
+    Gfx::ShaderId fragment_lighting_color_shader{next_shader_id++};
     {
         Gfx::ShaderAsset shader_assets[] = {
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting_color.vert"},
             Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}
         };
-        Gfx::create_shader<FragmentLightingColorShader>(FRAGMENT_LIGHTING_COLOR_SHADER, shader_assets);
+        Gfx::create_shader<FragmentLightingColorShader>(fragment_lighting_color_shader, shader_assets);
     }
 
-    auto &unlit_material = Gfx::create_material<Gfx::UnlitMaterial>(UNLIT_MATERIAL, UNLIT_SHADER);
-
-    auto projection_buffer_id = next_uniform_buffer_id++;
-    auto &projection_buffer =
-        Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
-
-    auto lights_buffer_id = next_uniform_buffer_id++;
-    auto &lights_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsBlock>>(lights_buffer_id);
-
-    auto material_buffer_id = next_uniform_buffer_id++;
-    auto &material_buffer =
-        Gfx::create_uniform_buffer<Gfx::ArrayUniformBuffer<Gfx::MaterialBlock>>(material_buffer_id, 4);
-    auto material_buffer_writer = Gfx::ArrayUniformBufferWriter{material_buffer};
+    auto material_buffer = Gfx::create_uniform_buffer<Gfx::MaterialBlock[4]>();
+    auto material_buffer_writer = Gfx::UniformBufferWriter<decltype(material_buffer)>{material_buffer};
 
     constexpr std::size_t TEXTURE_SIZE{512};
 
@@ -196,6 +315,8 @@ void ValleyScene::init() const
     {
         Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
+        auto projection_buffer = Gfx::create_uniform_buffer<Gfx::ProjectionBlock>();
+
         camera_id = Core::create_entity(
             camera,
             Gfx::WorldToViewMatrix{},
@@ -203,8 +324,7 @@ void ValleyScene::init() const
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::CameraRenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
-            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
-            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
+            Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
                 .origin{0.0f, 2.0f, 0.0f}, .spherical_coord{30.0f, Math::Vector2{Math::radians(60.0f), 0.0f}}
@@ -213,15 +333,16 @@ void ValleyScene::init() const
         );
     }
 
-    // Global settings
-    Core::EntityId global_settings_id;
+    // Light settings
+    Core::EntityId light_settings_id;
     {
-        global_settings_id = Core::create_entity(Gfx::GlobalLightSettings{.light_attenuation{0.2f}});
+        light_settings_id = Core::create_entity(Gfx::LightSettings{.light_attenuation{0.2f}});
     }
 
     // Directional light 1
+    Core::EntityId directional_light_id;
     {
-        Core::create_entity(
+        directional_light_id = Core::create_entity(
             Core::Transform{.position{Math::normalize(Math::Vector3{1.0f, 1.0f, -1.0f})}},
             Gfx::DirectionalLight{},
             Sunlight{
@@ -229,17 +350,18 @@ void ValleyScene::init() const
                 .day_length{30.0f},
                 .time{5.0f},
                 .camera_id{camera_id},
-                .light_settings_id{global_settings_id}
+                .light_settings_id{light_settings_id}
             }
         );
     }
 
     // Point light 1
+    Core::EntityId point_light_1_id;
     {
         auto material_id = next_material_id++;
-        Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, UNLIT_COLOR_SHADER);
+        Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader);
 
-        auto id = Core::create_entity(
+        point_light_1_id = Core::create_entity(
             Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}},
             Gfx::LocalToViewMatrix{},
             Gfx::MaterialRef{material_id},
@@ -254,16 +376,17 @@ void ValleyScene::init() const
             }
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_1_id, Gfx::WITH_LV_MATRIX);
     }
 
     // Point light 2
+    Core::EntityId point_light_2_id;
     {
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, UNLIT_COLOR_SHADER);
-        material.color = {0.0f, 0.0f, 1.0f, 1.0f};
+        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader);
+        material.color = {0.0f, 0.0f, 1.0f};
 
-        auto id = Core::create_entity(
+        point_light_2_id = Core::create_entity(
             Core::Transform{
                 .position{-0.600002f, 6.20000f, 0.300000f},
                 .orientation{1.00000f, 0.00000f, 0.00000f, 0.00000f},
@@ -282,16 +405,17 @@ void ValleyScene::init() const
             }
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_2_id, Gfx::WITH_LV_MATRIX);
     }
 
     // Point light 3
+    Core::EntityId point_light_3_id;
     {
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, UNLIT_COLOR_SHADER);
-        material.color = {1.0f, 0.0f, 0.0f, 1.0f};
+        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader);
+        material.color = {1.0f, 0.0f, 0.0f};
 
-        auto id = Core::create_entity(
+        point_light_3_id = Core::create_entity(
             Core::Transform{
                 .position{point_light_path_3[0]},
                 .orientation{1.00000f, 0.00000f, 0.00000f, 0.00000f},
@@ -310,13 +434,35 @@ void ValleyScene::init() const
             }
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_3_id, Gfx::WITH_LV_MATRIX);
+    }
+
+    auto light_buffer = Gfx::create_uniform_buffer<Gfx::LightBlock>();
+    auto light_buffer_range_id = light_buffer.create_range();
+
+    // Light group
+    {
+        Core::create_entity(
+            Gfx::LightGroup{
+                .light_settings_id = light_settings_id,
+                .light_ids = {directional_light_id, point_light_1_id, point_light_2_id, point_light_3_id},
+                .light_types =
+                    {Core::ComponentType::DIRECTIONAL_LIGHT,
+                     Core::ComponentType::POINT_LIGHT,
+                     Core::ComponentType::POINT_LIGHT,
+                     Core::ComponentType::POINT_LIGHT},
+                .uniform_buffer = light_buffer,
+                .uniform_buffer_range_id = light_buffer_range_id,
+            }
+        );
     }
 
     // Ground
     {
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
+        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, fragment_lighting_shader);
+        material.light_buffer_range_id = light_buffer_range_id;
+        material.material_buffer_range_id = material_buffer.create_range(0, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
 
         material_buffer_writer[0] = {.specular_color{0.0f}, .surface_shininess{0.1f}};
@@ -328,14 +474,11 @@ void ValleyScene::init() const
             Gfx::LocalToViewMatrix{},
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::UniformBufferRangeBind{material_buffer.get_block(0).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::MeshRef{ground_mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(
-            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
-        );
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
     }
 
     // Cylinder
@@ -343,7 +486,9 @@ void ValleyScene::init() const
         auto mesh_id = Gfx::CYLINDER_MESH_ID;
         auto material_id = next_material_id++;
         auto &material =
-            Gfx::create_material<FragmentLightingColorMaterial>(material_id, FRAGMENT_LIGHTING_COLOR_SHADER);
+            Gfx::create_material<FragmentLightingColorMaterial>(material_id, fragment_lighting_color_shader);
+        material.light_buffer_range_id = light_buffer_range_id;
+        material.material_buffer_range_id = material_buffer.create_range(1, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
         material.diffuse_color = {0.968f, 0.141f, 0.019f, 1.0f};
 
@@ -358,21 +503,20 @@ void ValleyScene::init() const
             Gfx::LocalToViewMatrix{},
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::UniformBufferRangeBind{material_buffer.get_block(1).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(
-            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
-        );
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
     }
 
     // Cube 1
     {
         auto mesh_id = Gfx::CUBE_MESH_ID;
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
+        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, fragment_lighting_shader);
+        material.light_buffer_range_id = light_buffer_range_id;
+        material.material_buffer_range_id = material_buffer.create_range(2, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
 
         material_buffer_writer[2] = {.specular_color{0.3f, 0.3f, 0.3f, 1.0f}, .surface_shininess{0.1f}};
@@ -386,21 +530,20 @@ void ValleyScene::init() const
             Gfx::LocalToViewMatrix{},
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::UniformBufferRangeBind{material_buffer.get_block(2).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(
-            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
-        );
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
     }
 
     // Cube 2
     {
         auto mesh_id = Gfx::CUBE_MESH_ID;
         auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, FRAGMENT_LIGHTING_SHADER);
+        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, fragment_lighting_shader);
+        material.light_buffer_range_id = light_buffer_range_id;
+        material.material_buffer_range_id = material_buffer.create_range(3, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
 
         material_buffer_writer[3] = {.specular_color{1.0f}, .surface_shininess{0.1f}};
@@ -414,14 +557,11 @@ void ValleyScene::init() const
             Gfx::LocalToViewMatrix{},
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::UniformBufferRangeBind{material_buffer.get_block(3).get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(
-            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
-        );
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
     }
 
     material_buffer_writer.apply();
@@ -439,21 +579,19 @@ void ValleyScene::init() const
         auto shader_id = next_shader_id++;
         Gfx::create_shader<SphereImpostorShader>(shader_id, shader_assets);
 
+        auto materials_buffer = Gfx::create_uniform_buffer<Age::Gfx::MaterialsBlock<4>>();
+        auto materials_buffer_range_id = materials_buffer.create_range();
+        materials_buffer.update(
+            {.materials = {
+                 {.diffuse_color{0.223f, 0.635f, 0.443f, 1.0f}, .specular_color{0.0f}},
+                 {.diffuse_color{0.968f, 0.141f, 0.019f, 1.0f}, .specular_color{0.0f}}
+             }}
+        );
+
         auto material_id = next_material_id++;
-        Gfx::create_material<SphereImpostorMaterial>(material_id, shader_id);
-
-        auto materials_buffer_id = next_uniform_buffer_id++;
-        auto &materials_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Age::Gfx::MaterialsBlock<4>>>(materials_buffer_id);
-
-        auto block = materials_buffer.get_block();
-        block = {
-            .materials = {
-                {.diffuse_color{0.223f, 0.635f, 0.443f, 1.0f}, .specular_color{0.0f}},
-                {.diffuse_color{0.968f, 0.141f, 0.019f, 1.0f}, .specular_color{0.0f}}
-            }
-        };
-        Gfx::bind_uniform_buffer(MATERIALS_BLOCK_BINDING, block.get_buffer_range());
+        auto &material = Gfx::create_material<SphereImpostorMaterial>(material_id, shader_id);
+        material.light_buffer_range_id = light_buffer_range_id;
+        material.materials_buffer_range_id = materials_buffer_range_id;
 
         auto id = Core::create_entity(
             Gfx::MeshRef{mesh_id},

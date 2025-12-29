@@ -193,6 +193,18 @@ static Vector2 calc_perspective_proj_zoom(float aspect_ratio, float vertical_fov
     return Vector2{1.0f / (proj_plane_vertical_size * aspect_ratio), 1.0f / proj_plane_vertical_size};
 }
 
+Matrix4 perspective_proj_matrix(float aspect_ratio, float vertical_fov)
+{
+    Vector2 zoom{calc_perspective_proj_zoom(aspect_ratio, vertical_fov)};
+
+    Matrix4 matrix{};
+    matrix[0].x = zoom.x;
+    matrix[1].y = zoom.y;
+    matrix[2].z = 1.0f;
+    matrix[2].w = -1.0f;
+    return matrix;
+}
+
 Matrix4 perspective_proj_matrix(float z_near, float z_far, float aspect_ratio, float vertical_fov)
 {
     Vector2 zoom{calc_perspective_proj_zoom(aspect_ratio, vertical_fov)};
@@ -217,6 +229,18 @@ void update_perspective_proj_zoom(Matrix4 &perspective_matrix, float aspect_rati
 static Vector2 calc_orthographic_proj_size(float aspect_ratio, float vertical_size)
 {
     return Vector2{1.0f / (vertical_size * 0.5f * aspect_ratio), 1.0f / (vertical_size * 0.5f)};
+}
+
+Matrix4 orthographic_proj_matrix(float aspect_ratio, float vertical_size)
+{
+    Vector2 orthographic_size{calc_orthographic_proj_size(aspect_ratio, vertical_size)};
+
+    Matrix4 matrix{};
+    matrix[0].x = orthographic_size.x;
+    matrix[1].y = orthographic_size.y;
+    matrix[2].z = 1.0f;
+    matrix[3].w = 1.0f;
+    return matrix;
 }
 
 Matrix4 orthographic_proj_matrix(float z_near, float z_far, float aspect_ratio, float vertical_size)

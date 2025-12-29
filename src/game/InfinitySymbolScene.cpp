@@ -3,25 +3,22 @@
 #include <utility>
 #include <vector>
 
-#include "Color.hpp"
 #include "DDS.hpp"
 #include "DefaultMaterials.hpp"
 #include "DefaultMeshes.hpp"
 #include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Lighting.hpp"
 #include "OpenGL.hpp"
-#include "Path.hpp"
 #include "Rendering.hpp"
 #include "SphericalCamera.hpp"
 #include "Transformations.hpp"
-#include "UniformBlocks.hpp"
 
 #include "game/InfinitySymbolMesh.hpp"
 #include "game/InfinitySymbolScene.hpp"
 #include "game/Meshes.hpp"
 #include "game/Processing.hpp"
-#include "game/ShadersAndMaterials.hpp"
 
 namespace Game
 {
@@ -34,24 +31,27 @@ struct InfinitySymbol
 
 struct InfinitySymbolShader : public Gfx::Shader
 {
+    Gfx::UniformBlock light_block{};
+    Gfx::UniformBlock material_block{};
     GLint gaussian_texture{-1};
     GLint shininess_texture{-1};
     GLint use_shininess_texture{-1};
-    GLuint material_block{GL_INVALID_INDEX};
 
     InfinitySymbolShader(GLuint shader_program)
-        : Shader{shader_program, Gfx::SHADER_LV_MATRIX | Gfx::SHADER_LV_NORMAL_MATRIX | Gfx::SHADER_LIGHT_DATA_BLOCK}
-        , gaussian_texture{Gfx::OGL::get_uniform_location(shader_program, "uGaussianTexture")}
-        , shininess_texture{Gfx::OGL::get_uniform_location(shader_program, "uShininessTexture")}
-        , use_shininess_texture{Gfx::OGL::get_uniform_location(shader_program, "uUseShininessTex")}
+        : Shader{shader_program, {.lv_normal_matrix = true}}
+        , light_block{Gfx::OGL::get_uniform_block_index(shader_program, "LightBlock")}
         , material_block{Gfx::OGL::get_uniform_block_index(shader_program, "MaterialBlock")}
+        , gaussian_texture{Gfx::OGL::get_uniform_location(shader_program, "_gaussianTexture")}
+        , shininess_texture{Gfx::OGL::get_uniform_location(shader_program, "_shininessTexture")}
+        , use_shininess_texture{Gfx::OGL::get_uniform_location(shader_program, "_useShininessTex")}
     {
-        Gfx::OGL::bind_uniform_block(shader_program, material_block, MATERIAL_BLOCK_BINDING);
     }
 };
 
 struct InfinitySymbolMaterial : public Gfx::Material
 {
+    Gfx::UniformBufferRangeId light_buffer_range_id{};
+    Gfx::UniformBufferRangeId material_buffer_range_id{};
     int gaussian_texture{};
     int shininess_texture{};
     bool use_shininess_texture{};
@@ -63,7 +63,9 @@ struct InfinitySymbolMaterial : public Gfx::Material
 
     void apply_properties() const override
     {
-        auto &shader = static_cast<const InfinitySymbolShader &>(this->shader);
+        auto &shader = static_cast<InfinitySymbolShader &>(this->shader);
+        Gfx::bind_uniform_buffer_range(shader.shader_program, shader.light_block, light_buffer_range_id);
+        Gfx::bind_uniform_buffer_range(shader.shader_program, shader.material_block, material_buffer_range_id);
         Gfx::OGL::set_uniform(shader.gaussian_texture, gaussian_texture);
         Gfx::OGL::set_uniform(shader.shininess_texture, shininess_texture);
         Gfx::OGL::set_uniform(shader.use_shininess_texture, use_shininess_texture);
@@ -78,12 +80,21 @@ struct MaterialBlock
     float _padding_[3];
 };
 
+void control_infinity_symbol_material(const InfinitySymbol &, const Gfx::MaterialRef &material_ref)
+{
+    auto &material = static_cast<InfinitySymbolMaterial &>(Gfx::get_material(material_ref.material_id));
+
+    if (Input::is_key_down(GLFW_KEY_T))
+        material.use_shininess_texture = true;
+    else if (Input::is_key_down(GLFW_KEY_P))
+        material.use_shininess_texture = false;
+}
+
 void InfinitySymbolScene::init() const
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::UniformBufferId next_uniform_buffer_id{0};
 
     auto unlit_color_shader_id = next_shader_id++;
     {
@@ -93,6 +104,9 @@ void InfinitySymbolScene::init() const
         };
         Gfx::create_shader<Gfx::UnlitColorShader>(unlit_color_shader_id, shader_assets);
     }
+
+    auto unlit_color_material_id = next_material_id++;
+    Gfx::create_material<Gfx::UnlitColorMaterial>(unlit_color_material_id, unlit_color_shader_id);
 
     constexpr std::size_t GAUSSIAN_TEX_ANGLE_RESOLUTION{512};
     constexpr std::size_t GAUSSIAN_TEX_SHININESS_RESOLUTION{128};
@@ -177,26 +191,19 @@ void InfinitySymbolScene::init() const
     glBindSampler(shininess_texture_image_unit, texture_sampler);
 
     // Camera
-    Core::EntityId camera_id;
     {
         Gfx::PerspectiveCamera camera{.near_plane_z{0.1f}, .far_plane_z{1000.0f}, .vertical_fov{Math::radians(50.0f)}};
 
-        auto projection_buffer_id = next_uniform_buffer_id++;
-        auto &projection_buffer =
-            Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::ProjectionBlock>>(projection_buffer_id);
+        auto projection_buffer = Gfx::create_uniform_buffer<Gfx::ProjectionBlock>();
 
-        auto lights_buffer_id = next_uniform_buffer_id++;
-        auto &lights_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<Gfx::LightsBlock>>(lights_buffer_id);
-
-        camera_id = Core::create_entity(
+        Core::create_entity(
             camera,
             Gfx::WorldToViewMatrix{},
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
             Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
-            Gfx::ProjectionBufferBlockRef{projection_buffer.get_block()},
-            Gfx::LightsBufferBlockRef{lights_buffer.get_block()},
+            Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
                 .origin{0.0f, 0.0f, 0.0f}, .spherical_coord{30.0f, Math::Vector2{Math::radians(60.0f), 0.0f}}
@@ -205,47 +212,58 @@ void InfinitySymbolScene::init() const
         );
     }
 
-    // Global settings
-    Core::EntityId global_settings_id;
+    auto light_buffer = Gfx::create_uniform_buffer<Gfx::LightBlock>();
+    auto light_buffer_range_id = light_buffer.create_range();
+
+    // Light settings
     {
-        global_settings_id = Core::create_entity(
-            Gfx::GlobalLightSettings{
+        auto light_settings_id = Core::create_entity(
+            Gfx::LightSettings{
                 .ambient_light_intensity{0.2f, 0.2f, 0.2f, 1.0f},
                 .light_attenuation{1.0f / (25.0f * 25.0f)},
                 .max_intensity{1.0f}
             }
         );
-    }
 
-    // Directional light
-    {
-        Core::create_entity(
+        auto directional_light_id = Core::create_entity(
             Core::Transform{.position{Math::normalize(Math::Vector3{1.0f, 1.0f, -1.0f})}},
             Gfx::DirectionalLight{.light_intensity{0.6f, 0.6f, 0.6f, 1.0f}}
         );
-    }
 
-    // Point light
-    {
-        auto material_id = next_material_id++;
-        Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader_id);
-
-        auto id = Core::create_entity(
+        auto point_light_id = Core::create_entity(
             Core::Transform{.position{10.0f, 0.0f, 1.0f}, .scale{0.5f}},
             Gfx::LocalToViewMatrix{},
-            Gfx::MaterialRef{material_id},
+            Gfx::MaterialRef{unlit_color_material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             Gfx::PointLight{.light_intensity{0.4f, 0.4f, 0.4f, 1.0f}}
         );
 
-        Gfx::init_renderer(id, Gfx::RENDER_WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_id, Gfx::WITH_LV_MATRIX);
+
+        Core::create_entity(
+            Gfx::LightGroup{
+                .light_settings_id = light_settings_id,
+                .light_ids = {directional_light_id, point_light_id},
+                .light_types = {Core::ComponentType::DIRECTIONAL_LIGHT, Core::ComponentType::POINT_LIGHT},
+                .uniform_buffer = light_buffer,
+                .uniform_buffer_range_id = light_buffer_range_id,
+            }
+        );
     }
 
     // Infinity symbol
     {
         auto infinity_mesh_id = next_mesh_id++;
         Gfx::create_mesh<1>(infinity_mesh_id, std::function{create_infinity_symbol_mesh});
+
+        auto material_buffer = Gfx::create_uniform_buffer<MaterialBlock>();
+        auto material_buffer_range_id = material_buffer.create_range();
+        material_buffer.update(
+            {.diffuse_color{1.0f, 0.673f, 0.043f, 1.0f},
+             .specular_color{Math::Vector4{1.0f, 0.673f, 0.043f, 1.0f} * 0.4f},
+             .surface_shininess{0.125f}}
+        );
 
         auto infinity_shader_id = next_shader_id++;
         {
@@ -258,43 +276,24 @@ void InfinitySymbolScene::init() const
 
         auto material_id = next_material_id++;
         auto &material = Gfx::create_material<InfinitySymbolMaterial>(material_id, infinity_shader_id);
+        material.light_buffer_range_id = light_buffer_range_id;
+        material.material_buffer_range_id = material_buffer_range_id;
         material.gaussian_texture = gaussian_texture_image_unit;
         material.shininess_texture = shininess_texture_image_unit;
         material.use_shininess_texture = true;
-
-        auto material_buffer_id = next_uniform_buffer_id++;
-        auto &material_buffer = Gfx::create_uniform_buffer<Gfx::ScalarUniformBuffer<MaterialBlock>>(material_buffer_id);
-        material_buffer.get_block() = MaterialBlock{
-            .diffuse_color{1.0f, 0.673f, 0.043f, 1.0f},
-            .specular_color{Math::Vector4{1.0f, 0.673f, 0.043f, 1.0f} * 0.4f},
-            .surface_shininess{0.125f}
-        };
 
         auto id = Core::create_entity(
             Core::Transform{.scale{4.0f}},
             Gfx::LocalToViewMatrix{},
             Gfx::LocalToViewNormalMatrix{},
             Gfx::MaterialRef{material_id},
-            Gfx::UniformBufferRangeBind{material_buffer.get_block().get_buffer_range(), MATERIAL_BLOCK_BINDING},
             Gfx::MeshRef{infinity_mesh_id},
             Gfx::Renderer{},
             InfinitySymbol{}
         );
 
-        Gfx::init_renderer(
-            id, Gfx::RENDER_WITH_LV_MATRIX | Gfx::RENDER_WITH_LV_NORMAL_MATRIX | Gfx::RENDER_WITH_BUFFER_RANGE_BIND
-        );
+        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
     }
-}
-
-void control_infinity_symbol_material(const InfinitySymbol &, const Gfx::MaterialRef &material_ref)
-{
-    auto &material = static_cast<InfinitySymbolMaterial &>(Gfx::get_material(material_ref.material_id));
-
-    if (Input::is_key_down(GLFW_KEY_T))
-        material.use_shininess_texture = true;
-    else if (Input::is_key_down(GLFW_KEY_P))
-        material.use_shininess_texture = false;
 }
 
 void InfinitySymbolScene::update() const

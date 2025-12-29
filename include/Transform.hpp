@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "ECS.hpp"
+#include "Matrix.hpp"
 #include "Quaternion.hpp"
 #include "Vector.hpp"
 
@@ -18,4 +19,6 @@ struct Transform
 };
 
 std::ostream &operator<<(std::ostream &out, const Transform &transform);
+
+Math::Matrix4 transform_matrix(const Transform &transform);
 } // namespace Age::Core

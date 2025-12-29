@@ -19,6 +19,7 @@ struct UnlitColorShader : public UnlitShader
 
 struct LitDiffuseTextureShader : public Shader
 {
+    UniformBlock light_block{};
     SamplerUniform sampler{};
 
     LitDiffuseTextureShader(GLuint shader_program);

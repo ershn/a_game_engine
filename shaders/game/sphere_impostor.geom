@@ -6,7 +6,7 @@ layout(std140) uniform;
 layout(points) in;
 layout(triangle_strip, max_vertices=4) out;
 
-in VertexData
+in Varyings
 {
     vec3 sphereViewPosition;
     float sphereRadius;
@@ -21,7 +21,7 @@ out FragmentData
 
 uniform ProjectionBlock
 {
-    mat4 viewToClipMatrix;
+    mat4 _viewToClipMatrix;
 };
 
 void main()
@@ -31,28 +31,28 @@ void main()
     sphereViewPosition = In[0].sphereViewPosition;
     sphereRadius = In[0].sphereRadius;
     mapping = vec2(-1.0, 1.0) * squareCorrection;
-    gl_Position = viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(-In[0].sphereRadius, In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
+    gl_Position = _viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(-In[0].sphereRadius, In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
     gl_PrimitiveID = gl_PrimitiveIDIn;
     EmitVertex();
 
     sphereViewPosition = In[0].sphereViewPosition;
     sphereRadius = In[0].sphereRadius;
     mapping = vec2(1.0, 1.0) * squareCorrection;
-    gl_Position = viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(In[0].sphereRadius, In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
+    gl_Position = _viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(In[0].sphereRadius, In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
     gl_PrimitiveID = gl_PrimitiveIDIn;
     EmitVertex();
 
     sphereViewPosition = In[0].sphereViewPosition;
     sphereRadius = In[0].sphereRadius;
     mapping = vec2(-1.0, -1.0) * squareCorrection;
-    gl_Position = viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(-In[0].sphereRadius, -In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
+    gl_Position = _viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(-In[0].sphereRadius, -In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
     gl_PrimitiveID = gl_PrimitiveIDIn;
     EmitVertex();
 
     sphereViewPosition = In[0].sphereViewPosition;
     sphereRadius = In[0].sphereRadius;
     mapping = vec2(1.0, -1.0) * squareCorrection;
-    gl_Position = viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(In[0].sphereRadius, -In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
+    gl_Position = _viewToClipMatrix * vec4(In[0].sphereViewPosition + vec3(In[0].sphereRadius, -In[0].sphereRadius, 0.0) * squareCorrection, 1.0);
     gl_PrimitiveID = gl_PrimitiveIDIn;
     EmitVertex();
 }

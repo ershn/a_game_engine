@@ -1,15 +1,15 @@
 #version 330
 
-in VertexData
+in Varyings
 {
 	vec2 texCoord;
 } In;
 
-uniform sampler2D uTexture;
+uniform sampler2D _texture;
 
-out vec4 oColor;
+out vec4 outColor;
 
 void main()
 {
-	oColor = texture(uTexture, In.texCoord);
+	outColor = texture(_texture, In.texCoord);
 }

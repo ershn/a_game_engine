@@ -31,7 +31,7 @@ static std::unordered_map<std::size_t, ArchetypeId> s_component_types_to_archety
 std::vector<std::vector<ArchetypeId>> g_component_archetype_ids{};
 std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets{};
 
-Util::IdGenerator<EntityId> g_entity_id_generator{0};
+Util::IdGenerator<EntityId> g_entity_id_generator{1};
 std::vector<EntityLocation> g_entity_locations{};
 
 void init_ecs(const App::Definitions &definitions)

@@ -1,27 +1,32 @@
 #version 330
 
-layout(location = 0) in vec4 aPosition;
-layout(location = 2) in vec3 aNormal;
+layout(std140) uniform;
 
-uniform mat4 uLocalToViewMatrix;
-uniform mat3 uLocalToViewNormalMatrix;
-uniform vec4 uDiffuseColor;
+layout(location = 0) in vec4 inPosition;
+layout(location = 2) in vec3 inNormal;
 
-layout(std140) uniform ProjectionBlock
+uniform mat4 _localToViewMatrix;
+uniform mat3 _localToViewNormalMatrix;
+uniform vec4 _diffuseColor;
+
+uniform ProjectionBlock
 {
-    mat4 uViewToClipMatrix;
+    mat4 _viewToClipMatrix;
 };
 
-smooth out vec4 iViewPosition;
-smooth out vec4 iDiffuseColor;
-smooth out vec3 iViewNormal;
+out Varyings
+{
+	vec4 viewPosition;
+	vec4 diffuseColor;
+	vec3 viewNormal;
+} Out;
 
 void main()
 {
-    vec4 viewPosition = uLocalToViewMatrix * aPosition;
-    gl_Position = uViewToClipMatrix * viewPosition;
+    vec4 viewPosition = _localToViewMatrix * inPosition;
+    gl_Position = _viewToClipMatrix * viewPosition;
 
-    iViewPosition = viewPosition;
-    iDiffuseColor = uDiffuseColor;
-    iViewNormal = uLocalToViewNormalMatrix * aNormal;
+    Out.viewPosition = viewPosition;
+    Out.diffuseColor = _diffuseColor;
+    Out.viewNormal = _localToViewNormalMatrix * inNormal;
 }

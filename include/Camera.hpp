@@ -1,9 +1,8 @@
 #pragma once
 
-#include "ECS.hpp"
+#include "Components.hpp"
 #include "Matrix.hpp"
 #include "Transform.hpp"
-#include "UniformBlocks.hpp"
 #include "UniformBuffer.hpp"
 #include "Viewport.hpp"
 
@@ -66,11 +65,17 @@ struct WindowSpaceCamera
     int viewport_height{};
 };
 
-struct ProjectionBufferBlockRef : public UniformBufferBlockRef<ProjectionBlock>
+struct ProjectionBlock
 {
-    static constexpr auto TYPE{Core::ComponentType::PROJECTION_BUFFER_BLOCK};
+    Math::Matrix4 view_to_clip_matrix{};
+};
 
-    using UniformBufferBlockRef<ProjectionBlock>::operator=;
+struct ProjectionUniformBuffer
+{
+    static constexpr auto TYPE{Core::ComponentType::PROJECTION_UNIFORM_BUFFER};
+
+    UniformBuffer<ProjectionBlock> buffer;
+    UniformBufferRangeId buffer_range_id{};
 };
 
 Math::Matrix4 window_space_orthographic_proj_matrix(int viewport_width, int viewport_height);
@@ -82,21 +87,21 @@ void update_perspective_camera_matrix(
     const CameraRenderState &camera_render_state,
     PerspectiveCamera &camera,
     ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
+    const ProjectionUniformBuffer &projection_uniform_buffer
 );
 
 void update_orthographic_camera_matrix(
     const CameraRenderState &camera_render_state,
     OrthographicCamera &camera,
     ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
+    const ProjectionUniformBuffer &projection_uniform_buffer
 );
 
 void update_window_space_camera_matrix(
     const CameraRenderState &camera_render_state,
     WindowSpaceCamera &camera,
     ViewToClipMatrix &view_to_clip_matrix,
-    const ProjectionBufferBlockRef &projection_buffer_block
+    const ProjectionUniformBuffer &projection_uniform_buffer
 );
 
 void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix);

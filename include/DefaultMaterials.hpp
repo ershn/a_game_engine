@@ -14,7 +14,7 @@ struct UnlitMaterial : public Material
 
 struct UnlitColorMaterial : public UnlitMaterial
 {
-    Math::Vector4 color{1.0f};
+    Math::Vector3 color{1.0f};
 
     UnlitColorMaterial(Shader &shader);
 
@@ -23,6 +23,7 @@ struct UnlitColorMaterial : public UnlitMaterial
 
 struct LitDiffuseTextureMaterial : public Material
 {
+    UniformBufferRangeId light_buffer_range_id{};
     TextureId texture_id{NULL_TEXTURE_ID};
     SamplerId sampler_id{NULL_SAMPLER_ID};
 
