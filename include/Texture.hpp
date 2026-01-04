@@ -147,7 +147,8 @@ enum struct TextureFormat : std::uint32_t
 
     // Custom formats
     FIRST_CUSTOM_FORMAT = 65536,
-    R8G8B8_UNORM = FIRST_CUSTOM_FORMAT
+    R8G8B8_UNORM = FIRST_CUSTOM_FORMAT,
+    R8G8B8X8_UNORM,
 };
 
 enum struct AlphaType : std::uint8_t
@@ -280,9 +281,14 @@ struct Sampler
     TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
 };
 
+struct TextureLoadOptions
+{
+    bool force_srgb_internal_format : 1 {};
+};
+
 void init_texture_system();
 
-void load_texture(TextureId texture_id, const TextureData &texture_data);
+void load_texture(TextureId texture_id, const TextureData &texture_data, TextureLoadOptions load_options = {});
 
 void create_sampler(SamplerId sampler_id, const SamplerParams &sampler_params);
 const SamplerParams &get_sampler_params(SamplerId sampler_id);

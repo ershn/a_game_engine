@@ -59,7 +59,7 @@ struct PixelDataFormat
     GLenum type{};
 };
 
-GLint s_default_texture_internal_formats_dxgi[] = {
+GLint s_texture_internal_formats_dxgi[] = {
     0,                                      // UNKNOWN
     0,                                      // R32G32B32A32_TYPELESS
     0,                                      // R32G32B32A32_FLOAT
@@ -178,11 +178,136 @@ GLint s_default_texture_internal_formats_dxgi[] = {
     0,                                      // B4G4R4A4_UNORM
 };
 
-GLint s_default_texture_internal_formats_custom[] = {
-    GL_RGB8 // R8G8B8_UNORM
+GLint s_texture_internal_formats_custom[] = {
+    GL_RGB8, // R8G8B8_UNORM
+    GL_RGB8, // R8G8B8X8_UNORM
 };
 
-PixelDataFormat s_default_texture_pixel_data_formats_dxgi[] = {
+GLint s_texture_srgb_internal_formats_dxgi[] = {
+    0,                                      // UNKNOWN
+    0,                                      // R32G32B32A32_TYPELESS
+    0,                                      // R32G32B32A32_FLOAT
+    0,                                      // R32G32B32A32_UINT
+    0,                                      // R32G32B32A32_SINT
+    0,                                      // R32G32B32_TYPELESS
+    0,                                      // R32G32B32_FLOAT
+    0,                                      // R32G32B32_UINT
+    0,                                      // R32G32B32_SINT
+    0,                                      // R16G16B16A16_TYPELESS
+    0,                                      // R16G16B16A16_FLOAT
+    0,                                      // R16G16B16A16_UNORM
+    0,                                      // R16G16B16A16_UINT
+    0,                                      // R16G16B16A16_SNORM
+    0,                                      // R16G16B16A16_SINT
+    0,                                      // R32G32_TYPELESS
+    0,                                      // R32G32_FLOAT
+    0,                                      // R32G32_UINT
+    0,                                      // R32G32_SINT
+    0,                                      // R32G8X24_TYPELESS
+    0,                                      // D32_FLOAT_S8X24_UINT
+    0,                                      // R32_FLOAT_X8X24_TYPELESS
+    0,                                      // X32_TYPELESS_G8X24_UINT
+    0,                                      // R10G10B10A2_TYPELESS
+    0,                                      // R10G10B10A2_UNORM
+    0,                                      // R10G10B10A2_UINT
+    0,                                      // R11G11B10_FLOAT
+    0,                                      // R8G8B8A8_TYPELESS
+    GL_SRGB8_ALPHA8,                        // R8G8B8A8_UNORM
+    GL_SRGB8_ALPHA8,                        // R8G8B8A8_UNORM_SRGB
+    0,                                      // R8G8B8A8_UINT
+    0,                                      // R8G8B8A8_SNORM
+    0,                                      // R8G8B8A8_SINT
+    0,                                      // R16G16_TYPELESS
+    0,                                      // R16G16_FLOAT
+    0,                                      // R16G16_UNORM
+    0,                                      // R16G16_UINT
+    0,                                      // R16G16_SNORM
+    0,                                      // R16G16_SINT
+    0,                                      // R32_TYPELESS
+    0,                                      // D32_FLOAT
+    0,                                      // R32_FLOAT
+    0,                                      // R32_UINT
+    0,                                      // R32_SINT
+    0,                                      // R24G8_TYPELESS
+    0,                                      // D24_UNORM_S8_UINT
+    0,                                      // R24_UNORM_X8_TYPELESS
+    0,                                      // X24_TYPELESS_G8_UINT
+    0,                                      // R8G8_TYPELESS
+    0,                                      // R8G8_UNORM
+    0,                                      // R8G8_UINT
+    0,                                      // R8G8_SNORM
+    0,                                      // R8G8_SINT
+    0,                                      // R16_TYPELESS
+    0,                                      // R16_FLOAT
+    0,                                      // D16_UNORM
+    0,                                      // R16_UNORM
+    0,                                      // R16_UINT
+    0,                                      // R16_SNORM
+    0,                                      // R16_SINT
+    0,                                      // R8_TYPELESS
+    0,                                      // R8_UNORM
+    0,                                      // R8_UINT
+    0,                                      // R8_SNORM
+    0,                                      // R8_SINT
+    0,                                      // A8_UNORM
+    0,                                      // R1_UNORM
+    0,                                      // R9G9B9E5_SHAREDEXP
+    0,                                      // R8G8_B8G8_UNORM
+    0,                                      // G8R8_G8B8_UNORM
+    0,                                      // BC1_TYPELESS
+    GL_COMPRESSED_SRGB_S3TC_DXT1_EXT,       // BC1_UNORM
+    GL_COMPRESSED_SRGB_S3TC_DXT1_EXT,       // BC1_UNORM_SRGB
+    0,                                      // BC2_TYPELESS
+    GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, // BC2_UNORM
+    GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, // BC2_UNORM_SRGB
+    0,                                      // BC3_TYPELESS
+    GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, // BC3_UNORM
+    GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, // BC3_UNORM_SRGB
+    0,                                      // BC4_TYPELESS
+    0,                                      // BC4_UNORM
+    0,                                      // BC4_SNORM
+    0,                                      // BC5_TYPELESS
+    0,                                      // BC5_UNORM
+    0,                                      // BC5_SNORM
+    0,                                      // B5G6R5_UNORM
+    0,                                      // B5G5R5A1_UNORM
+    GL_SRGB8_ALPHA8,                        // B8G8R8A8_UNORM
+    GL_SRGB8,                               // B8G8R8X8_UNORM
+    0,                                      // R10G10B10_XR_BIAS_A2_UNORM
+    0,                                      // B8G8R8A8_TYPELESS
+    GL_SRGB8_ALPHA8,                        // B8G8R8A8_UNORM_SRGB
+    0,                                      // B8G8R8X8_TYPELESS
+    GL_SRGB8,                               // B8G8R8X8_UNORM_SRGB
+    0,                                      // BC6H_TYPELESS
+    0,                                      // BC6H_UF16
+    0,                                      // BC6H_SF16
+    0,                                      // BC7_TYPELESS
+    0,                                      // BC7_UNORM
+    0,                                      // BC7_UNORM_SRGB
+    0,                                      // AYUV
+    0,                                      // Y410
+    0,                                      // Y416
+    0,                                      // NV12
+    0,                                      // P010
+    0,                                      // P016
+    0,                                      // YUV_420_OPAQUE
+    0,                                      // YUY2
+    0,                                      // Y210
+    0,                                      // Y216
+    0,                                      // NV11
+    0,                                      // AI44
+    0,                                      // IA44
+    0,                                      // P8
+    0,                                      // A8P8
+    0,                                      // B4G4R4A4_UNORM
+};
+
+GLint s_texture_srgb_internal_formats_custom[] = {
+    GL_SRGB8, // R8G8B8_UNORM
+    GL_SRGB8, // R8G8B8X8_UNORM
+};
+
+PixelDataFormat s_texture_pixel_data_formats_dxgi[] = {
     {},                                                     // UNKNOWN
     {.format{}, .type{}},                                   // R32G32B32A32_TYPELESS
     {.format{}, .type{}},                                   // R32G32B32A32_FLOAT
@@ -301,46 +426,62 @@ PixelDataFormat s_default_texture_pixel_data_formats_dxgi[] = {
     {.format{}, .type{}},                                   // B4G4R4A4_UNORM
 };
 
-PixelDataFormat s_default_texture_pixel_data_formats_custom[] = {
-    {.format{GL_RGB}, .type{GL_UNSIGNED_BYTE}} // R8G8B8_UNORM
+PixelDataFormat s_texture_pixel_data_formats_custom[] = {
+    {.format{GL_RGB}, .type{GL_UNSIGNED_BYTE}},             // R8G8B8_UNORM
+    {.format{GL_RGBA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // R8G8B8X8_UNORM
 };
 
-GLint get_default_texture_internal_format(TextureFormat format)
+GLint get_texture_internal_format(TextureFormat format, bool force_srgb_internal_format)
 {
     GLint internal_format{};
 
     auto format_index = Util::to_underlying(format);
     if (format_index < Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT))
     {
-        if (format_index < std::size(s_default_texture_internal_formats_dxgi))
-            internal_format = s_default_texture_internal_formats_dxgi[format_index];
+        if (format_index < std::size(s_texture_internal_formats_dxgi))
+        {
+            if (force_srgb_internal_format)
+                internal_format = s_texture_srgb_internal_formats_dxgi[format_index];
+            else
+                internal_format = s_texture_internal_formats_dxgi[format_index];
+        }
     }
     else
     {
         auto offset = format_index - Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT);
-        if (offset < std::size(s_default_texture_internal_formats_custom))
-            internal_format = s_default_texture_internal_formats_custom[offset];
+        if (offset < std::size(s_texture_internal_formats_custom))
+        {
+            if (force_srgb_internal_format)
+                internal_format = s_texture_srgb_internal_formats_custom[offset];
+            else
+                internal_format = s_texture_internal_formats_custom[offset];
+        }
     }
 
-    LOG_ERROR_IF(internal_format == 0, "no internal format found for texture format: {}", format_index);
+    LOG_ERROR_IF(
+        internal_format == 0,
+        "no internal format found for texture format: {} (force_srgb_internal_format = {})",
+        format_index,
+        force_srgb_internal_format
+    );
     return internal_format;
 }
 
-PixelDataFormat get_default_pixel_data_format(TextureFormat format)
+PixelDataFormat get_pixel_data_format(TextureFormat format)
 {
     PixelDataFormat pixel_data_format{};
 
     auto format_index = Util::to_underlying(format);
     if (format_index < Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT))
     {
-        if (format_index < std::size(s_default_texture_pixel_data_formats_dxgi))
-            pixel_data_format = s_default_texture_pixel_data_formats_dxgi[format_index];
+        if (format_index < std::size(s_texture_pixel_data_formats_dxgi))
+            pixel_data_format = s_texture_pixel_data_formats_dxgi[format_index];
     }
     else
     {
         auto offset = format_index - Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT);
-        if (offset < std::size(s_default_texture_pixel_data_formats_custom))
-            pixel_data_format = s_default_texture_pixel_data_formats_custom[offset];
+        if (offset < std::size(s_texture_pixel_data_formats_custom))
+            pixel_data_format = s_texture_pixel_data_formats_custom[offset];
     }
 
     LOG_ERROR_IF(pixel_data_format.format == 0, "no pixel data format found for texture format: {}", format_index);
@@ -476,12 +617,13 @@ void update_pixel_data_unpack_alignment(std::uint32_t pitch, GLint &unpack_align
     }
 }
 
-GLuint load_texture_1d(const TextureData &texture_data, TextureUnitId texture_unit_id)
+GLuint load_texture_1d(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
 {
     GLuint texture;
 
-    auto internal_format = get_default_texture_internal_format(texture_data.desc.format);
-    auto data_format = get_default_pixel_data_format(texture_data.desc.format);
+    auto internal_format =
+        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
+    auto data_format = get_pixel_data_format(texture_data.desc.format);
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
@@ -531,12 +673,13 @@ GLuint load_texture_1d(const TextureData &texture_data, TextureUnitId texture_un
     return texture;
 }
 
-GLuint load_texture_2d(const TextureData &texture_data, TextureUnitId texture_unit_id)
+GLuint load_texture_2d(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
 {
     GLuint texture;
 
-    auto internal_format = get_default_texture_internal_format(texture_data.desc.format);
-    auto data_format = get_default_pixel_data_format(texture_data.desc.format);
+    auto internal_format =
+        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
+    auto data_format = get_pixel_data_format(texture_data.desc.format);
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
@@ -588,12 +731,13 @@ GLuint load_texture_2d(const TextureData &texture_data, TextureUnitId texture_un
     return texture;
 }
 
-GLuint load_texture_3d(const TextureData &texture_data, TextureUnitId texture_unit_id)
+GLuint load_texture_3d(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
 {
     GLuint texture;
 
-    auto internal_format = get_default_texture_internal_format(texture_data.desc.format);
-    auto data_format = get_default_pixel_data_format(texture_data.desc.format);
+    auto internal_format =
+        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
+    auto data_format = get_pixel_data_format(texture_data.desc.format);
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
@@ -647,11 +791,14 @@ GLuint load_texture_3d(const TextureData &texture_data, TextureUnitId texture_un
     return texture;
 }
 
-GLuint load_compressed_texture_1d(const TextureData &texture_data, TextureUnitId texture_unit_id)
+GLuint load_compressed_texture_1d(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+)
 {
     GLuint texture;
 
-    auto internal_format = get_default_texture_internal_format(texture_data.desc.format);
+    auto internal_format =
+        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
@@ -693,11 +840,14 @@ GLuint load_compressed_texture_1d(const TextureData &texture_data, TextureUnitId
     return texture;
 }
 
-GLuint load_compressed_texture_2d(const TextureData &texture_data, TextureUnitId texture_unit_id)
+GLuint load_compressed_texture_2d(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+)
 {
     GLuint texture;
 
-    auto internal_format = get_default_texture_internal_format(texture_data.desc.format);
+    auto internal_format =
+        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
@@ -741,11 +891,14 @@ GLuint load_compressed_texture_2d(const TextureData &texture_data, TextureUnitId
     return texture;
 }
 
-GLuint load_compressed_texture_3d(const TextureData &texture_data, TextureUnitId texture_unit_id)
+GLuint load_compressed_texture_3d(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+)
 {
     GLuint texture;
 
-    auto internal_format = get_default_texture_internal_format(texture_data.desc.format);
+    auto internal_format =
+        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
@@ -887,7 +1040,7 @@ void init_texture_system()
     s_sampler_params.reserve(64);
 }
 
-void load_texture(TextureId texture_id, const TextureData &texture_data)
+void load_texture(TextureId texture_id, const TextureData &texture_data, TextureLoadOptions load_options)
 {
     if (texture_id >= s_textures.size())
     {
@@ -908,13 +1061,13 @@ void load_texture(TextureId texture_id, const TextureData &texture_data)
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            texture.texture = load_compressed_texture_1d(texture_data, texture_unit_id);
+            texture.texture = load_compressed_texture_1d(texture_data, texture_unit_id, load_options);
             break;
         case TextureType::TEXTURE_2D:
-            texture.texture = load_compressed_texture_2d(texture_data, texture_unit_id);
+            texture.texture = load_compressed_texture_2d(texture_data, texture_unit_id, load_options);
             break;
         case TextureType::TEXTURE_3D:
-            texture.texture = load_compressed_texture_3d(texture_data, texture_unit_id);
+            texture.texture = load_compressed_texture_3d(texture_data, texture_unit_id, load_options);
             break;
         }
     }
@@ -923,13 +1076,13 @@ void load_texture(TextureId texture_id, const TextureData &texture_data)
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            texture.texture = load_texture_1d(texture_data, texture_unit_id);
+            texture.texture = load_texture_1d(texture_data, texture_unit_id, load_options);
             break;
         case TextureType::TEXTURE_2D:
-            texture.texture = load_texture_2d(texture_data, texture_unit_id);
+            texture.texture = load_texture_2d(texture_data, texture_unit_id, load_options);
             break;
         case TextureType::TEXTURE_3D:
-            texture.texture = load_texture_3d(texture_data, texture_unit_id);
+            texture.texture = load_texture_3d(texture_data, texture_unit_id, load_options);
             break;
         }
     }

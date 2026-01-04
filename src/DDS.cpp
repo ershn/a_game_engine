@@ -351,6 +351,21 @@ bool detect_texture_format(
             }
             else
             {
+                if (header.ddspf.rgbBitCount == 32)
+                {
+                    if (header.ddspf.rBitMask == 0x00ff0000 && header.ddspf.gBitMask == 0x0000ff00 &&
+                        header.ddspf.bBitMask == 0x000000ff)
+                    {
+                        texture_desc.format = TextureFormat::B8G8R8X8_UNORM;
+                        texture_desc.alpha_type = AlphaType::STRAIGHT;
+                    }
+                    else if (header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
+                             header.ddspf.bBitMask == 0x00ff0000)
+                    {
+                        texture_desc.format = TextureFormat::R8G8B8X8_UNORM;
+                        texture_desc.alpha_type = AlphaType::STRAIGHT;
+                    }
+                }
             }
         }
         else if (header.ddspf.flags & DDPF_YUV) // r (Y), g (U), b (V)
