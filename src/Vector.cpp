@@ -4,24 +4,6 @@
 
 namespace Age::Math
 {
-Vector2::Vector2()
-    : x{}
-    , y{}
-{
-}
-
-Vector2::Vector2(float value)
-    : x{value}
-    , y{value}
-{
-}
-
-Vector2::Vector2(float x, float y)
-    : x{x}
-    , y{y}
-{
-}
-
 Vector2::Vector2(const Vector3 &vec)
     : x{vec.x}
     , y{vec.y}
@@ -68,27 +50,6 @@ std::ostream &operator<<(std::ostream &out, const Vector2 &vector)
 {
     out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f}";
     return out;
-}
-
-Vector3::Vector3()
-    : x{}
-    , y{}
-    , z{}
-{
-}
-
-Vector3::Vector3(float value)
-    : x{value}
-    , y{value}
-    , z{value}
-{
-}
-
-Vector3::Vector3(float x, float y, float z)
-    : x{x}
-    , y{y}
-    , z{z}
-{
 }
 
 Vector3::Vector3(const Vector2 &vec, float z)
@@ -153,30 +114,6 @@ std::ostream &operator<<(std::ostream &out, const Vector3 &vector)
     return out;
 }
 
-Vector4::Vector4()
-    : x{}
-    , y{}
-    , z{}
-    , w{}
-{
-}
-
-Vector4::Vector4(float value)
-    : x{value}
-    , y{value}
-    , z{value}
-    , w{value}
-{
-}
-
-Vector4::Vector4(float x, float y, float z, float w)
-    : x{x}
-    , y{y}
-    , z{z}
-    , w{w}
-{
-}
-
 Vector4::Vector4(const Vector3 &vec, float w)
     : x{vec.x}
     , y{vec.y}
@@ -235,6 +172,36 @@ std::ostream &operator<<(std::ostream &out, const Vector4 &vector)
 {
     out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f, " << vector.z << "f, " << vector.w << "f}";
     return out;
+}
+
+bool operator==(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool operator==(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+}
+
+bool operator==(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w;
+}
+
+bool operator!=(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator!=(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator!=(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return !(lhs == rhs);
 }
 
 Vector2 operator-(const Vector2 &vector)

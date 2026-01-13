@@ -25,7 +25,6 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
     VIEW_MATRIX_READER,
     POST_PROJECTION_ROTATION,
     ROTATION_OVER_TIME,
-    PROJECTIVE_TEXTURING_MATRIX,
 
     LAST_VALUE
 };

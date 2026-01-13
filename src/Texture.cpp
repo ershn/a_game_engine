@@ -981,6 +981,7 @@ void bind_sampler_uniform(SamplerUniform &sampler_uniform, TextureUnitId texture
 // Default OpenGL sampler parameter values
 constexpr SamplerParams DEFAULT_SAMPLER_PARAMS{
     .max_anisotropy{1.0f},
+    .texture_border_color{0.0f},
     .flags{
         .texture_wrap_s{TextureWrapMode::REPEAT},
         .texture_wrap_t{TextureWrapMode::REPEAT},
@@ -994,6 +995,9 @@ void update_sampler_params(GLuint sampler, const SamplerParams &params, const Sa
 {
     if (params.max_anisotropy != prev_params.max_anisotropy)
         glSamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, params.max_anisotropy);
+
+    if (params.texture_border_color != prev_params.texture_border_color)
+        glSamplerParameterfv(sampler, GL_TEXTURE_BORDER_COLOR, static_cast<const float *>(params.texture_border_color));
 
     if (params.flags.texture_wrap_s != prev_params.flags.texture_wrap_s)
         glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, to_gl_enum(params.flags.texture_wrap_s));

@@ -139,11 +139,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\game\CheckerboardScene.cpp" />
+    <ClCompile Include="src\game\DioramaMesh.cpp" />
     <ClCompile Include="src\game\DoubleProjectionScene.cpp" />
     <ClCompile Include="src\game\GammaAndTexturesScene.cpp" />
     <ClCompile Include="src\game\BigPlaneMesh.cpp" />
     <ClCompile Include="src\game\CorridorMesh.cpp" />
     <ClCompile Include="src\game\InfinitySymbolScene.cpp" />
+    <ClCompile Include="src\game\ProjectedLightScene.cpp" />
     <ClCompile Include="src\game\ValleyScene.cpp" />
     <ClCompile Include="src\game\InfinitySymbolMesh.cpp" />
     <ClCompile Include="src\Lighting.cpp" />
@@ -199,6 +201,7 @@
     <ClInclude Include="include\game\CheckerboardScene.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
     <ClInclude Include="include\game\CorridorMesh.hpp" />
+    <ClInclude Include="include\game\DioramaMesh.hpp" />
     <ClInclude Include="include\game\DoubleProjectionScene.hpp" />
     <ClInclude Include="include\game\GammaAndTexturesScene.hpp" />
     <ClInclude Include="include\game\GroundMesh.hpp" />
@@ -207,6 +210,7 @@
     <ClInclude Include="include\game\Meshes.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
+    <ClInclude Include="include\game\ProjectedLightScene.hpp" />
     <ClInclude Include="include\game\ShadersAndMaterials.hpp" />
     <ClInclude Include="include\game\ValleyScene.hpp" />
     <ClInclude Include="include\GLFW.hpp" />
@@ -251,6 +255,8 @@
     <None Include="shaders\game\gamma_and_textures.vert" />
     <None Include="shaders\game\infinity_symbol.vert" />
     <None Include="shaders\game\infinity_symbol.frag" />
+    <None Include="shaders\game\spotlight.frag" />
+    <None Include="shaders\game\spotlight.vert" />
     <None Include="shaders\game\sphere_impostor.geom" />
     <None Include="shaders\lit_diffuse_texture.frag" />
     <None Include="shaders\lit_diffuse_texture.vert" />

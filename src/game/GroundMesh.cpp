@@ -16645,6 +16645,7 @@ void create_ground_mesh(Gfx::MeshBuffers &mesh_buffer, std::span<Gfx::DrawComman
         sizeof(s_positions) / sizeof(s_positions[0]),
         s_indexes,
         sizeof(s_indexes) / sizeof(s_indexes[0]),
+        Gfx::OGL::RenderingMode::TRIANGLES,
         mesh_buffer,
         draw_commands[0]
     );

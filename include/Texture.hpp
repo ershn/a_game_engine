@@ -272,6 +272,7 @@ struct SamplerFlags
 struct SamplerParams
 {
     float max_anisotropy{1.0f};
+    Math::Vector4 texture_border_color{0.0f};
     SamplerFlags flags{};
 };
 

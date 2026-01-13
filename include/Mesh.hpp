@@ -62,14 +62,26 @@ extern std::vector<Mesh> g_meshes;
 
 void init_mesh_system();
 
+void create_arrays_mesh(
+    const Math::Vector3 *vertex_positions,
+    const Math::Vector3 *vertex_colors,
+    const Math::Vector3 *vertex_normals,
+    const Math::Vector2 *vertex_texture_coords,
+    std::size_t vertex_count,
+    OGL::RenderingMode rendering_mode,
+    MeshBuffers &mesh_buffers,
+    DrawCommand &draw_command
+);
+
 void create_elements_mesh(
     const Math::Vector3 *vertex_positions,
     const Math::Vector3 *vertex_colors,
     const Math::Vector3 *vertex_normals,
     const Math::Vector2 *vertex_texture_coords,
     std::size_t vertex_count,
-    const unsigned short *vertex_indexes,
+    const unsigned short *vertex_indices,
     std::size_t vertex_index_count,
+    OGL::RenderingMode rendering_mode,
     MeshBuffers &mesh_buffers,
     DrawCommand &draw_command
 );

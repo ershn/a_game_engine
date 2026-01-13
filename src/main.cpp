@@ -5,11 +5,12 @@
 #include "game/Game.hpp"
 #include "game/GammaAndTexturesScene.hpp"
 #include "game/InfinitySymbolScene.hpp"
+#include "game/ProjectedLightScene.hpp"
 #include "game/ValleyScene.hpp"
 
 int main()
 {
-    auto scene = Game::DoubleProjectionScene{};
+    auto scene = Game::ProjectedLightScene{};
 
 #ifdef _DEBUG
     Age::Core::run_engine(Game::g_definitions, scene);

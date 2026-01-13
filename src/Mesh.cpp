@@ -13,14 +13,82 @@ void init_mesh_system()
     g_meshes.reserve(128);
 }
 
+void create_arrays_mesh(
+    const Math::Vector3 *vertex_positions,
+    const Math::Vector3 *vertex_colors,
+    const Math::Vector3 *vertex_normals,
+    const Math::Vector2 *vertex_texture_coords,
+    std::size_t vertex_count,
+    OGL::RenderingMode rendering_mode,
+    MeshBuffers &mesh_buffers,
+    DrawCommand &draw_command
+)
+{
+    glGenVertexArrays(1, &mesh_buffers.vertex_array_object);
+    glBindVertexArray(mesh_buffers.vertex_array_object);
+
+    std::size_t buffer_size{vertex_count * sizeof(*vertex_positions)};
+    if (vertex_colors != nullptr)
+        buffer_size += vertex_count * sizeof(*vertex_colors);
+    if (vertex_normals != nullptr)
+        buffer_size += vertex_count * sizeof(*vertex_normals);
+    if (vertex_texture_coords != nullptr)
+        buffer_size += vertex_count * sizeof(*vertex_texture_coords);
+
+    glGenBuffers(1, &mesh_buffers.vertex_buffer_object);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_buffers.vertex_buffer_object);
+    glBufferData(GL_ARRAY_BUFFER, buffer_size, nullptr, GL_STATIC_DRAW);
+
+    std::size_t buffer_offset{0};
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+    glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(*vertex_positions), vertex_positions);
+    buffer_offset += vertex_count * sizeof(*vertex_positions);
+
+    if (vertex_colors != nullptr)
+    {
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(*vertex_colors), vertex_colors);
+        buffer_offset += vertex_count * sizeof(*vertex_colors);
+    }
+    if (vertex_normals != nullptr)
+    {
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glBufferSubData(GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(*vertex_normals), vertex_normals);
+        buffer_offset += vertex_count * sizeof(*vertex_normals);
+    }
+    if (vertex_texture_coords != nullptr)
+    {
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 2, GL_FLOAT, false, 0, reinterpret_cast<GLvoid *>(buffer_offset));
+        glBufferSubData(
+            GL_ARRAY_BUFFER, buffer_offset, vertex_count * sizeof(*vertex_texture_coords), vertex_texture_coords
+        );
+        buffer_offset += vertex_count * sizeof(*vertex_texture_coords);
+    }
+
+    glBindVertexArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    draw_command.type = DrawCommandType::DRAW_ARRAYS;
+    draw_command.rendering_mode = rendering_mode;
+    draw_command.element_count = static_cast<std::uint32_t>(vertex_count);
+    draw_command.offset = 0;
+}
+
 void create_elements_mesh(
     const Math::Vector3 *vertex_positions,
     const Math::Vector3 *vertex_colors,
     const Math::Vector3 *vertex_normals,
     const Math::Vector2 *vertex_texture_coords,
     std::size_t vertex_count,
-    const unsigned short *vertex_indexes,
+    const unsigned short *vertex_indices,
     std::size_t vertex_index_count,
+    OGL::RenderingMode rendering_mode,
     MeshBuffers &mesh_buffers,
     DrawCommand &draw_command
 )
@@ -71,7 +139,7 @@ void create_elements_mesh(
 
     glGenBuffers(1, &mesh_buffers.index_buffer_object);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_buffers.index_buffer_object);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_index_count * sizeof(unsigned short), vertex_indexes, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_index_count * sizeof(unsigned short), vertex_indices, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -79,7 +147,7 @@ void create_elements_mesh(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     draw_command.type = DrawCommandType::DRAW_ELEMENTS;
-    draw_command.rendering_mode = OGL::RenderingMode::TRIANGLES;
+    draw_command.rendering_mode = rendering_mode;
     draw_command.element_count = static_cast<std::uint32_t>(vertex_index_count);
     draw_command.offset = 0;
 }

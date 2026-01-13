@@ -204,6 +204,7 @@ void create_plane_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw
         sizeof(s_plane_vertex_positions) / sizeof(Vector3),
         s_plane_vertex_indices,
         sizeof(s_plane_vertex_indices) / sizeof(GLushort),
+        OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]
     );
@@ -219,6 +220,7 @@ void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_
         sizeof(s_cube_vertex_positions) / sizeof(Vector3),
         s_cube_vertex_indices,
         sizeof(s_cube_vertex_indices) / sizeof(GLushort),
+        OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]
     );

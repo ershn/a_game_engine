@@ -71,6 +71,7 @@ void create_corridor_mesh(Age::Gfx::MeshBuffers &mesh_buffers, std::span<Age::Gf
         sizeof(s_positions) / sizeof(*s_positions),
         s_indexes,
         sizeof(s_indexes) / sizeof(*s_indexes),
+        Gfx::OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]
     );

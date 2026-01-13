@@ -13,9 +13,24 @@ struct Vector2
     float x;
     float y;
 
-    Vector2();
-    Vector2(float value);
-    Vector2(float x, float y);
+    constexpr Vector2()
+        : x{}
+        , y{}
+    {
+    }
+
+    constexpr Vector2(float value)
+        : x{value}
+        , y{value}
+    {
+    }
+
+    constexpr Vector2(float x, float y)
+        : x{x}
+        , y{y}
+    {
+    }
+
     explicit Vector2(const Vector3 &vec);
 
     explicit operator const float *() const;
@@ -37,9 +52,27 @@ struct Vector3
     float y;
     float z;
 
-    Vector3();
-    Vector3(float value);
-    Vector3(float x, float y, float z);
+    constexpr Vector3()
+        : x{}
+        , y{}
+        , z{}
+    {
+    }
+
+    constexpr Vector3(float value)
+        : x{value}
+        , y{value}
+        , z{value}
+    {
+    }
+
+    constexpr Vector3(float x, float y, float z)
+        : x{x}
+        , y{y}
+        , z{z}
+    {
+    }
+
     Vector3(const Vector2 &vec, float z);
     explicit Vector3(const Vector4 &vec);
 
@@ -65,9 +98,30 @@ struct Vector4
     float z;
     float w;
 
-    Vector4();
-    Vector4(float value);
-    Vector4(float x, float y, float z, float w);
+    constexpr Vector4()
+        : x{}
+        , y{}
+        , z{}
+        , w{}
+    {
+    }
+
+    constexpr Vector4(float value)
+        : x{value}
+        , y{value}
+        , z{value}
+        , w{value}
+    {
+    }
+
+    constexpr Vector4(float x, float y, float z, float w)
+        : x{x}
+        , y{y}
+        , z{z}
+        , w{w}
+    {
+    }
+
     Vector4(const Vector3 &vec, float w);
 
     explicit operator const float *() const;
@@ -84,6 +138,14 @@ struct Vector4
 };
 
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector);
+
+bool operator==(const Vector2 &lhs, const Vector2 &rhs);
+bool operator==(const Vector3 &lhs, const Vector3 &rhs);
+bool operator==(const Vector4 &lhs, const Vector4 &rhs);
+
+bool operator!=(const Vector2 &lhs, const Vector2 &rhs);
+bool operator!=(const Vector3 &lhs, const Vector3 &rhs);
+bool operator!=(const Vector4 &lhs, const Vector4 &rhs);
 
 Vector2 operator-(const Vector2 &vector);
 Vector3 operator-(const Vector3 &vector);
