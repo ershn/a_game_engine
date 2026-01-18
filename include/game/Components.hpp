@@ -15,6 +15,7 @@ enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
 
     SUNLIGHT,
     SPOTLIGHT,
+    CUBE_POINT_LIGHT,
 
     SPHERE_IMPOSTOR_MATERIALS_BUFFER_BLOCK,
     SPHERE_IMPOSTORS,

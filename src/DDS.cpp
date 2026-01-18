@@ -44,7 +44,7 @@ constexpr std::uint32_t DDSCAPS_MIPMAP{0x400000};
 constexpr std::uint32_t DDSCAPS_TEXTURE{0x1000};
 
 constexpr std::uint32_t DDSCAPS2_CUBEMAP{0x200};
-constexpr std::uint32_t DDS_CUBEMAP_ALLFACES{0xfc00};
+constexpr std::uint32_t DDS_CUBEMAP_ALLFACES{0xfe00};
 constexpr std::uint32_t DDSCAPS2_VOLUME{0x200000};
 
 struct DDS_HEADER
@@ -197,6 +197,8 @@ enum D3D10_RESOURCE_DIMENSION : std::uint32_t
     D3D10_RESOURCE_DIMENSION_TEXTURE3D = 4,
 };
 
+constexpr std::uint32_t DDS_RESOURCE_MISC_TEXTURECUBE{0x4};
+
 struct DDS_HEADER_DXT10
 {
     DXGI_FORMAT dxgiFormat;
@@ -225,6 +227,8 @@ unsigned int get_bit_count_per_pixel(const DDS_HEADER &header, const DDS_HEADER_
     case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
     case DXGI_FORMAT_B8G8R8A8_UNORM:
     case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+    case DXGI_FORMAT_B8G8R8X8_UNORM:
+    case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
         return 32;
     case DXGI_FORMAT_R8_UNORM:
         return 8;
@@ -276,18 +280,6 @@ bool read_dds_header(
     }
 
     texture_size = file_size;
-    return true;
-}
-
-bool read_texture_bytes(
-    std::ifstream &fstream, std::size_t texture_size, TextureData &texture_data, std::string_view file_path
-)
-{
-    auto texture_bytes = std::make_unique_for_overwrite<std::byte[]>(texture_size);
-    fstream.read(reinterpret_cast<char *>(texture_bytes.get()), texture_size);
-    VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
-
-    texture_data.bytes = std::move(texture_bytes);
     return true;
 }
 
@@ -402,19 +394,19 @@ bool detect_texture_format(
 
 bool detect_texture_dimensions(const DDS_HEADER &header, TextureDesc &texture_desc, std::string_view file_path)
 {
-    if (header.caps2 & DDSCAPS2_VOLUME) // volume texture
+    if (header.caps2 & DDSCAPS2_VOLUME) // 3d texture
     {
         texture_desc.type = TextureType::TEXTURE_3D;
         texture_desc.width = header.width;
         texture_desc.height = header.height;
         texture_desc.depth = header.depth;
     }
-    else if (header.caps2 & DDSCAPS2_CUBEMAP) // cubemap texture
+    else if (header.caps2 & DDSCAPS2_CUBEMAP) // cube map texture
     {
-        bool is_full_cubemap = (header.caps2 & DDS_CUBEMAP_ALLFACES) != DDS_CUBEMAP_ALLFACES;
-        VBAIL_ERROR_IF(!is_full_cubemap, false, "partial cubemap textures are unsupported: {}", file_path);
+        bool is_full_cube_map{(header.caps2 & DDS_CUBEMAP_ALLFACES) == DDS_CUBEMAP_ALLFACES};
+        VBAIL_ERROR_IF(!is_full_cube_map, false, "partial cube map textures are unsupported: {}", file_path);
 
-        texture_desc.type = TextureType::TEXTURE_2D;
+        texture_desc.type = TextureType::TEXTURE_CUBE_MAP;
         texture_desc.width = header.width;
         texture_desc.height = header.height;
         texture_desc.depth = 1;
@@ -491,6 +483,18 @@ void calc_texture_pitch(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header
         texture_data.row_count = header.height;
         break;
     }
+}
+
+bool read_texture_bytes(
+    std::ifstream &fstream, std::size_t texture_size, TextureData &texture_data, std::string_view file_path
+)
+{
+    auto texture_bytes = std::make_unique_for_overwrite<std::byte[]>(texture_size);
+    fstream.read(reinterpret_cast<char *>(texture_bytes.get()), texture_size);
+    VBAIL_ERROR_IF(fstream.fail(), false, "IO error: {}", file_path);
+
+    texture_data.bytes = std::move(texture_bytes);
+    return true;
 }
 } // namespace
 

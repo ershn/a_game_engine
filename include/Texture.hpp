@@ -15,6 +15,7 @@ enum struct TextureType : std::uint8_t
 {
     TEXTURE_1D,
     TEXTURE_2D,
+    TEXTURE_CUBE_MAP,
     TEXTURE_3D
 };
 
@@ -172,19 +173,57 @@ struct TextureDesc
 
 struct TextureData
 {
-    std::unique_ptr<std::byte[]> bytes;
+    std::unique_ptr<std::byte[]> bytes{};
     std::uint32_t row_pitch{};
     std::uint32_t row_count{};
-    TextureDesc desc;
+    TextureDesc desc{};
 };
-
-std::size_t get_texture_base_image_size(const TextureData &texture_data);
 
 bool is_compressed_texture_format(TextureFormat format);
 
+struct CubeMapFace;
+
+struct CubeMap
+{
+    const TextureData &texture;
+    std::uint32_t face_size{};
+
+    CubeMapFace operator[](std::size_t index) const;
+};
+
+struct CubeMapFace
+{
+    const CubeMap &cube_map;
+    std::uint32_t byte_offset{};
+};
+
+struct CubeMapFaceIterator
+{
+    const CubeMap &cube_map;
+    std::uint32_t byte_offset{};
+    std::uint32_t face_index{};
+};
+
+CubeMap get_cube_map(const TextureData &texture);
+
+bool operator==(const CubeMapFaceIterator &it1, const CubeMapFaceIterator &it2);
+bool operator!=(const CubeMapFaceIterator &it1, const CubeMapFaceIterator &it2);
+CubeMapFaceIterator &operator++(CubeMapFaceIterator &it);
+CubeMapFace operator*(const CubeMapFaceIterator &it);
+
+CubeMapFaceIterator begin(const CubeMap &cube_map);
+CubeMapFaceIterator end(const CubeMap &cube_map);
+
+struct Mipmap
+{
+    const TextureData &texture;
+    std::uint32_t byte_offset{};
+};
+
 struct MipmapLevel
 {
-    std::span<std::byte> bytes;
+    const TextureData &texture;
+    std::uint32_t byte_offset{};
     std::uint32_t row_pitch{};
     std::uint32_t row_count{};
     std::uint32_t width{};
@@ -196,17 +235,20 @@ struct MipmapLevel
 struct MipmapLevelIterator
 {
     const TextureData &texture;
-    std::uint32_t offset{};
+    std::uint32_t byte_offset{};
     std::uint32_t level{};
 };
+
+Mipmap get_mipmap(const TextureData &texture);
+Mipmap get_mipmap(const CubeMapFace &cube_map_face);
 
 bool operator==(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2);
 bool operator!=(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2);
 MipmapLevelIterator &operator++(MipmapLevelIterator &it);
 MipmapLevel operator*(const MipmapLevelIterator &it);
 
-MipmapLevelIterator begin(const TextureData &texture);
-MipmapLevelIterator end(const TextureData &texture);
+MipmapLevelIterator begin(const Mipmap &mipmap);
+MipmapLevelIterator end(const Mipmap &mipmap);
 
 using TextureUnitId = std::uint16_t;
 using TextureId = std::uint32_t;

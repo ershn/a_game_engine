@@ -1,6 +1,7 @@
 #include "MainLoop.hpp"
 
 #include "game/CheckerboardScene.hpp"
+#include "game/CubePointLightScene.hpp"
 #include "game/DoubleProjectionScene.hpp"
 #include "game/Game.hpp"
 #include "game/GammaAndTexturesScene.hpp"
@@ -10,7 +11,7 @@
 
 int main()
 {
-    auto scene = Game::ProjectedLightScene{};
+    auto scene = Game::CubePointLightScene{};
 
 #ifdef _DEBUG
     Age::Core::run_engine(Game::g_definitions, scene);

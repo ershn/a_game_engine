@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\game\CheckerboardScene.cpp" />
+    <ClCompile Include="src\game\CubePointLightScene.cpp" />
     <ClCompile Include="src\game\DioramaMesh.cpp" />
     <ClCompile Include="src\game\DoubleProjectionScene.cpp" />
     <ClCompile Include="src\game\GammaAndTexturesScene.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="include\game\CheckerboardScene.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
     <ClInclude Include="include\game\CorridorMesh.hpp" />
+    <ClInclude Include="include\game\CubePointLightScene.hpp" />
     <ClInclude Include="include\game\DioramaMesh.hpp" />
     <ClInclude Include="include\game\DoubleProjectionScene.hpp" />
     <ClInclude Include="include\game\GammaAndTexturesScene.hpp" />
@@ -260,6 +262,8 @@
     <None Include="shaders\game\sphere_impostor.geom" />
     <None Include="shaders\lit_diffuse_texture.frag" />
     <None Include="shaders\lit_diffuse_texture.vert" />
+    <None Include="shaders\game\cube_point_light.frag" />
+    <None Include="shaders\game\cube_point_light.vert" />
     <None Include="shaders\unlit.frag" />
     <None Include="shaders\unlit.vert" />
     <None Include="shaders\diffuse_lighting.vert" />

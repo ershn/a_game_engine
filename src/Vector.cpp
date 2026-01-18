@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "Logging.hpp"
 #include "Vector.hpp"
 
 namespace Age::Math
@@ -15,7 +16,7 @@ Vector2::operator const float *() const
     return &x;
 }
 
-float Vector2::operator[](size_t index) const
+float Vector2::operator[](std::size_t index) const
 {
     switch (index)
     {
@@ -24,11 +25,12 @@ float Vector2::operator[](size_t index) const
     case 1:
         return y;
     default:
-        throw std::out_of_range("Index must be in [0, 1]");
+        Core::log_error("Vector2 index must be in the range [0, 1]: {}", index);
+        return y;
     }
 }
 
-float &Vector2::operator[](size_t index)
+float &Vector2::operator[](std::size_t index)
 {
     switch (index)
     {
@@ -37,7 +39,8 @@ float &Vector2::operator[](size_t index)
     case 1:
         return y;
     default:
-        throw std::out_of_range("Index must be in [0, 1]");
+        Core::log_error("Vector2 index must be in the range [0, 1]: {}", index);
+        return y;
     }
 }
 
@@ -71,7 +74,7 @@ Vector3::operator const float *() const
     return &x;
 }
 
-float Vector3::operator[](size_t index) const
+float Vector3::operator[](std::size_t index) const
 {
     switch (index)
     {
@@ -82,11 +85,12 @@ float Vector3::operator[](size_t index) const
     case 2:
         return z;
     default:
-        throw std::out_of_range("Index must be in [0, 2]");
+        Core::log_error("Vector3 index must be in the range [0, 2]: {}", index);
+        return z;
     }
 }
 
-float &Vector3::operator[](size_t index)
+float &Vector3::operator[](std::size_t index)
 {
     switch (index)
     {
@@ -97,7 +101,8 @@ float &Vector3::operator[](size_t index)
     case 2:
         return z;
     default:
-        throw std::out_of_range("Index must be in [0, 2]");
+        Core::log_error("Vector3 index must be in the range [0, 2]: {}", index);
+        return z;
     }
 }
 
@@ -127,7 +132,7 @@ Vector4::operator const float *() const
     return &x;
 }
 
-float Vector4::operator[](size_t index) const
+float Vector4::operator[](std::size_t index) const
 {
     switch (index)
     {
@@ -140,11 +145,12 @@ float Vector4::operator[](size_t index) const
     case 3:
         return w;
     default:
-        throw std::out_of_range("Index must be in [0, 3]");
+        Core::log_error("Vector4 index must be in the range [0, 3]: {}", index);
+        return w;
     }
 }
 
-float &Vector4::operator[](size_t index)
+float &Vector4::operator[](std::size_t index)
 {
     switch (index)
     {
@@ -157,7 +163,8 @@ float &Vector4::operator[](size_t index)
     case 3:
         return w;
     default:
-        throw std::out_of_range("Index must be in [0, 3]");
+        Core::log_error("Vector4 index must be in the range [0, 3]: {}", index);
+        return w;
     }
 }
 

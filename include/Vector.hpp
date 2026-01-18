@@ -35,8 +35,8 @@ struct Vector2
 
     explicit operator const float *() const;
 
-    float operator[](size_t index) const;
-    float &operator[](size_t index);
+    float operator[](std::size_t index) const;
+    float &operator[](std::size_t index);
 
     static const Vector2 right;
     static const Vector2 left;
@@ -78,8 +78,8 @@ struct Vector3
 
     explicit operator const float *() const;
 
-    float operator[](size_t index) const;
-    float &operator[](size_t index);
+    float operator[](std::size_t index) const;
+    float &operator[](std::size_t index);
 
     static const Vector3 right;
     static const Vector3 left;
@@ -126,8 +126,8 @@ struct Vector4
 
     explicit operator const float *() const;
 
-    float operator[](size_t index) const;
-    float &operator[](size_t index);
+    float operator[](std::size_t index) const;
+    float &operator[](std::size_t index);
 
     static const Vector4 right;
     static const Vector4 left;
