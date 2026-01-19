@@ -32,6 +32,7 @@ uniform LightBlock
 uniform SpotlightBlock
 {
     vec4 _spotlightViewPosition;
+    vec4 _spotlightViewDirection;
     mat4 _projectiveTexturingMatrix;
 };
 
@@ -69,8 +70,14 @@ vec3 calcDiffuseLighting(vec3 diffuseColor, Light light)
 
 vec3 calcSpotlightLighting(vec3 diffuseColor)
 {
+    // const float pi = 3.141592;
+    // const float maxAngle = pi / 6.0;
+    // const float minAngle = pi / 20.0;
+
     Light light;
     light.viewPosition = _spotlightViewPosition;
+    // float angleToCenter = acos(dot(_spotlightViewDirection.xyz, normalize(In.viewPosition - _spotlightViewPosition.xyz)));
+    // light.intensity = vec4(1.0 - clamp((angleToCenter - minAngle) / (maxAngle - minAngle), 0.0, 1.0)) * 4.0;
     light.intensity = textureProj(_spotlightTexture, In.projTexCoord) * 4.0;
     light.intensity = In.projTexCoord.w > 0.0 ? light.intensity : vec4(0.0);
     return calcDiffuseLighting(diffuseColor, light);

@@ -64,6 +64,7 @@ void create_space_axes_mesh(Gfx::MeshBuffers &mesh_buffers, std::span<Gfx::DrawC
 struct SpotlightBlock
 {
     Math::Vector4 view_position{};
+    Math::Vector4 view_direction{};
     Math::Matrix4 projective_texturing_matrix{};
 };
 
@@ -143,6 +144,10 @@ void calc_spotlight_matrix(Spotlight &spotlight, const Core::Transform &transfor
     const auto &world_to_view_matrix = Core::get_entity_component<Gfx::WorldToViewMatrix>(spotlight.camera_id).matrix;
 
     Math::Vector4 spotlight_view_position{world_to_view_matrix * Math::Vector4{transform.position, 1.0f}};
+    Math::Vector4 spotlight_view_direction{
+        world_to_view_matrix * Math::affine_rotation_matrix(transform.orientation) *
+        Math::Vector4{0.0f, 0.0f, -1.0f, 0.0f}
+    };
 
     Math::Matrix4 view_to_world_matrix{world_to_view_matrix.inverted()};
     Math::Matrix4 world_to_spotlight_matrix{Core::transform_matrix(transform).invert()};
@@ -150,7 +155,9 @@ void calc_spotlight_matrix(Spotlight &spotlight, const Core::Transform &transfor
                                     world_to_spotlight_matrix * view_to_world_matrix;
 
     spotlight.uniform_buffer.update(
-        {.view_position = spotlight_view_position, .projective_texturing_matrix = proj_tex_matrix}
+        {.view_position = spotlight_view_position,
+         .view_direction = spotlight_view_direction,
+         .projective_texturing_matrix = proj_tex_matrix}
     );
 }
 } // namespace

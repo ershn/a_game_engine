@@ -17,6 +17,7 @@ uniform ProjectionBlock
 uniform SpotlightBlock
 {
     vec4 _spotlightViewPosition;
+    vec4 _spotlightViewDirection;
     mat4 _projectiveTexturingMatrix;
 };
 
