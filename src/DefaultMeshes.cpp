@@ -1,178 +1,177 @@
+#include <bit>
 #include <functional>
 
 #include "DefaultMeshes.hpp"
 #include "Math.hpp"
+#include "Packing.hpp"
 
 namespace Age::Gfx
 {
-using Math::Vector2;
-using Math::Vector3;
+using namespace Age::Packing;
 
 namespace
 {
 // clang-format off
-const Vector3 s_plane_vertex_positions[] = {
-    {-0.5f,  0.5f, 0.0f},
-    { 0.5f,  0.5f, 0.0f},
-    {-0.5f, -0.5f, 0.0f},
-    { 0.5f, -0.5f, 0.0f},
+const std::uint32_t s_plane_vertex_attrs[] = {
+    in_uint32(normalized_int16(-0.5f), normalized_int16(0.5f)), in_uint32(std::int16_t{0}, 0),
+    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_int(0.0f, 0.0f, 1.0f, 0.0f),
+    in_uint32(std::uint16_t{0}, normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16(0.5f), normalized_int16(0.5f)), in_uint32(std::int16_t{0}, 0),
+    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_int(0.0f, 0.0f, 1.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(std::int16_t{0}, 0),
+    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_int(0.0f, 0.0f, 1.0f, 0.0f),
+    in_uint32(std::uint16_t{0}, 0),
+
+    in_uint32(normalized_int16(0.5f), normalized_int16(-0.5f)), in_uint32(std::int16_t{0}, 0),
+    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_int(0.0f, 0.0f, 1.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), 0),
 };
 
-const Vector3 s_plane_vertex_colors[] = {
-    {0.859f, 0.533f, 0.416f},
-    {0.859f, 0.533f, 0.416f},
-    {0.859f, 0.533f, 0.416f},
-    {0.859f, 0.533f, 0.416f},
-};
-
-const Vector3 s_plane_vertex_normals[] = {
-    {0.0f, 0.0f, 1.0f},
-    {0.0f, 0.0f, 1.0f},
-    {0.0f, 0.0f, 1.0f},
-    {0.0f, 0.0f, 1.0f},
-};
-
-const Vector2 s_plane_vertex_texture_coords[] = {
-    {0.0f, 1.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-};
-
-const GLushort s_plane_vertex_indices[] = {
+const std::uint16_t s_plane_vertex_indices[] = {
     0, 1, 2,
     1, 3, 2,
 };
 
-const Vector3 s_cube_vertex_positions[] = {
-    {-0.5f,  0.5f,  0.5f},
-    { 0.5f,  0.5f,  0.5f},
-    {-0.5f, -0.5f,  0.5f},
-    { 0.5f, -0.5f,  0.5f},
+const std::uint32_t s_cube_vertex_attrs[] = {
+    in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
-    {-0.5f,  0.5f, -0.5f},
-    { 0.5f,  0.5f, -0.5f},
-    {-0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
+    in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
-    {-0.5f,  0.5f,  0.5f},
-    { 0.5f,  0.5f,  0.5f},
-    {-0.5f,  0.5f, -0.5f},
-    { 0.5f,  0.5f, -0.5f},
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 
-    {-0.5f, -0.5f,  0.5f},
-    { 0.5f, -0.5f,  0.5f},
-    {-0.5f, -0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
+    in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
-    { 0.5f,  0.5f,  0.5f},
-    { 0.5f, -0.5f,  0.5f},
-    { 0.5f,  0.5f, -0.5f},
-    { 0.5f, -0.5f, -0.5f},
 
-    {-0.5f,  0.5f,  0.5f},
-    {-0.5f, -0.5f,  0.5f},
-    {-0.5f,  0.5f, -0.5f},
-    {-0.5f, -0.5f, -0.5f},
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
+
+
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
+
+
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
+
+
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
+
+
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
+    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
+
+    in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
+    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
+    in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 };
 
-const Vector3 s_cube_vertex_colors[] = {
-    {0.000f, 0.980f, 0.529f},
-    {0.000f, 0.980f, 0.529f},
-    {0.000f, 0.980f, 0.529f},
-    {0.000f, 0.980f, 0.529f},
-
-    {0.721f, 0.262f, 0.196f},
-    {0.721f, 0.262f, 0.196f},
-    {0.721f, 0.262f, 0.196f},
-    {0.721f, 0.262f, 0.196f},
-
-    {0.968f, 0.141f, 0.019f},
-    {0.968f, 0.141f, 0.019f},
-    {0.968f, 0.141f, 0.019f},
-    {0.968f, 0.141f, 0.019f},
-
-    {0.223f, 0.635f, 0.443f},
-    {0.223f, 0.635f, 0.443f},
-    {0.223f, 0.635f, 0.443f},
-    {0.223f, 0.635f, 0.443f},
-
-    {0.470f, 0.274f, 0.243f},
-    {0.470f, 0.274f, 0.243f},
-    {0.470f, 0.274f, 0.243f},
-    {0.470f, 0.274f, 0.243f},
-
-    {0.239f, 0.309f, 0.278f},
-    {0.239f, 0.309f, 0.278f},
-    {0.239f, 0.309f, 0.278f},
-    {0.239f, 0.309f, 0.278f},
-};
-
-const Vector3 s_cube_vertex_normals[] = {
-    { 0.0f,  0.0f,  1.0f},
-    { 0.0f,  0.0f,  1.0f},
-    { 0.0f,  0.0f,  1.0f},
-    { 0.0f,  0.0f,  1.0f},
-
-    { 0.0f,  0.0f, -1.0f},
-    { 0.0f,  0.0f, -1.0f},
-    { 0.0f,  0.0f, -1.0f},
-    { 0.0f,  0.0f, -1.0f},
-
-    { 0.0f,  1.0f,  0.0f},
-    { 0.0f,  1.0f,  0.0f},
-    { 0.0f,  1.0f,  0.0f},
-    { 0.0f,  1.0f,  0.0f},
-
-    { 0.0f, -1.0f,  0.0f},
-    { 0.0f, -1.0f,  0.0f},
-    { 0.0f, -1.0f,  0.0f},
-    { 0.0f, -1.0f,  0.0f},
-
-    { 1.0f,  0.0f,  0.0f},
-    { 1.0f,  0.0f,  0.0f},
-    { 1.0f,  0.0f,  0.0f},
-    { 1.0f,  0.0f,  0.0f},
-
-    {-1.0f,  0.0f,  0.0f},
-    {-1.0f,  0.0f,  0.0f},
-    {-1.0f,  0.0f,  0.0f},
-    {-1.0f,  0.0f,  0.0f},
-};
-
-const Vector2 s_cube_vertex_texture_coords[] = {
-    {0.0f, 1.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-
-    {1.0f, 1.0f},
-    {0.0f, 1.0f},
-    {1.0f, 0.0f},
-    {0.0f, 0.0f},
-
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {0.0f, 1.0f},
-    {1.0f, 1.0f},
-
-    {0.0f, 1.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-
-    {0.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {1.0f, 0.0f},
-
-    {1.0f, 1.0f},
-    {1.0f, 0.0f},
-    {0.0f, 1.0f},
-    {0.0f, 0.0f},
-};
-
-const GLushort s_cube_vertex_indices[] = {
+const std::uint16_t s_cube_vertex_indices[] = {
     0, 1, 3,
     0, 3, 2,
 
@@ -197,13 +196,12 @@ const GLushort s_cube_vertex_indices[] = {
 void create_plane_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands)
 {
     create_elements_mesh(
-        s_plane_vertex_positions,
-        s_plane_vertex_colors,
-        s_plane_vertex_normals,
-        s_plane_vertex_texture_coords,
-        sizeof(s_plane_vertex_positions) / sizeof(Vector3),
-        s_plane_vertex_indices,
-        sizeof(s_plane_vertex_indices) / sizeof(GLushort),
+        VertexAttrDesc{.size = 3, .type = VertexAttrType::INT16, .normalized = true, .stride = 20, .offset = 0},
+        VertexAttrDesc{.size = 4, .type = VertexAttrType::PACKED_UINT, .normalized = true, .stride = 20, .offset = 8},
+        VertexAttrDesc{.size = 4, .type = VertexAttrType::PACKED_INT, .normalized = true, .stride = 20, .offset = 12},
+        VertexAttrDesc{.size = 2, .type = VertexAttrType::UINT16, .normalized = true, .stride = 20, .offset = 16},
+        std::span{reinterpret_cast<const std::byte *>(s_plane_vertex_attrs), sizeof(s_plane_vertex_attrs)},
+        std::span{s_plane_vertex_indices},
         OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]
@@ -213,13 +211,12 @@ void create_plane_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw
 void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_commands)
 {
     create_elements_mesh(
-        s_cube_vertex_positions,
-        s_cube_vertex_colors,
-        s_cube_vertex_normals,
-        s_cube_vertex_texture_coords,
-        sizeof(s_cube_vertex_positions) / sizeof(Vector3),
-        s_cube_vertex_indices,
-        sizeof(s_cube_vertex_indices) / sizeof(GLushort),
+        VertexAttrDesc{.size = 3, .type = VertexAttrType::INT16, .normalized = true, .stride = 20, .offset = 0},
+        VertexAttrDesc{.size = 4, .type = VertexAttrType::PACKED_UINT, .normalized = true, .stride = 20, .offset = 8},
+        VertexAttrDesc{.size = 4, .type = VertexAttrType::PACKED_INT, .normalized = true, .stride = 20, .offset = 12},
+        VertexAttrDesc{.size = 2, .type = VertexAttrType::UINT16, .normalized = true, .stride = 20, .offset = 16},
+        std::span{reinterpret_cast<const std::byte *>(s_cube_vertex_attrs), sizeof(s_cube_vertex_attrs)},
+        std::span{s_cube_vertex_indices},
         OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]
@@ -228,6 +225,8 @@ void create_cube_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 1> draw_
 
 void create_cylinder_mesh(MeshBuffers &mesh_buffers, std::span<DrawCommand, 3> draw_commands, std::size_t side_count)
 {
+    using Math::Vector3;
+
     const Vector3 color{1.0f, 1.0f, 1.0f};
 
     std::size_t side_vertex_count{side_count * 2};

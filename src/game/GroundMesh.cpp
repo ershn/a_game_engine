@@ -10132,7 +10132,7 @@ const Math::Vector3 s_normals[] = {
 	{0.00134277f, -0.00576794f, 0.999969f}
 };
 
-const GLushort s_indexes[] = {
+const std::uint16_t s_indexes[] = {
 	0, 1, 2,
 	3, 0, 2,
 	4, 0, 3,
@@ -16643,8 +16643,7 @@ void create_ground_mesh(Gfx::MeshBuffers &mesh_buffer, std::span<Gfx::DrawComman
         s_normals,
         nullptr,
         sizeof(s_positions) / sizeof(s_positions[0]),
-        s_indexes,
-        sizeof(s_indexes) / sizeof(s_indexes[0]),
+        std::span{s_indexes},
         Gfx::OGL::RenderingMode::TRIANGLES,
         mesh_buffer,
         draw_commands[0]

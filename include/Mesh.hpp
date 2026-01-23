@@ -12,6 +12,29 @@
 
 namespace Age::Gfx
 {
+enum struct VertexAttrType : std::uint8_t
+{
+    INT8,
+    UINT8,
+    INT16,
+    UINT16,
+    INT32,
+    UINT32,
+    PACKED_INT,
+    PACKED_UINT,
+    FLOAT,
+    DOUBLE,
+};
+
+struct VertexAttrDesc
+{
+    std::uint8_t size{};
+    VertexAttrType type : 7 {};
+    bool normalized : 1 {};
+    std::uint16_t stride{};
+    std::uint32_t offset{};
+};
+
 struct MeshBuffers
 {
     GLuint vertex_array_object{};
@@ -62,6 +85,40 @@ extern std::vector<Mesh> g_meshes;
 
 void init_mesh_system();
 
+MeshBuffers &create_mesh_buffers(std::uint16_t &index);
+
+template <std::uint16_t Count>
+std::span<DrawCommand, Count> create_draw_commands(std::uint32_t &offset)
+{
+    offset = static_cast<std::uint32_t>(g_draw_commands.size());
+    g_draw_commands.resize(g_draw_commands.size() + Count);
+    return std::span<DrawCommand, Count>{g_draw_commands.begin() + offset, Count};
+}
+
+void create_arrays_mesh(
+    VertexAttrDesc vertex_positions_desc,
+    VertexAttrDesc vertex_colors_desc,
+    VertexAttrDesc vertex_normals_desc,
+    VertexAttrDesc vertex_texture_coords_desc,
+    std::span<const std::byte> vertex_data,
+    std::size_t vertex_count,
+    OGL::RenderingMode rendering_mode,
+    MeshBuffers &mesh_buffers,
+    DrawCommand &draw_command
+);
+
+void create_elements_mesh(
+    VertexAttrDesc vertex_positions_desc,
+    VertexAttrDesc vertex_colors_desc,
+    VertexAttrDesc vertex_normals_desc,
+    VertexAttrDesc vertex_texture_coords_desc,
+    std::span<const std::byte> vertex_data,
+    std::span<const std::uint16_t> vertex_indices,
+    OGL::RenderingMode rendering_mode,
+    MeshBuffers &mesh_buffers,
+    DrawCommand &draw_command
+);
+
 void create_arrays_mesh(
     const Math::Vector3 *vertex_positions,
     const Math::Vector3 *vertex_colors,
@@ -79,22 +136,11 @@ void create_elements_mesh(
     const Math::Vector3 *vertex_normals,
     const Math::Vector2 *vertex_texture_coords,
     std::size_t vertex_count,
-    const unsigned short *vertex_indices,
-    std::size_t vertex_index_count,
+    std::span<const std::uint16_t> vertex_indices,
     OGL::RenderingMode rendering_mode,
     MeshBuffers &mesh_buffers,
     DrawCommand &draw_command
 );
-
-MeshBuffers &create_mesh_buffers(std::uint16_t &index);
-
-template <std::uint16_t Count>
-std::span<DrawCommand, Count> create_draw_commands(std::uint32_t &offset)
-{
-    offset = static_cast<std::uint32_t>(g_draw_commands.size());
-    g_draw_commands.resize(g_draw_commands.size() + Count);
-    return std::span<DrawCommand, Count>{g_draw_commands.begin() + offset, Count};
-}
 
 template <std::uint16_t Count, typename... TArgs>
 void create_mesh(

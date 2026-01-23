@@ -91,7 +91,7 @@ const Math::Vector2 s_texture_coords[] = {
     {1.0f, 0.0f},
 };
 
-const GLushort s_indexes[] = {
+const std::uint16_t s_indexes[] = {
     0, 1, 2,
     2, 3, 0,
     4, 5, 6,
@@ -116,8 +116,7 @@ void create_diorama_mesh(Age::Gfx::MeshBuffers &mesh_buffers, std::span<Age::Gfx
         s_normals,
         s_texture_coords,
         sizeof(s_positions) / sizeof(*s_positions),
-        s_indexes,
-        sizeof(s_indexes) / sizeof(*s_indexes),
+        std::span{s_indexes},
         Gfx::OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]

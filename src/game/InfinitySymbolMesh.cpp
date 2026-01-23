@@ -2794,7 +2794,7 @@ const Math::Vector2 s_texture_coords[] = {
 	{0.38306f, 0.656056f},
 };
 
-const GLushort s_indexes[] = {
+const std::uint16_t s_indexes[] = {
 	0, 1, 2,
 	0, 3, 1,
 	4, 3, 0,
@@ -4535,8 +4535,7 @@ void create_infinity_symbol_mesh(Age::Gfx::MeshBuffers &mesh_buffer, std::span<A
         s_normals,
         s_texture_coords,
         sizeof(s_positions) / sizeof(s_positions[0]),
-        s_indexes,
-        sizeof(s_indexes) / sizeof(s_indexes[0]),
+        std::span{s_indexes},
         Gfx::OGL::RenderingMode::TRIANGLES,
         mesh_buffer,
         draw_commands[0]

@@ -32,7 +32,7 @@ const Math::Vector2 s_texture_coords[] = {
 	{-64.0f, -64.0f},
 };
 
-const GLushort s_indexes[] = {
+const std::uint16_t s_indexes[] = {
 	0, 1, 2,
 	2, 3, 0,
 	4, 6, 5,
@@ -49,8 +49,7 @@ void create_big_plane_mesh(Age::Gfx::MeshBuffers &mesh_buffers, std::span<Age::G
         nullptr,
         s_texture_coords,
         sizeof(s_positions) / sizeof(*s_positions),
-        s_indexes,
-        sizeof(s_indexes) / sizeof(*s_indexes),
+        std::span{s_indexes},
         Gfx::OGL::RenderingMode::TRIANGLES,
         mesh_buffers,
         draw_commands[0]

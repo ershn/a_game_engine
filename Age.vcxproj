@@ -230,6 +230,7 @@
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\DefaultMeshes.hpp" />
     <ClInclude Include="include\OpenGL.hpp" />
+    <ClInclude Include="include\Packing.hpp" />
     <ClInclude Include="include\Path.hpp" />
     <ClInclude Include="include\Quaternion.hpp" />
     <ClInclude Include="include\Random.hpp" />
