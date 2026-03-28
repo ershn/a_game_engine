@@ -307,7 +307,7 @@ GLint s_texture_srgb_internal_formats_custom[] = {
     GL_SRGB8, // R8G8B8X8_UNORM
 };
 
-PixelDataFormat s_texture_pixel_data_formats_dxgi[] = {
+PixelDataFormat s_pixel_data_formats_dxgi[] = {
     {},                                                     // UNKNOWN
     {.format{}, .type{}},                                   // R32G32B32A32_TYPELESS
     {.format{}, .type{}},                                   // R32G32B32A32_FLOAT
@@ -426,9 +426,133 @@ PixelDataFormat s_texture_pixel_data_formats_dxgi[] = {
     {.format{}, .type{}},                                   // B4G4R4A4_UNORM
 };
 
-PixelDataFormat s_texture_pixel_data_formats_custom[] = {
+PixelDataFormat s_pixel_data_formats_custom[] = {
     {.format{GL_RGB}, .type{GL_UNSIGNED_BYTE}},             // R8G8B8_UNORM
     {.format{GL_RGBA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // R8G8B8X8_UNORM
+};
+
+unsigned int s_pixel_data_bpp_dxgi[] = {
+    0,  // UNKNOWN
+    0,  // R32G32B32A32_TYPELESS
+    0,  // R32G32B32A32_FLOAT
+    0,  // R32G32B32A32_UINT
+    0,  // R32G32B32A32_SINT
+    0,  // R32G32B32_TYPELESS
+    0,  // R32G32B32_FLOAT
+    0,  // R32G32B32_UINT
+    0,  // R32G32B32_SINT
+    0,  // R16G16B16A16_TYPELESS
+    0,  // R16G16B16A16_FLOAT
+    0,  // R16G16B16A16_UNORM
+    0,  // R16G16B16A16_UINT
+    0,  // R16G16B16A16_SNORM
+    0,  // R16G16B16A16_SINT
+    0,  // R32G32_TYPELESS
+    0,  // R32G32_FLOAT
+    0,  // R32G32_UINT
+    0,  // R32G32_SINT
+    0,  // R32G8X24_TYPELESS
+    0,  // D32_FLOAT_S8X24_UINT
+    0,  // R32_FLOAT_X8X24_TYPELESS
+    0,  // X32_TYPELESS_G8X24_UINT
+    0,  // R10G10B10A2_TYPELESS
+    0,  // R10G10B10A2_UNORM
+    0,  // R10G10B10A2_UINT
+    0,  // R11G11B10_FLOAT
+    0,  // R8G8B8A8_TYPELESS
+    32, // R8G8B8A8_UNORM
+    32, // R8G8B8A8_UNORM_SRGB
+    0,  // R8G8B8A8_UINT
+    0,  // R8G8B8A8_SNORM
+    0,  // R8G8B8A8_SINT
+    0,  // R16G16_TYPELESS
+    0,  // R16G16_FLOAT
+    0,  // R16G16_UNORM
+    0,  // R16G16_UINT
+    0,  // R16G16_SNORM
+    0,  // R16G16_SINT
+    0,  // R32_TYPELESS
+    0,  // D32_FLOAT
+    0,  // R32_FLOAT
+    0,  // R32_UINT
+    0,  // R32_SINT
+    0,  // R24G8_TYPELESS
+    0,  // D24_UNORM_S8_UINT
+    0,  // R24_UNORM_X8_TYPELESS
+    0,  // X24_TYPELESS_G8_UINT
+    0,  // R8G8_TYPELESS
+    0,  // R8G8_UNORM
+    0,  // R8G8_UINT
+    0,  // R8G8_SNORM
+    0,  // R8G8_SINT
+    0,  // R16_TYPELESS
+    0,  // R16_FLOAT
+    0,  // D16_UNORM
+    0,  // R16_UNORM
+    0,  // R16_UINT
+    0,  // R16_SNORM
+    0,  // R16_SINT
+    0,  // R8_TYPELESS
+    8,  // R8_UNORM
+    0,  // R8_UINT
+    0,  // R8_SNORM
+    0,  // R8_SINT
+    0,  // A8_UNORM
+    0,  // R1_UNORM
+    0,  // R9G9B9E5_SHAREDEXP
+    0,  // R8G8_B8G8_UNORM
+    0,  // G8R8_G8B8_UNORM
+    0,  // BC1_TYPELESS
+    0,  // BC1_UNORM
+    0,  // BC1_UNORM_SRGB
+    0,  // BC2_TYPELESS
+    0,  // BC2_UNORM
+    0,  // BC2_UNORM_SRGB
+    0,  // BC3_TYPELESS
+    0,  // BC3_UNORM
+    0,  // BC3_UNORM_SRGB
+    0,  // BC4_TYPELESS
+    0,  // BC4_UNORM
+    0,  // BC4_SNORM
+    0,  // BC5_TYPELESS
+    0,  // BC5_UNORM
+    0,  // BC5_SNORM
+    0,  // B5G6R5_UNORM
+    0,  // B5G5R5A1_UNORM
+    32, // B8G8R8A8_UNORM
+    32, // B8G8R8X8_UNORM
+    0,  // R10G10B10_XR_BIAS_A2_UNORM
+    0,  // B8G8R8A8_TYPELESS
+    32, // B8G8R8A8_UNORM_SRGB
+    0,  // B8G8R8X8_TYPELESS
+    32, // B8G8R8X8_UNORM_SRGB
+    0,  // BC6H_TYPELESS
+    0,  // BC6H_UF16
+    0,  // BC6H_SF16
+    0,  // BC7_TYPELESS
+    0,  // BC7_UNORM
+    0,  // BC7_UNORM_SRGB
+    0,  // AYUV
+    0,  // Y410
+    0,  // Y416
+    0,  // NV12
+    0,  // P010
+    0,  // P016
+    0,  // YUV_420_OPAQUE
+    0,  // YUY2
+    0,  // Y210
+    0,  // Y216
+    0,  // NV11
+    0,  // AI44
+    0,  // IA44
+    0,  // P8
+    0,  // A8P8
+    0,  // B4G4R4A4_UNORM
+};
+
+unsigned int s_pixel_data_bpp_custom[] = {
+    24, // R8G8B8_UNORM
+    32, // R8G8B8X8_UNORM
 };
 
 GLint get_texture_internal_format(TextureFormat format, bool force_srgb_internal_format)
@@ -474,21 +598,82 @@ PixelDataFormat get_pixel_data_format(TextureFormat format)
     auto format_index = Util::to_underlying(format);
     if (format_index < Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT))
     {
-        if (format_index < std::size(s_texture_pixel_data_formats_dxgi))
-            pixel_data_format = s_texture_pixel_data_formats_dxgi[format_index];
+        if (format_index < std::size(s_pixel_data_formats_dxgi))
+            pixel_data_format = s_pixel_data_formats_dxgi[format_index];
     }
     else
     {
         auto offset = format_index - Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT);
-        if (offset < std::size(s_texture_pixel_data_formats_custom))
-            pixel_data_format = s_texture_pixel_data_formats_custom[offset];
+        if (offset < std::size(s_pixel_data_formats_custom))
+            pixel_data_format = s_pixel_data_formats_custom[offset];
     }
 
     LOG_ERROR_IF(pixel_data_format.format == 0, "no pixel data format found for texture format: {}", format_index);
     return pixel_data_format;
 }
 
-unsigned int get_row_alignment_from_pitch(std::uint32_t pitch)
+unsigned int get_pixel_data_bpp(TextureFormat format)
+{
+    unsigned int bpp{};
+
+    auto format_index = Util::to_underlying(format);
+    if (format_index < Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT))
+    {
+        if (format_index < std::size(s_pixel_data_bpp_dxgi))
+            bpp = s_pixel_data_bpp_dxgi[format_index];
+    }
+    else
+    {
+        auto offset = format_index - Util::to_underlying(TextureFormat::FIRST_CUSTOM_FORMAT);
+        if (offset < std::size(s_pixel_data_bpp_custom))
+            bpp = s_pixel_data_bpp_custom[offset];
+    }
+
+    LOG_ERROR_IF(bpp == 0, "no pixel data bpp defined for texture format: {}", format_index);
+    return bpp;
+}
+
+void calc_pixel_data_pitch(
+    TextureFormat texture_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    unsigned int &pitch,
+    unsigned int &row_count
+)
+{
+    switch (texture_format)
+    {
+    case TextureFormat::BC1_TYPELESS:
+    case TextureFormat::BC1_UNORM:
+    case TextureFormat::BC1_UNORM_SRGB:
+        pitch = std::max(1U, (width + 3) / 4) * 8;
+        row_count = (height + 3) / 4;
+        break;
+    case TextureFormat::BC2_TYPELESS:
+    case TextureFormat::BC2_UNORM:
+    case TextureFormat::BC2_UNORM_SRGB:
+    case TextureFormat::BC3_TYPELESS:
+    case TextureFormat::BC3_UNORM:
+    case TextureFormat::BC3_UNORM_SRGB:
+        pitch = std::max(1U, (width + 3) / 4) * 16;
+        row_count = (height + 3) / 4;
+        break;
+    case TextureFormat::R8G8_B8G8_UNORM:
+    case TextureFormat::G8R8_G8B8_UNORM:
+    case TextureFormat::YUY2:
+    case TextureFormat::Y210:
+    case TextureFormat::Y216:
+        pitch = ((width + 1) >> 1) * 4;
+        row_count = height;
+        break;
+    default:
+        pitch = (width * get_pixel_data_bpp(texture_format) + 7) / 8;
+        row_count = height;
+        break;
+    }
+}
+
+unsigned int get_row_alignment_from_pitch(unsigned int pitch)
 {
     if ((pitch & 0b1111) == 0b1000)
         return 8;
@@ -500,26 +685,27 @@ unsigned int get_row_alignment_from_pitch(std::uint32_t pitch)
         return 1;
 }
 
-std::uint32_t get_base_image_size(const TextureData &texture_data)
+std::uint32_t get_base_image_pixel_data_size(const TextureDesc &texture_desc)
 {
-    return texture_data.row_pitch * texture_data.row_count * texture_data.desc.depth;
+    unsigned int pitch, row_count;
+    calc_pixel_data_pitch(texture_desc.format, texture_desc.width, texture_desc.height, pitch, row_count);
+
+    return pitch * row_count * texture_desc.depth;
 }
 
-std::uint32_t get_mipmap_size(const TextureData &texture_data)
+std::uint32_t get_mipmap_pixel_data_size(const TextureData &texture)
 {
     std::uint32_t mipmap_size{0};
-    for (std::size_t mipmap_level{0}; mipmap_level < texture_data.desc.mipmap_level_count; ++mipmap_level)
+    for (const auto &mipmap_level : get_mipmap(texture))
     {
-        mipmap_size += std::max(1U, texture_data.row_pitch >> mipmap_level) *
-                       std::max(1U, texture_data.row_count >> mipmap_level) *
-                       std::max(1U, texture_data.desc.depth >> mipmap_level);
+        mipmap_size += mipmap_level.pitch * mipmap_level.row_count * mipmap_level.depth;
     }
     return mipmap_size;
 }
 
-std::uint32_t get_mipmap_level_size(const MipmapLevel &mipmap_level)
+std::uint32_t get_mipmap_level_pixel_data_size(const MipmapLevel &mipmap_level)
 {
-    return mipmap_level.row_pitch * mipmap_level.row_count * mipmap_level.depth;
+    return mipmap_level.pitch * mipmap_level.row_count * mipmap_level.depth;
 }
 } // namespace
 
@@ -539,42 +725,46 @@ CubeMapFace CubeMap::operator[](std::size_t index) const
         Core::log_error("Cube map face index must be in the range [0, 5]: {}", index);
         index = 5;
     }
-    return {.cube_map = *this, .byte_offset = this->face_size * static_cast<std::uint32_t>(index)};
+    return {
+        .cube_map = *this,
+        .byte_offset = this->face_size * static_cast<std::uint32_t>(index),
+        .face_index = static_cast<std::uint32_t>(index)
+    };
 }
 
 CubeMap get_cube_map(const TextureData &texture)
 {
-    return {.texture = texture, .face_size = get_mipmap_size(texture)};
+    return {.texture = texture, .face_size = get_mipmap_pixel_data_size(texture)};
 }
 
-bool operator==(const CubeMapFaceIterator &it1, const CubeMapFaceIterator &it2)
+bool operator==(const CubeMapFace &it1, const CubeMapFace &it2)
 {
     return &it1.cube_map == &it2.cube_map && it1.face_index == it2.face_index;
 }
 
-bool operator!=(const CubeMapFaceIterator &it1, const CubeMapFaceIterator &it2)
+bool operator!=(const CubeMapFace &it1, const CubeMapFace &it2)
 {
     return !(it1 == it2);
 }
 
-CubeMapFaceIterator &operator++(CubeMapFaceIterator &it)
+CubeMapFace &operator++(CubeMapFace &it)
 {
     it.byte_offset += it.cube_map.face_size;
     ++it.face_index;
     return it;
 }
 
-CubeMapFace operator*(const CubeMapFaceIterator &it)
+const CubeMapFace &operator*(const CubeMapFace &it)
 {
-    return {.cube_map = it.cube_map, .byte_offset = it.byte_offset};
+    return it;
 }
 
-CubeMapFaceIterator begin(const CubeMap &cube_map)
+CubeMapFace begin(const CubeMap &cube_map)
 {
     return {.cube_map = cube_map, .byte_offset = 0, .face_index = 0};
 }
 
-CubeMapFaceIterator end(const CubeMap &cube_map)
+CubeMapFace end(const CubeMap &cube_map)
 {
     return {.cube_map = cube_map, .face_index = 6};
 }
@@ -589,53 +779,58 @@ Mipmap get_mipmap(const CubeMapFace &cube_map_face)
     return {.texture = cube_map_face.cube_map.texture, .byte_offset = cube_map_face.byte_offset};
 }
 
-bool operator==(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
+bool operator==(const MipmapLevel &it1, const MipmapLevel &it2)
 {
     return &it1.texture == &it2.texture && it1.level == it2.level;
 }
 
-bool operator!=(const MipmapLevelIterator &it1, const MipmapLevelIterator &it2)
+bool operator!=(const MipmapLevel &it1, const MipmapLevel &it2)
 {
     return !(it1 == it2);
 }
 
-MipmapLevelIterator &operator++(MipmapLevelIterator &it)
+MipmapLevel &operator++(MipmapLevel &it)
 {
-    auto row_pitch = std::max(1U, it.texture.row_pitch >> it.level);
-    auto row_count = std::max(1U, it.texture.row_count >> it.level);
-    auto depth = std::max(1U, it.texture.desc.depth >> it.level);
-
-    it.byte_offset += row_pitch * row_count * depth;
+    it.byte_offset += it.pitch * it.row_count * it.depth;
     ++it.level;
+
+    it.width = std::max(1U, it.width >> 1);
+    it.height = std::max(1U, it.height >> 1);
+    it.depth = std::max(1U, it.depth >> 1);
+
+    unsigned int pitch, row_count;
+    calc_pixel_data_pitch(it.texture.desc.format, it.width, it.height, pitch, row_count);
+
+    it.pitch = pitch;
+    it.row_count = row_count;
     return it;
 }
 
-MipmapLevel operator*(const MipmapLevelIterator &it)
+const MipmapLevel &operator*(const MipmapLevel &it)
 {
-    auto row_pitch = std::max(1U, it.texture.row_pitch >> it.level);
-    auto row_count = std::max(1U, it.texture.row_count >> it.level);
-    auto width = std::max(1U, it.texture.desc.width >> it.level);
-    auto height = std::max(1U, it.texture.desc.height >> it.level);
-    auto depth = std::max(1U, it.texture.desc.depth >> it.level);
+    return it;
+}
+
+MipmapLevel begin(const Mipmap &mipmap)
+{
+    const TextureDesc &texture_desc{mipmap.texture.desc};
+
+    unsigned int pitch, row_count;
+    calc_pixel_data_pitch(texture_desc.format, texture_desc.width, texture_desc.height, pitch, row_count);
 
     return {
-        .texture = it.texture,
-        .byte_offset = it.byte_offset,
-        .row_pitch = row_pitch,
+        .texture = mipmap.texture,
+        .byte_offset = mipmap.byte_offset,
+        .pitch = pitch,
         .row_count = row_count,
-        .width = width,
-        .height = height,
-        .depth = depth,
-        .level = it.level
+        .level = 0,
+        .width = texture_desc.width,
+        .height = texture_desc.height,
+        .depth = texture_desc.depth
     };
 }
 
-MipmapLevelIterator begin(const Mipmap &mipmap)
-{
-    return {.texture = mipmap.texture, .byte_offset = mipmap.byte_offset, .level = 0};
-}
-
-MipmapLevelIterator end(const Mipmap &mipmap)
+MipmapLevel end(const Mipmap &mipmap)
 {
     return {.texture = mipmap.texture, .level = mipmap.texture.desc.mipmap_level_count};
 }
@@ -682,7 +877,7 @@ GLint get_pixel_data_unpack_alignment()
     return OGL::get_integer(GL_UNPACK_ALIGNMENT);
 }
 
-void update_pixel_data_unpack_alignment(std::uint32_t pitch, GLint &unpack_alignment)
+void update_pixel_data_unpack_alignment(unsigned int pitch, GLint &unpack_alignment)
 {
     GLint row_alignment{static_cast<GLint>(get_row_alignment_from_pitch(pitch))};
     if (row_alignment != unpack_alignment)
@@ -692,114 +887,138 @@ void update_pixel_data_unpack_alignment(std::uint32_t pitch, GLint &unpack_align
     }
 }
 
-GLuint load_1d_texture(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
+using TextureImageLoader = void (*)(
+    std::uint32_t level,
+    GLint internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    PixelDataFormat data_format,
+    const std::byte *bytes
+);
+
+void load_1d_texture_image(
+    std::uint32_t level,
+    GLint internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    PixelDataFormat data_format,
+    const std::byte *bytes
+)
 {
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-    auto data_format = get_pixel_data_format(texture_data.desc.format);
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(GL_TEXTURE_1D, texture);
-
-    GLint unpack_alignment{get_pixel_data_unpack_alignment()};
-
-    if (texture_data.desc.mipmap_level_count > 1)
-    {
-        for (const auto &mipmap_level : get_mipmap(texture_data))
-        {
-            update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
-
-            glTexImage1D(
-                GL_TEXTURE_1D,
-                mipmap_level.level,
-                internal_format,
-                mipmap_level.width,
-                0,
-                data_format.format,
-                data_format.type,
-                &mipmap_level.texture.bytes[mipmap_level.byte_offset]
-            );
-        }
-    }
-    else
-    {
-        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
-
-        glTexImage1D(
-            GL_TEXTURE_1D,
-            0,
-            internal_format,
-            texture_data.desc.width,
-            0,
-            data_format.format,
-            data_format.type,
-            texture_data.bytes.get()
-        );
-    }
-
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
-
-    glBindTexture(GL_TEXTURE_1D, 0);
-
-    return texture;
+    glTexImage1D(
+        GL_TEXTURE_1D,
+        static_cast<GLint>(level),
+        internal_format,
+        static_cast<GLsizei>(width),
+        0,
+        data_format.format,
+        data_format.type,
+        bytes
+    );
 }
 
-GLuint load_2d_texture(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
+void load_2d_texture_image(
+    std::uint32_t level,
+    GLint internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    PixelDataFormat data_format,
+    const std::byte *bytes
+)
 {
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-    auto data_format = get_pixel_data_format(texture_data.desc.format);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        static_cast<GLint>(level),
+        internal_format,
+        static_cast<GLsizei>(width),
+        static_cast<GLsizei>(height),
+        0,
+        data_format.format,
+        data_format.type,
+        bytes
+    );
+}
+
+void load_3d_texture_image(
+    std::uint32_t level,
+    GLint internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    PixelDataFormat data_format,
+    const std::byte *bytes
+)
+{
+    glTexImage3D(
+        GL_TEXTURE_3D,
+        static_cast<GLint>(level),
+        internal_format,
+        static_cast<GLsizei>(width),
+        static_cast<GLsizei>(height),
+        static_cast<GLsizei>(depth),
+        0,
+        data_format.format,
+        data_format.type,
+        bytes
+    );
+}
+
+template <GLenum TextureTarget, TextureImageLoader LoadTextureImage>
+GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
+{
+    const TextureDesc &texture_desc{texture_data.desc};
+
+    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
+    auto data_format = get_pixel_data_format(texture_desc.format);
 
     GLuint texture;
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(TextureTarget, texture);
 
     GLint unpack_alignment{get_pixel_data_unpack_alignment()};
 
-    if (texture_data.desc.mipmap_level_count > 1)
+    if (texture_desc.mipmap_level_count > 1)
     {
         for (const auto &mipmap_level : get_mipmap(texture_data))
         {
-            update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
+            update_pixel_data_unpack_alignment(mipmap_level.pitch, unpack_alignment);
 
-            glTexImage2D(
-                GL_TEXTURE_2D,
+            LoadTextureImage(
                 mipmap_level.level,
                 internal_format,
                 mipmap_level.width,
                 mipmap_level.height,
-                0,
-                data_format.format,
-                data_format.type,
+                mipmap_level.depth,
+                data_format,
                 &mipmap_level.texture.bytes[mipmap_level.byte_offset]
             );
         }
     }
     else
     {
-        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
+        unsigned int pitch, row_count;
+        calc_pixel_data_pitch(texture_desc.format, texture_desc.width, texture_desc.height, pitch, row_count);
+        update_pixel_data_unpack_alignment(pitch, unpack_alignment);
 
-        glTexImage2D(
-            GL_TEXTURE_2D,
+        LoadTextureImage(
             0,
             internal_format,
-            texture_data.desc.width,
-            texture_data.desc.height,
-            0,
-            data_format.format,
-            data_format.type,
+            texture_desc.width,
+            texture_desc.height,
+            texture_desc.depth,
+            data_format,
             texture_data.bytes.get()
         );
     }
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
+    glTexParameteri(TextureTarget, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(TextureTarget, GL_TEXTURE_MAX_LEVEL, texture_desc.mipmap_level_count - 1);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(TextureTarget, 0);
 
     return texture;
 }
@@ -808,9 +1027,10 @@ GLuint load_cube_map_texture(
     const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
 )
 {
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-    auto data_format = get_pixel_data_format(texture_data.desc.format);
+    const TextureDesc &texture_desc{texture_data.desc};
+
+    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
+    auto data_format = get_pixel_data_format(texture_desc.format);
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -819,14 +1039,14 @@ GLuint load_cube_map_texture(
 
     GLint unpack_alignment{get_pixel_data_unpack_alignment()};
 
-    if (texture_data.desc.mipmap_level_count > 1)
+    if (texture_desc.mipmap_level_count > 1)
     {
         unsigned int face_index{0};
         for (const auto &cube_map_face : get_cube_map(texture_data))
         {
             for (const auto &mipmap_level : get_mipmap(cube_map_face))
             {
-                update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
+                update_pixel_data_unpack_alignment(mipmap_level.pitch, unpack_alignment);
 
                 glTexImage2D(
                     GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_index,
@@ -845,7 +1065,9 @@ GLuint load_cube_map_texture(
     }
     else
     {
-        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
+        unsigned int pitch, row_count;
+        calc_pixel_data_pitch(texture_desc.format, texture_desc.width, texture_desc.height, pitch, row_count);
+        update_pixel_data_unpack_alignment(pitch, unpack_alignment);
 
         unsigned int face_index{0};
         for (const auto &cube_map_face : get_cube_map(texture_data))
@@ -854,8 +1076,8 @@ GLuint load_cube_map_texture(
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_index,
                 0,
                 internal_format,
-                texture_data.desc.width,
-                texture_data.desc.height,
+                texture_desc.width,
+                texture_desc.height,
                 0,
                 data_format.format,
                 data_format.type,
@@ -866,166 +1088,135 @@ GLuint load_cube_map_texture(
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, texture_desc.mipmap_level_count - 1);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
     return texture;
 }
 
-GLuint load_3d_texture(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
+using CompressedTextureImageLoader = void (*)(
+    std::uint32_t level,
+    GLenum internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    std::uint32_t image_size,
+    const std::byte *bytes
+);
+
+void load_compressed_1d_texture_image(
+    std::uint32_t level,
+    GLenum internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    std::uint32_t image_size,
+    const std::byte *bytes
+)
 {
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-    auto data_format = get_pixel_data_format(texture_data.desc.format);
+    glCompressedTexImage1D(
+        GL_TEXTURE_1D,
+        static_cast<GLint>(level),
+        static_cast<GLenum>(internal_format),
+        static_cast<GLsizei>(width),
+        0,
+        static_cast<GLsizei>(image_size),
+        bytes
+    );
+}
+
+void load_compressed_2d_texture_image(
+    std::uint32_t level,
+    GLenum internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    std::uint32_t image_size,
+    const std::byte *bytes
+)
+{
+    glCompressedTexImage2D(
+        GL_TEXTURE_2D,
+        static_cast<GLint>(level),
+        static_cast<GLenum>(internal_format),
+        static_cast<GLsizei>(width),
+        static_cast<GLsizei>(height),
+        0,
+        static_cast<GLsizei>(image_size),
+        bytes
+    );
+}
+
+void load_compressed_3d_texture_image(
+    std::uint32_t level,
+    GLenum internal_format,
+    std::uint32_t width,
+    std::uint32_t height,
+    std::uint32_t depth,
+    std::uint32_t image_size,
+    const std::byte *bytes
+)
+{
+    glCompressedTexImage3D(
+        GL_TEXTURE_3D,
+        static_cast<GLint>(level),
+        static_cast<GLenum>(internal_format),
+        static_cast<GLsizei>(width),
+        static_cast<GLsizei>(height),
+        static_cast<GLsizei>(depth),
+        0,
+        static_cast<GLsizei>(image_size),
+        bytes
+    );
+}
+
+template <GLenum TextureTarget, CompressedTextureImageLoader LoadCompressedTextureImage>
+GLuint load_compressed_texture(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+)
+{
+    const TextureDesc &texture_desc{texture_data.desc};
+
+    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
 
     GLuint texture;
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(GL_TEXTURE_3D, texture);
+    glBindTexture(TextureTarget, texture);
 
-    GLint unpack_alignment{get_pixel_data_unpack_alignment()};
-
-    if (texture_data.desc.mipmap_level_count > 1)
+    if (texture_desc.mipmap_level_count > 1)
     {
         for (const auto &mipmap_level : get_mipmap(texture_data))
         {
-            update_pixel_data_unpack_alignment(mipmap_level.row_pitch, unpack_alignment);
-
-            glTexImage3D(
-                GL_TEXTURE_3D,
+            LoadCompressedTextureImage(
                 mipmap_level.level,
                 internal_format,
                 mipmap_level.width,
                 mipmap_level.height,
                 mipmap_level.depth,
-                0,
-                data_format.format,
-                data_format.type,
+                get_mipmap_level_pixel_data_size(mipmap_level),
                 &mipmap_level.texture.bytes[mipmap_level.byte_offset]
             );
         }
     }
     else
     {
-        update_pixel_data_unpack_alignment(texture_data.row_pitch, unpack_alignment);
-
-        glTexImage3D(
-            GL_TEXTURE_3D,
+        LoadCompressedTextureImage(
             0,
             internal_format,
-            texture_data.desc.width,
-            texture_data.desc.height,
-            texture_data.desc.depth,
-            0,
-            data_format.format,
-            data_format.type,
+            texture_desc.width,
+            texture_desc.height,
+            texture_desc.depth,
+            get_base_image_pixel_data_size(texture_desc),
             texture_data.bytes.get()
         );
     }
 
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
+    glTexParameteri(TextureTarget, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(TextureTarget, GL_TEXTURE_MAX_LEVEL, texture_desc.mipmap_level_count - 1);
 
-    glBindTexture(GL_TEXTURE_3D, 0);
-
-    return texture;
-}
-
-GLuint load_compressed_1d_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
-)
-{
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(GL_TEXTURE_1D, texture);
-
-    if (texture_data.desc.mipmap_level_count > 1)
-    {
-        for (const auto &mipmap_level : get_mipmap(texture_data))
-        {
-            glCompressedTexImage1D(
-                GL_TEXTURE_1D,
-                static_cast<GLint>(mipmap_level.level),
-                static_cast<GLenum>(internal_format),
-                static_cast<GLsizei>(mipmap_level.width),
-                0,
-                static_cast<GLsizei>(get_mipmap_level_size(mipmap_level)),
-                &mipmap_level.texture.bytes[mipmap_level.byte_offset]
-            );
-        }
-    }
-    else
-    {
-        glCompressedTexImage1D(
-            GL_TEXTURE_1D,
-            0,
-            static_cast<GLenum>(internal_format),
-            static_cast<GLsizei>(texture_data.desc.width),
-            0,
-            static_cast<GLsizei>(get_base_image_size(texture_data)),
-            texture_data.bytes.get()
-        );
-    }
-
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
-
-    glBindTexture(GL_TEXTURE_1D, 0);
-
-    return texture;
-}
-
-GLuint load_compressed_2d_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
-)
-{
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    if (texture_data.desc.mipmap_level_count > 1)
-    {
-        for (const auto &mipmap_level : get_mipmap(texture_data))
-        {
-            glCompressedTexImage2D(
-                GL_TEXTURE_2D,
-                static_cast<GLint>(mipmap_level.level),
-                static_cast<GLenum>(internal_format),
-                static_cast<GLsizei>(mipmap_level.width),
-                static_cast<GLsizei>(mipmap_level.height),
-                0,
-                static_cast<GLsizei>(get_mipmap_level_size(mipmap_level)),
-                &mipmap_level.texture.bytes[mipmap_level.byte_offset]
-            );
-        }
-    }
-    else
-    {
-        glCompressedTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            static_cast<GLenum>(internal_format),
-            static_cast<GLsizei>(texture_data.desc.width),
-            static_cast<GLsizei>(texture_data.desc.height),
-            0,
-            static_cast<GLsizei>(get_base_image_size(texture_data)),
-            texture_data.bytes.get()
-        );
-    }
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(TextureTarget, 0);
 
     return texture;
 }
@@ -1034,15 +1225,16 @@ GLuint load_compressed_cube_map_texture(
     const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
 )
 {
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
+    const TextureDesc &texture_desc{texture_data.desc};
+
+    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
 
     GLuint texture;
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
-    if (texture_data.desc.mipmap_level_count > 1)
+    if (texture_desc.mipmap_level_count > 1)
     {
         unsigned int face_index{0};
         for (const auto &cube_map_face : get_cube_map(texture_data))
@@ -1056,7 +1248,7 @@ GLuint load_compressed_cube_map_texture(
                     static_cast<GLsizei>(mipmap_level.width),
                     static_cast<GLsizei>(mipmap_level.height),
                     0,
-                    static_cast<GLsizei>(get_mipmap_level_size(mipmap_level)),
+                    static_cast<GLsizei>(get_mipmap_level_pixel_data_size(mipmap_level)),
                     &mipmap_level.texture.bytes[mipmap_level.byte_offset]
                 );
             }
@@ -1072,10 +1264,10 @@ GLuint load_compressed_cube_map_texture(
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_index,
                 0,
                 static_cast<GLenum>(internal_format),
-                static_cast<GLsizei>(texture_data.desc.width),
-                static_cast<GLsizei>(texture_data.desc.height),
+                static_cast<GLsizei>(texture_desc.width),
+                static_cast<GLsizei>(texture_desc.height),
                 0,
-                static_cast<GLsizei>(get_base_image_size(texture_data)),
+                static_cast<GLsizei>(get_base_image_pixel_data_size(texture_desc)),
                 &cube_map_face.cube_map.texture.bytes[cube_map_face.byte_offset]
             );
             ++face_index;
@@ -1083,61 +1275,9 @@ GLuint load_compressed_cube_map_texture(
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, texture_desc.mipmap_level_count - 1);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    return texture;
-}
-
-GLuint load_compressed_3d_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
-)
-{
-    auto internal_format =
-        get_texture_internal_format(texture_data.desc.format, load_options.force_srgb_internal_format);
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(GL_TEXTURE_3D, texture);
-
-    if (texture_data.desc.mipmap_level_count > 1)
-    {
-        for (const auto &mipmap_level : get_mipmap(texture_data))
-        {
-            glCompressedTexImage3D(
-                GL_TEXTURE_3D,
-                static_cast<GLint>(mipmap_level.level),
-                static_cast<GLenum>(internal_format),
-                static_cast<GLsizei>(mipmap_level.width),
-                static_cast<GLsizei>(mipmap_level.height),
-                static_cast<GLsizei>(mipmap_level.depth),
-                0,
-                static_cast<GLsizei>(get_mipmap_level_size(mipmap_level)),
-                &mipmap_level.texture.bytes[mipmap_level.byte_offset]
-            );
-        }
-    }
-    else
-    {
-        glCompressedTexImage3D(
-            GL_TEXTURE_3D,
-            0,
-            static_cast<GLenum>(internal_format),
-            static_cast<GLsizei>(texture_data.desc.width),
-            static_cast<GLsizei>(texture_data.desc.height),
-            static_cast<GLsizei>(texture_data.desc.depth),
-            0,
-            static_cast<GLsizei>(get_base_image_size(texture_data)),
-            texture_data.bytes.get()
-        );
-    }
-
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, texture_data.desc.mipmap_level_count - 1);
-
-    glBindTexture(GL_TEXTURE_3D, 0);
 
     return texture;
 }
@@ -1149,13 +1289,19 @@ GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            return load_compressed_1d_texture(texture_data, texture_unit_id, load_options);
+            return load_compressed_texture<GL_TEXTURE_1D, load_compressed_1d_texture_image>(
+                texture_data, texture_unit_id, load_options
+            );
         case TextureType::TEXTURE_2D:
-            return load_compressed_2d_texture(texture_data, texture_unit_id, load_options);
+            return load_compressed_texture<GL_TEXTURE_2D, load_compressed_2d_texture_image>(
+                texture_data, texture_unit_id, load_options
+            );
         case TextureType::TEXTURE_CUBE_MAP:
             return load_compressed_cube_map_texture(texture_data, texture_unit_id, load_options);
         case TextureType::TEXTURE_3D:
-            return load_compressed_3d_texture(texture_data, texture_unit_id, load_options);
+            return load_compressed_texture<GL_TEXTURE_3D, load_compressed_3d_texture_image>(
+                texture_data, texture_unit_id, load_options
+            );
         }
     }
     else
@@ -1163,13 +1309,13 @@ GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            return load_1d_texture(texture_data, texture_unit_id, load_options);
+            return load_texture<GL_TEXTURE_1D, load_1d_texture_image>(texture_data, texture_unit_id, load_options);
         case TextureType::TEXTURE_2D:
-            return load_2d_texture(texture_data, texture_unit_id, load_options);
+            return load_texture<GL_TEXTURE_2D, load_2d_texture_image>(texture_data, texture_unit_id, load_options);
         case TextureType::TEXTURE_CUBE_MAP:
             return load_cube_map_texture(texture_data, texture_unit_id, load_options);
         case TextureType::TEXTURE_3D:
-            return load_3d_texture(texture_data, texture_unit_id, load_options);
+            return load_texture<GL_TEXTURE_3D, load_3d_texture_image>(texture_data, texture_unit_id, load_options);
         }
     }
 

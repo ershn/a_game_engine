@@ -139,6 +139,44 @@ struct Vector4
 
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector);
 
+struct Vector3U
+{
+    unsigned int x;
+    unsigned int y;
+    unsigned int z;
+
+    constexpr Vector3U()
+        : x{}
+        , y{}
+        , z{}
+    {
+    }
+
+    constexpr Vector3U(unsigned int value)
+        : x{value}
+        , y{value}
+        , z{value}
+    {
+    }
+
+    constexpr Vector3U(unsigned int x, unsigned int y, unsigned int z)
+        : x{x}
+        , y{y}
+        , z{z}
+    {
+    }
+
+    // Vector3U(const Vector2U &vec, unsigned int z);
+    // explicit Vector3U(const Vector4U &vec);
+
+    explicit operator const unsigned int *() const;
+
+    unsigned int operator[](std::size_t index) const;
+    unsigned int &operator[](std::size_t index);
+};
+
+std::ostream &operator<<(std::ostream &out, const Vector3U &vector);
+
 bool operator==(const Vector2 &lhs, const Vector2 &rhs);
 bool operator==(const Vector3 &lhs, const Vector3 &rhs);
 bool operator==(const Vector4 &lhs, const Vector4 &rhs);

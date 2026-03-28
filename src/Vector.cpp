@@ -181,6 +181,49 @@ std::ostream &operator<<(std::ostream &out, const Vector4 &vector)
     return out;
 }
 
+Vector3U::operator const unsigned int *() const
+{
+    return &x;
+}
+
+unsigned int Vector3U::operator[](std::size_t index) const
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    default:
+        Core::log_error("Vector3U index must be in the range [0, 2]: {}", index);
+        return z;
+    }
+}
+
+unsigned int &Vector3U::operator[](std::size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    default:
+        Core::log_error("Vector3U index must be in the range [0, 2]: {}", index);
+        return z;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Vector3U &vector)
+{
+    out << '{' << vector.x << "U, " << vector.y << "U, " << vector.z << "U}";
+    return out;
+}
+
 bool operator==(const Vector2 &lhs, const Vector2 &rhs)
 {
     return lhs.x == rhs.x && lhs.y == rhs.y;

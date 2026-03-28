@@ -450,41 +450,6 @@ void detect_texture_count(const DDS_HEADER &header, const DDS_HEADER_DXT10 &head
     }
 }
 
-void calc_texture_pitch(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureData &texture_data)
-{
-    // TODO: handle block compressed formats
-    switch (texture_data.desc.format)
-    {
-    case TextureFormat::BC1_TYPELESS:
-    case TextureFormat::BC1_UNORM:
-    case TextureFormat::BC1_UNORM_SRGB:
-        texture_data.row_pitch = std::max(1U, (header.width + 3) / 4) * 8;
-        texture_data.row_count = (header.height + 3) / 4;
-        break;
-    case TextureFormat::BC2_TYPELESS:
-    case TextureFormat::BC2_UNORM:
-    case TextureFormat::BC2_UNORM_SRGB:
-    case TextureFormat::BC3_TYPELESS:
-    case TextureFormat::BC3_UNORM:
-    case TextureFormat::BC3_UNORM_SRGB:
-        texture_data.row_pitch = std::max(1U, (header.width + 3) / 4) * 16;
-        texture_data.row_count = (header.height + 3) / 4;
-        break;
-    case TextureFormat::R8G8_B8G8_UNORM:
-    case TextureFormat::G8R8_G8B8_UNORM:
-    case TextureFormat::YUY2:
-    case TextureFormat::Y210:
-    case TextureFormat::Y216:
-        texture_data.row_pitch = ((header.width + 1) >> 1) * 4;
-        texture_data.row_count = header.height;
-        break;
-    default:
-        texture_data.row_pitch = (header.width * get_bit_count_per_pixel(header, header_extension) + 7) / 8;
-        texture_data.row_count = header.height;
-        break;
-    }
-}
-
 bool read_texture_bytes(
     std::ifstream &fstream, std::size_t texture_size, TextureData &texture_data, std::string_view file_path
 )
@@ -517,8 +482,6 @@ bool read_texture_data_from_dds_file(std::string_view file_path, TextureData &te
         return false;
 
     detect_texture_count(dds_header, dds_header_extension, texture_data.desc);
-
-    calc_texture_pitch(dds_header, dds_header_extension, texture_data);
 
     return read_texture_bytes(fstream, texture_size, texture_data, file_path);
 }
