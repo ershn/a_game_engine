@@ -6,12 +6,13 @@
 #include "game/Game.hpp"
 #include "game/GammaAndTexturesScene.hpp"
 #include "game/InfinitySymbolScene.hpp"
+#include "game/ProceduralTextureScene.hpp"
 #include "game/ProjectedLightScene.hpp"
 #include "game/ValleyScene.hpp"
 
 int main()
 {
-    auto scene = Game::CubePointLightScene{};
+    auto scene = Game::ProceduralTextureScene{};
 
 #ifdef _DEBUG
     Age::Core::run_engine(Game::g_definitions, scene);

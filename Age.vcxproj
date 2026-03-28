@@ -146,6 +146,7 @@
     <ClCompile Include="src\game\BigPlaneMesh.cpp" />
     <ClCompile Include="src\game\CorridorMesh.cpp" />
     <ClCompile Include="src\game\InfinitySymbolScene.cpp" />
+    <ClCompile Include="src\game\ProceduralTextureScene.cpp" />
     <ClCompile Include="src\game\ProjectedLightScene.cpp" />
     <ClCompile Include="src\game\ValleyScene.cpp" />
     <ClCompile Include="src\game\InfinitySymbolMesh.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="include\game\InfinitySymbolMesh.hpp" />
     <ClInclude Include="include\game\InfinitySymbolScene.hpp" />
     <ClInclude Include="include\game\Meshes.hpp" />
+    <ClInclude Include="include\game\ProceduralTextureScene.hpp" />
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
     <ClInclude Include="include\game\ProjectedLightScene.hpp" />
@@ -251,6 +253,8 @@
     <ClInclude Include="include\Viewport.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\game\star_texture.frag" />
+    <None Include="shaders\game\star_texture.vert" />
     <None Include="shaders\fragment_lighting_color.vert" />
     <None Include="shaders\game\checkerboard.frag" />
     <None Include="shaders\game\checkerboard.vert" />
@@ -258,6 +262,8 @@
     <None Include="shaders\game\gamma_and_textures.vert" />
     <None Include="shaders\game\infinity_symbol.vert" />
     <None Include="shaders\game\infinity_symbol.frag" />
+    <None Include="shaders\game\brick_texture.frag" />
+    <None Include="shaders\game\brick_texture.vert" />
     <None Include="shaders\game\spotlight.frag" />
     <None Include="shaders\game\spotlight.vert" />
     <None Include="shaders\game\sphere_impostor.geom" />

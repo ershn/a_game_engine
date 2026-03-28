@@ -77,7 +77,7 @@ void init_input_system(GLFWwindow *window)
     s_window = window;
 
     // TODO: control input settings through a window component
-    // glfwSetInputMode(s_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(s_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // TODO: activate sticky keys and sticky mouse buttons ?
 
     glfwSetScrollCallback(s_window, scroll_callback);
