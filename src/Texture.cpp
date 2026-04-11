@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "ErrorHandling.hpp"
+#include "IdGenerator.hpp"
 #include "Texture.hpp"
 #include "Utils.hpp"
 
@@ -693,19 +694,17 @@ std::uint32_t get_base_image_pixel_data_size(const TextureDesc &texture_desc)
     return pitch * row_count * texture_desc.depth;
 }
 
+std::uint32_t get_mipmap_level_pixel_data_size(const MipmapLevel &mipmap_level)
+{
+    return mipmap_level.pitch * mipmap_level.row_count * mipmap_level.depth;
+}
+
 std::uint32_t get_mipmap_pixel_data_size(const TextureData &texture)
 {
     std::uint32_t mipmap_size{0};
     for (const auto &mipmap_level : get_mipmap(texture))
-    {
-        mipmap_size += mipmap_level.pitch * mipmap_level.row_count * mipmap_level.depth;
-    }
+        mipmap_size += get_mipmap_level_pixel_data_size(mipmap_level);
     return mipmap_size;
-}
-
-std::uint32_t get_mipmap_level_pixel_data_size(const MipmapLevel &mipmap_level)
-{
-    return mipmap_level.pitch * mipmap_level.row_count * mipmap_level.depth;
 }
 } // namespace
 
@@ -838,8 +837,12 @@ MipmapLevel end(const Mipmap &mipmap)
 namespace
 {
 std::vector<TextureUnit> s_texture_units;
+
+Util::IdGenerator<TextureId> s_texture_id_generator{0};
 std::vector<Texture> s_textures;
 std::vector<TextureDesc> s_texture_descs;
+
+Util::IdGenerator<SamplerId> s_sampler_id_generator{0};
 std::vector<Sampler> s_samplers;
 std::vector<SamplerParams> s_sampler_params;
 
@@ -967,11 +970,14 @@ void load_3d_texture_image(
 }
 
 template <GLenum TextureTarget, TextureImageLoader LoadTextureImage>
-GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
+GLuint create_texture(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
+)
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
-    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
+    auto internal_format =
+        get_texture_internal_format(texture_desc.format, creation_options.force_srgb_internal_format);
     auto data_format = get_pixel_data_format(texture_desc.format);
 
     GLuint texture;
@@ -1023,13 +1029,14 @@ GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_
     return texture;
 }
 
-GLuint load_cube_map_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+GLuint create_cube_map_texture(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
 )
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
-    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
+    auto internal_format =
+        get_texture_internal_format(texture_desc.format, creation_options.force_srgb_internal_format);
     auto data_format = get_pixel_data_format(texture_desc.format);
 
     GLuint texture;
@@ -1172,13 +1179,14 @@ void load_compressed_3d_texture_image(
 }
 
 template <GLenum TextureTarget, CompressedTextureImageLoader LoadCompressedTextureImage>
-GLuint load_compressed_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+GLuint create_compressed_texture(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
 )
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
-    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
+    auto internal_format =
+        get_texture_internal_format(texture_desc.format, creation_options.force_srgb_internal_format);
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -1221,13 +1229,14 @@ GLuint load_compressed_texture(
     return texture;
 }
 
-GLuint load_compressed_cube_map_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options
+GLuint create_compressed_cube_map_texture(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
 )
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
-    auto internal_format = get_texture_internal_format(texture_desc.format, load_options.force_srgb_internal_format);
+    auto internal_format =
+        get_texture_internal_format(texture_desc.format, creation_options.force_srgb_internal_format);
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -1282,25 +1291,27 @@ GLuint load_compressed_cube_map_texture(
     return texture;
 }
 
-GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_id, TextureLoadOptions load_options)
+GLuint create_texture(
+    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
+)
 {
     if (is_compressed_texture_format(texture_data.desc.format))
     {
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            return load_compressed_texture<GL_TEXTURE_1D, load_compressed_1d_texture_image>(
-                texture_data, texture_unit_id, load_options
+            return create_compressed_texture<GL_TEXTURE_1D, load_compressed_1d_texture_image>(
+                texture_data, texture_unit_id, creation_options
             );
         case TextureType::TEXTURE_2D:
-            return load_compressed_texture<GL_TEXTURE_2D, load_compressed_2d_texture_image>(
-                texture_data, texture_unit_id, load_options
+            return create_compressed_texture<GL_TEXTURE_2D, load_compressed_2d_texture_image>(
+                texture_data, texture_unit_id, creation_options
             );
         case TextureType::TEXTURE_CUBE_MAP:
-            return load_compressed_cube_map_texture(texture_data, texture_unit_id, load_options);
+            return create_compressed_cube_map_texture(texture_data, texture_unit_id, creation_options);
         case TextureType::TEXTURE_3D:
-            return load_compressed_texture<GL_TEXTURE_3D, load_compressed_3d_texture_image>(
-                texture_data, texture_unit_id, load_options
+            return create_compressed_texture<GL_TEXTURE_3D, load_compressed_3d_texture_image>(
+                texture_data, texture_unit_id, creation_options
             );
         }
     }
@@ -1309,13 +1320,19 @@ GLuint load_texture(const TextureData &texture_data, TextureUnitId texture_unit_
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            return load_texture<GL_TEXTURE_1D, load_1d_texture_image>(texture_data, texture_unit_id, load_options);
+            return create_texture<GL_TEXTURE_1D, load_1d_texture_image>(
+                texture_data, texture_unit_id, creation_options
+            );
         case TextureType::TEXTURE_2D:
-            return load_texture<GL_TEXTURE_2D, load_2d_texture_image>(texture_data, texture_unit_id, load_options);
+            return create_texture<GL_TEXTURE_2D, load_2d_texture_image>(
+                texture_data, texture_unit_id, creation_options
+            );
         case TextureType::TEXTURE_CUBE_MAP:
-            return load_cube_map_texture(texture_data, texture_unit_id, load_options);
+            return create_cube_map_texture(texture_data, texture_unit_id, creation_options);
         case TextureType::TEXTURE_3D:
-            return load_texture<GL_TEXTURE_3D, load_3d_texture_image>(texture_data, texture_unit_id, load_options);
+            return create_texture<GL_TEXTURE_3D, load_3d_texture_image>(
+                texture_data, texture_unit_id, creation_options
+            );
         }
     }
 
@@ -1423,8 +1440,10 @@ void init_texture_system()
     s_sampler_params.reserve(64);
 }
 
-void load_texture(TextureId texture_id, const TextureData &texture_data, TextureLoadOptions load_options)
+TextureId create_texture(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
+    TextureId texture_id{s_texture_id_generator.generate()};
+
     if (texture_id >= s_textures.size())
     {
         s_textures.resize(texture_id + 1);
@@ -1439,11 +1458,15 @@ void load_texture(TextureId texture_id, const TextureData &texture_data, Texture
     auto [texture_unit_id, texture_unit] = get_least_used_texture_unit();
     unbind_texture(texture_unit);
 
-    texture.texture = load_texture(texture_data, texture_unit_id, load_options);
+    texture.texture = create_texture(texture_data, texture_unit_id, creation_options);
+
+    return texture_id;
 }
 
-void create_sampler(SamplerId sampler_id, const SamplerParams &sampler_params)
+SamplerId create_sampler(const SamplerParams &sampler_params)
 {
+    SamplerId sampler_id{s_sampler_id_generator.generate()};
+
     if (sampler_id >= s_samplers.size())
     {
         s_samplers.resize(sampler_id + 1);
@@ -1454,6 +1477,8 @@ void create_sampler(SamplerId sampler_id, const SamplerParams &sampler_params)
     glGenSamplers(1, &sampler.sampler);
     update_sampler_params(sampler.sampler, sampler_params, DEFAULT_SAMPLER_PARAMS);
     s_sampler_params[sampler_id] = sampler_params;
+
+    return sampler_id;
 }
 
 const SamplerParams &get_sampler_params(SamplerId sampler_id)

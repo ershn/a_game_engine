@@ -8,6 +8,7 @@
 #include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Framebuffer.hpp"
 #include "Lighting.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
@@ -15,7 +16,6 @@
 #include "Time.hpp"
 #include "Transformations.hpp"
 
-#include "game/InfinitySymbolMesh.hpp"
 #include "game/ProceduralTextureScene.hpp"
 #include "game/Processing.hpp"
 
@@ -129,9 +129,6 @@ void ProceduralTextureScene::init() const
             Gfx::create_shader<TextureShader>(shader_id, shader_assets);
         }
 
-        // auto infinity_mesh_id = next_mesh_id++;
-        // Gfx::create_mesh<1>(infinity_mesh_id, std::function{create_infinity_symbol_mesh});
-
         auto material_id = next_material_id++;
         auto &material = Gfx::create_material<TextureMaterial>(material_id, shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
@@ -158,7 +155,7 @@ void ProceduralTextureScene::update() const
     process_components(Gfx::update_spherical_camera_via_input);
     process_components(Gfx::calc_spherical_camera_view_matrix);
 
-    if (Gfx::has_framebuffer_size_changed())
+    if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

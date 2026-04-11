@@ -2,34 +2,29 @@
 
 #include <cstdint>
 
-#include "GLFW.hpp"
+#include "Framebuffer.hpp"
+#include "Rectangle.hpp"
 
 namespace Age::Gfx
 {
-using ViewportId = std::uint16_t;
+enum struct ViewportId : std::uint16_t
+{
+};
 
-inline constexpr ViewportId FULL_VIEWPORT_ID{0};
-inline constexpr ViewportId USER_VIEWPORT_START_ID{1};
+inline constexpr ViewportId FULL_VIEWPORT_ID{1};
 
 struct Viewport
 {
-    int origin_x{};
-    int origin_y{};
-    unsigned int width{};
-    unsigned int height{};
+    Rectangle norm_rect{};
 };
 
-bool has_framebuffer_size_changed();
-void get_framebuffer_size(unsigned int &width, unsigned int &height);
+void init_viewport_system();
 
-void init_viewport_system(GLFWwindow *window);
-
-void start_viewports_update();
-void end_viewports_update();
-
-void create_viewport(ViewportId viewport_id);
+ViewportId create_viewport(const Rectangle &norm_rect);
 
 Viewport &get_viewport(ViewportId viewport_id);
 
-const Viewport &use_viewport(ViewportId viewport_id);
+RectangleI calc_viewport_pixel_rect(const Viewport &viewport, const Framebuffer &framebuffer);
+
+void use_viewport_pixel_rect(const RectangleI &pixel_rect);
 } // namespace Age::Gfx

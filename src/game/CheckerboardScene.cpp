@@ -6,6 +6,7 @@
 
 #include "DDS.hpp"
 #include "ECS.hpp"
+#include "Framebuffer.hpp"
 #include "Input.hpp"
 #include "Logging.hpp"
 #include "Rendering.hpp"
@@ -124,8 +125,6 @@ void CheckerBoardScene::init() const
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::TextureId next_texture_id{0};
-    Gfx::SamplerId next_sampler_id{0};
 
     float max_anisotropy{Gfx::get_texture_filtering_max_max_anisotropy()};
     Core::log_info("max anisotropy: {}", max_anisotropy);
@@ -165,15 +164,10 @@ void CheckerBoardScene::init() const
         }
     }
 
-    Gfx::TextureId checkerboard_texture_id{next_texture_id++};
-    Gfx::load_texture(checkerboard_texture_id, checkerboard_texture_data);
+    auto checkerboard_texture_id = Gfx::create_texture(checkerboard_texture_data);
+    auto mipmap_texture_id = Gfx::create_texture(mipmap_texture_data);
 
-    Gfx::TextureId mipmap_texture_id{next_texture_id++};
-    Gfx::load_texture(mipmap_texture_id, mipmap_texture_data);
-
-    Gfx::SamplerId mipmap_aniso_sampler_id{next_sampler_id++};
-    Gfx::create_sampler(
-        mipmap_aniso_sampler_id,
+    auto mipmap_aniso_sampler_id = Gfx::create_sampler(
         Gfx::SamplerParams{
             .max_anisotropy{max_anisotropy},
             .flags{
@@ -246,7 +240,7 @@ void CheckerBoardScene::update() const
     process_components(update_camera);
     process_components(control_scene);
 
-    if (Gfx::has_framebuffer_size_changed())
+    if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

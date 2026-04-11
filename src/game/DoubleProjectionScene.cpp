@@ -30,24 +30,6 @@ using namespace Age;
 
 namespace
 {
-constexpr Gfx::ViewportId LEFT_VIEWPORT_ID{Gfx::USER_VIEWPORT_START_ID};
-constexpr Gfx::ViewportId RIGHT_VIEWPORT_ID{Gfx::USER_VIEWPORT_START_ID + 1};
-
-void update_viewports()
-{
-    unsigned int width, height;
-    Gfx::get_framebuffer_size(width, height);
-
-    Gfx::Viewport &left_viewport{Gfx::get_viewport(LEFT_VIEWPORT_ID)};
-    left_viewport.width = width / 2;
-    left_viewport.height = height;
-
-    Gfx::Viewport &right_viewport{Gfx::get_viewport(RIGHT_VIEWPORT_ID)};
-    right_viewport.origin_x = width / 2;
-    right_viewport.width = width / 2;
-    right_viewport.height = height;
-}
-
 struct SphericalCameraMouseController
 {
     static constexpr Core::ComponentType TYPE{SPHERICAL_CAMERA_MOUSE_CONTROLLER};
@@ -119,8 +101,6 @@ void DoubleProjectionScene::init() const
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::TextureId next_texture_id{0};
-    Gfx::SamplerId next_sampler_id{0};
 
     auto unlit_shader_id = next_shader_id++;
     {
@@ -144,19 +124,16 @@ void DoubleProjectionScene::init() const
     if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
         return;
 
-    Gfx::TextureId checkerboard_texture_id{next_texture_id++};
-    Gfx::load_texture(checkerboard_texture_id, checkerboard_texture_data);
+    auto checkerboard_texture_id = Gfx::create_texture(checkerboard_texture_data);
 
-    Gfx::SamplerId linear_sampler_id{next_sampler_id++};
-    Gfx::create_sampler(
-        linear_sampler_id,
+    auto linear_sampler_id = Gfx::create_sampler(
         Gfx::SamplerParams{.flags{
             .texture_mag_filter{Gfx::TextureMagFilter::LINEAR}, .texture_min_filter{Gfx::TextureMinFilter::LINEAR}
         }}
     );
 
-    Gfx::create_viewport(LEFT_VIEWPORT_ID);
-    Gfx::create_viewport(RIGHT_VIEWPORT_ID);
+    Gfx::ViewportId left_viewport_id{Gfx::create_viewport({.position{0.0f, 0.0f}, .size{0.5f, 1.0f}})};
+    Gfx::ViewportId right_viewport_id{Gfx::create_viewport({.position{0.5f, 0.0f}, .size{0.5f, 1.0f}})};
 
     // Left camera
     Core::EntityId left_camera_id;
@@ -171,7 +148,7 @@ void DoubleProjectionScene::init() const
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}, .viewport_id{LEFT_VIEWPORT_ID}},
+            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}, .viewport_id{left_viewport_id}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_LEFT}},
@@ -199,7 +176,7 @@ void DoubleProjectionScene::init() const
             Gfx::CameraRenderState{
                 .flags{Gfx::DEFAULT_CAMERA_FLAGS | Gfx::DEPTH_CLAMPING},
                 .clear_color{0.75f, 0.75f, 1.0f, 1.0f},
-                .viewport_id{RIGHT_VIEWPORT_ID}
+                .viewport_id{right_viewport_id}
             },
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
@@ -269,9 +246,6 @@ void DoubleProjectionScene::init() const
 void DoubleProjectionScene::update() const
 {
     using Core::process_components;
-
-    if (Gfx::has_framebuffer_size_changed())
-        update_viewports();
 
     process_components(control_game_via_keyboard);
     process_components(update_spherical_camera_via_input);

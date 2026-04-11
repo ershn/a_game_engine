@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 
 #include "Matrix.hpp"
+#include "Rectangle.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -65,6 +66,11 @@ void enable_srgb_rendering(bool enable);
 
 void set_clear_color(const Math::Vector4 &color);
 void set_clear_depth(float depth);
+
+void set_viewport(const RectangleI &rect);
+
+void enable_scissor_test(bool enable);
+void set_scissor(const RectangleI &rect);
 
 void draw_arrays(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t start_index);
 void draw_elements(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t buffer_offset);

@@ -9,6 +9,7 @@
 #include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Framebuffer.hpp"
 #include "Lighting.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
@@ -623,7 +624,7 @@ void ValleyScene::update() const
     process_components(update_sunlight);
     process_components(update_sphere_impostors);
 
-    if (Gfx::has_framebuffer_size_changed())
+    if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

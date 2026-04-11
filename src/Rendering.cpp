@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "Color.hpp"
 #include "ECS.hpp"
+#include "Framebuffer.hpp"
 #include "Lighting.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
@@ -87,13 +88,17 @@ void render_camera(
     }});
 
     {
-        const Viewport &viewport{use_viewport(camera_render_state.viewport_id)};
+        const Framebuffer &framebuffer{get_framebuffer(camera_render_state.framebuffer_id)};
 
-        bool is_custom_viewport{camera_render_state.viewport_id != FULL_VIEWPORT_ID};
+        ViewportId viewport_id{camera_render_state.viewport_id};
+        RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(get_viewport(viewport_id), framebuffer)};
+        use_viewport_pixel_rect(viewport_pixel_rect);
+
+        bool is_custom_viewport{viewport_id != FULL_VIEWPORT_ID};
         if (is_custom_viewport)
         {
-            glEnable(GL_SCISSOR_TEST);
-            glScissor(viewport.origin_x, viewport.origin_y, viewport.width, viewport.height);
+            OGL::enable_scissor_test(true);
+            OGL::set_scissor(viewport_pixel_rect);
         }
 
         GLbitfield cleared_buffers{};
@@ -111,7 +116,7 @@ void render_camera(
             glClear(cleared_buffers);
 
         if (is_custom_viewport)
-            glDisable(GL_SCISSOR_TEST);
+            OGL::enable_scissor_test(false);
     }
 
     if (camera_render_state.flags & DEPTH_CLAMPING)
@@ -168,7 +173,8 @@ void init_rendering_system(GLFWwindow *window)
     s_draw_calls.reserve(2048);
     s_draw_call_keys.reserve(2048);
 
-    init_viewport_system(window);
+    init_framebuffer_system(window);
+    init_viewport_system();
     init_mesh_system();
     init_shader_system();
     init_material_system();
@@ -205,8 +211,6 @@ void init_renderer(Core::EntityId entity_id, unsigned int options)
 
 void render()
 {
-    end_viewports_update();
-
     sort_draw_calls();
     Core::process_components(render_camera);
     release_used_material();
@@ -216,6 +220,6 @@ void render()
 
 void update_render_state()
 {
-    start_viewports_update();
+    update_system_framebuffer_size();
 }
 } // namespace Age::Gfx

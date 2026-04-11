@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Framebuffer.cpp" />
     <ClCompile Include="src\game\CheckerboardScene.cpp" />
     <ClCompile Include="src\game\CubePointLightScene.cpp" />
     <ClCompile Include="src\game\DioramaMesh.cpp" />
@@ -157,6 +158,7 @@
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
+    <ClCompile Include="src\Rectangle.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\third_parties\glad.c" />
     <ClCompile Include="src\Transform.cpp" />
@@ -199,6 +201,7 @@
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\ErrorHandling.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
+    <ClInclude Include="include\Framebuffer.hpp" />
     <ClInclude Include="include\game\BigPlaneMesh.hpp" />
     <ClInclude Include="include\game\CheckerboardScene.hpp" />
     <ClInclude Include="include\game\Components.hpp" />
@@ -236,6 +239,7 @@
     <ClInclude Include="include\Path.hpp" />
     <ClInclude Include="include\Quaternion.hpp" />
     <ClInclude Include="include\Random.hpp" />
+    <ClInclude Include="include\Rectangle.hpp" />
     <ClInclude Include="include\Rendering.hpp" />
     <ClInclude Include="include\Scene.hpp" />
     <ClInclude Include="include\Shader.hpp" />

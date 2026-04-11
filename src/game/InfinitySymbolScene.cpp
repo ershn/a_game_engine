@@ -9,6 +9,7 @@
 #include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Framebuffer.hpp"
 #include "Lighting.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
@@ -306,7 +307,7 @@ void InfinitySymbolScene::update() const
     process_components(Gfx::update_spherical_camera_via_input);
     process_components(Gfx::calc_spherical_camera_view_matrix);
 
-    if (Gfx::has_framebuffer_size_changed())
+    if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

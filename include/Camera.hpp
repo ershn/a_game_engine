@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Components.hpp"
+#include "Framebuffer.hpp"
 #include "Matrix.hpp"
 #include "Transform.hpp"
 #include "UniformBuffer.hpp"
@@ -34,6 +35,7 @@ struct CameraRenderState
     unsigned int flags{DEFAULT_CAMERA_FLAGS};
     Math::Vector4 clear_color{};
     float clear_depth{1.0f};
+    FramebufferId framebuffer_id{SYSTEM_FRAMEBUFFER_ID};
     ViewportId viewport_id{FULL_VIEWPORT_ID};
 };
 

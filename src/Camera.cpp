@@ -3,6 +3,17 @@
 
 namespace Age::Gfx
 {
+namespace
+{
+float calc_aspect_ratio(const CameraRenderState &camera_render_state)
+{
+    const Framebuffer &framebuffer{get_framebuffer(camera_render_state.framebuffer_id)};
+    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
+    RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(viewport, framebuffer)};
+    return static_cast<float>(viewport_pixel_rect.size.x) / viewport_pixel_rect.size.y;
+}
+} // namespace
+
 Math::Matrix4 window_space_orthographic_proj_matrix(int viewport_width, int viewport_height)
 {
     Math::Matrix4 matrix{};
@@ -30,8 +41,7 @@ void update_perspective_camera_matrix(
     const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
-    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
-    float aspect_ratio{static_cast<float>(viewport.width) / viewport.height};
+    float aspect_ratio{calc_aspect_ratio(camera_render_state)};
 
     camera.aspect_ratio = aspect_ratio;
     view_to_clip_matrix.matrix =
@@ -47,8 +57,7 @@ void update_orthographic_camera_matrix(
     const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
-    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
-    float aspect_ratio{static_cast<float>(viewport.width) / viewport.height};
+    float aspect_ratio{calc_aspect_ratio(camera_render_state)};
 
     camera.aspect_ratio = aspect_ratio;
     view_to_clip_matrix.matrix =
@@ -64,11 +73,12 @@ void update_window_space_camera_matrix(
     const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
-    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
+    const Framebuffer &framebuffer{get_framebuffer(camera_render_state.framebuffer_id)};
+    RectangleI viewport_rect{calc_viewport_pixel_rect(get_viewport(camera_render_state.viewport_id), framebuffer)};
 
-    camera.viewport_width = viewport.width;
-    camera.viewport_height = viewport.height;
-    view_to_clip_matrix.matrix = window_space_orthographic_proj_matrix(viewport.width, viewport.height);
+    camera.viewport_width = viewport_rect.size.x;
+    camera.viewport_height = viewport_rect.size.y;
+    view_to_clip_matrix.matrix = window_space_orthographic_proj_matrix(viewport_rect.size.x, viewport_rect.size.y);
 
     projection_uniform_buffer.buffer.update({.view_to_clip_matrix{view_to_clip_matrix.matrix}});
 }

@@ -139,51 +139,50 @@ struct Vector4
 
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector);
 
-struct Vector3U
+struct Vector2I
 {
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
+    int x;
+    int y;
 
-    constexpr Vector3U()
+    constexpr Vector2I()
         : x{}
         , y{}
-        , z{}
     {
     }
 
-    constexpr Vector3U(unsigned int value)
+    constexpr Vector2I(int value)
         : x{value}
         , y{value}
-        , z{value}
     {
     }
 
-    constexpr Vector3U(unsigned int x, unsigned int y, unsigned int z)
+    constexpr Vector2I(int x, int y)
         : x{x}
         , y{y}
-        , z{z}
     {
     }
 
-    // Vector3U(const Vector2U &vec, unsigned int z);
-    // explicit Vector3U(const Vector4U &vec);
+    // explicit Vector2I(const Vector3I &vec);
 
-    explicit operator const unsigned int *() const;
+    explicit operator const int *() const;
 
-    unsigned int operator[](std::size_t index) const;
-    unsigned int &operator[](std::size_t index);
+    int operator[](std::size_t index) const;
+    int &operator[](std::size_t index);
 };
 
-std::ostream &operator<<(std::ostream &out, const Vector3U &vector);
+std::ostream &operator<<(std::ostream &out, const Vector2I &vector);
 
 bool operator==(const Vector2 &lhs, const Vector2 &rhs);
 bool operator==(const Vector3 &lhs, const Vector3 &rhs);
 bool operator==(const Vector4 &lhs, const Vector4 &rhs);
 
+bool operator==(const Vector2I &lhs, const Vector2I &rhs);
+
 bool operator!=(const Vector2 &lhs, const Vector2 &rhs);
 bool operator!=(const Vector3 &lhs, const Vector3 &rhs);
 bool operator!=(const Vector4 &lhs, const Vector4 &rhs);
+
+bool operator!=(const Vector2I &lhs, const Vector2I &rhs);
 
 Vector2 operator-(const Vector2 &vector);
 Vector3 operator-(const Vector3 &vector);

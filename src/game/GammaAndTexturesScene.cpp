@@ -9,6 +9,7 @@
 #include "DefaultMeshes.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Framebuffer.hpp"
 #include "Input.hpp"
 #include "OpenGL.hpp"
 #include "Path.hpp"
@@ -103,19 +104,14 @@ void GammaAndTexturesScene::init() const
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::TextureId next_texture_id{0};
-    Gfx::SamplerId next_sampler_id{0};
 
     Gfx::TextureData gamma_ramp_texture_data{};
     if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/gamma_ramp.dds", gamma_ramp_texture_data))
         return;
 
-    Gfx::TextureId gamma_ramp_texture_id{next_texture_id++};
-    Gfx::load_texture(gamma_ramp_texture_id, gamma_ramp_texture_data);
+    auto gamma_ramp_texture_id = Gfx::create_texture(gamma_ramp_texture_data);
 
-    Gfx::SamplerId nearest_clamp_sampler_id{next_sampler_id++};
-    Gfx::create_sampler(
-        nearest_clamp_sampler_id,
+    auto nearest_clamp_sampler_id = Gfx::create_sampler(
         Gfx::SamplerParams{.flags{
             .texture_wrap_s = Gfx::TextureWrapMode::CLAMP_TO_EDGE, .texture_wrap_t = Gfx::TextureWrapMode::CLAMP_TO_EDGE
         }}
@@ -169,7 +165,7 @@ void GammaAndTexturesScene::update() const
 
     process_components(control_game_via_keyboard);
 
-    if (Gfx::has_framebuffer_size_changed())
+    if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_window_space_camera_matrix);
 }
 } // namespace Game

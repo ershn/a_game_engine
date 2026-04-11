@@ -143,6 +143,34 @@ void set_clear_depth(float depth)
     glClearDepth(depth);
 }
 
+void set_viewport(const RectangleI &rect)
+{
+    glViewport(
+        static_cast<GLint>(rect.position.x),
+        static_cast<GLint>(rect.position.y),
+        static_cast<GLsizei>(rect.size.x),
+        static_cast<GLsizei>(rect.size.y)
+    );
+}
+
+void enable_scissor_test(bool enable)
+{
+    if (enable)
+        glEnable(GL_SCISSOR_TEST);
+    else
+        glDisable(GL_SCISSOR_TEST);
+}
+
+void set_scissor(const RectangleI &rect)
+{
+    glScissor(
+        static_cast<GLint>(rect.position.x),
+        static_cast<GLint>(rect.position.y),
+        static_cast<GLsizei>(rect.size.x),
+        static_cast<GLsizei>(rect.size.y)
+    );
+}
+
 void draw_arrays(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t start_index)
 {
     glDrawArrays(

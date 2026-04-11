@@ -10,6 +10,7 @@
 #include "DefaultShaders.hpp"
 #include "ECS.hpp"
 #include "ErrorHandling.hpp"
+#include "Framebuffer.hpp"
 #include "Input.hpp"
 #include "Lighting.hpp"
 #include "OpenGL.hpp"
@@ -153,8 +154,6 @@ void CubePointLightScene::init() const
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
     Gfx::MaterialId next_material_id{0};
-    Gfx::TextureId next_texture_id{0};
-    Gfx::SamplerId next_sampler_id{0};
 
     auto space_axes_mesh_id = next_mesh_id++;
     Gfx::create_mesh<1>(space_axes_mesh_id, std::function{create_space_axes_mesh});
@@ -180,66 +179,62 @@ void CubePointLightScene::init() const
         Gfx::create_shader<CubePointLightShader>(cube_point_light_shader_id, shader_assets);
     }
 
-    Gfx::TextureId concrete_texture_id{next_texture_id++};
+    Gfx::TextureId concrete_texture_id{};
     {
         Gfx::TextureData texture_data{};
         if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/concrete.dds", texture_data))
             return;
 
-        Gfx::load_texture(concrete_texture_id, texture_data, {.force_srgb_internal_format = true});
+        concrete_texture_id = Gfx::create_texture(texture_data, {.force_srgb_internal_format = true});
     }
-    Gfx::TextureId dirt_texture_id{next_texture_id++};
+    Gfx::TextureId dirt_texture_id{};
     {
         Gfx::TextureData texture_data{};
         if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/dirt.dds", texture_data))
             return;
 
-        Gfx::load_texture(dirt_texture_id, texture_data, {.force_srgb_internal_format = true});
+        dirt_texture_id = Gfx::create_texture(texture_data, {.force_srgb_internal_format = true});
     }
-    Gfx::TextureId stone_texture_id{next_texture_id++};
+    Gfx::TextureId stone_texture_id{};
     {
         Gfx::TextureData texture_data{};
         if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/stone.dds", texture_data))
             return;
 
-        Gfx::load_texture(stone_texture_id, texture_data, {.force_srgb_internal_format = true});
+        stone_texture_id = Gfx::create_texture(texture_data, {.force_srgb_internal_format = true});
     }
-    Gfx::TextureId rough_stone_texture_id{next_texture_id++};
+    Gfx::TextureId rough_stone_texture_id{};
     {
         Gfx::TextureData texture_data{};
         if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/rough_stone.dds", texture_data))
             return;
 
-        Gfx::load_texture(rough_stone_texture_id, texture_data, {.force_srgb_internal_format = true});
+        rough_stone_texture_id = Gfx::create_texture(texture_data, {.force_srgb_internal_format = true});
     }
-    Gfx::TextureId wood_texture_id{next_texture_id++};
+    Gfx::TextureId wood_texture_id{};
     {
         Gfx::TextureData texture_data{};
         if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/wood.dds", texture_data))
             return;
 
-        Gfx::load_texture(wood_texture_id, texture_data, {.force_srgb_internal_format = true});
+        wood_texture_id = Gfx::create_texture(texture_data, {.force_srgb_internal_format = true});
     }
-    Gfx::TextureId cube_map_texture_id{next_texture_id++};
+    Gfx::TextureId cube_map_texture_id{};
     {
         Gfx::TextureData texture_data{};
         if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/planetarium.dds", texture_data))
             return;
 
-        Gfx::load_texture(cube_map_texture_id, texture_data);
+        cube_map_texture_id = Gfx::create_texture(texture_data);
     }
 
-    Gfx::SamplerId linear_sampler_id{next_sampler_id++};
-    Gfx::create_sampler(
-        linear_sampler_id,
+    auto linear_sampler_id = Gfx::create_sampler(
         Gfx::SamplerParams{.flags{
             .texture_mag_filter{Gfx::TextureMagFilter::LINEAR}, .texture_min_filter{Gfx::TextureMinFilter::LINEAR}
         }}
     );
 
-    Gfx::SamplerId cube_map_sampler_id{next_sampler_id++};
-    Gfx::create_sampler(
-        cube_map_sampler_id,
+    auto cube_map_sampler_id = Gfx::create_sampler(
         Gfx::SamplerParams{.flags{
             .texture_wrap_s = Gfx::TextureWrapMode::CLAMP_TO_EDGE,
             .texture_wrap_t = Gfx::TextureWrapMode::CLAMP_TO_EDGE,
@@ -495,7 +490,7 @@ void CubePointLightScene::update() const
     process_components(Gfx::calc_spherical_camera_view_matrix);
     process_components(calc_cube_point_light_matrix);
 
-    if (Gfx::has_framebuffer_size_changed())
+    if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
 }
 } // namespace Game

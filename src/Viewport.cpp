@@ -1,6 +1,7 @@
-#include <limits>
+#include <cmath>
 #include <vector>
 
+#include "IdGenerator.hpp"
 #include "OpenGL.hpp"
 #include "Viewport.hpp"
 
@@ -8,89 +9,62 @@ namespace Age::Gfx
 {
 namespace
 {
-bool s_framebuffer_size_changed{};
-int s_framebuffer_width{};
-int s_framebuffer_height{};
+Util::IdGenerator<ViewportId> s_viewport_id_generator{ViewportId{2}};
+std::vector<Viewport> s_viewports{Viewport{.norm_rect{.position{0.0f, 0.0f}, .size{1.0f, 1.0f}}}};
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+RectangleI s_current_viewport_pixel_rect{};
+
+constexpr std::size_t to_index(ViewportId id)
 {
-    s_framebuffer_width = width;
-    s_framebuffer_height = height;
-    s_framebuffer_size_changed = true;
+    return static_cast<std::size_t>(id) - 1;
 }
-
-std::vector<Viewport> s_viewports{};
-ViewportId s_used_viewport_id{std::numeric_limits<ViewportId>::max()};
 } // namespace
 
-bool has_framebuffer_size_changed()
+void init_viewport_system()
 {
-    return s_framebuffer_size_changed;
-}
-
-void get_framebuffer_size(unsigned int &width, unsigned int &height)
-{
-    width = static_cast<unsigned int>(s_framebuffer_width);
-    height = static_cast<unsigned int>(s_framebuffer_height);
-}
-
-void init_viewport_system(GLFWwindow *window)
-{
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    glfwGetFramebufferSize(window, &s_framebuffer_width, &s_framebuffer_height);
-    s_framebuffer_size_changed = true;
-
     s_viewports.reserve(8);
-    s_viewports.emplace_back(
-        0, 0, static_cast<unsigned int>(s_framebuffer_width), static_cast<unsigned int>(s_framebuffer_height)
-    );
 }
 
-void start_viewports_update()
+ViewportId create_viewport(const Rectangle &norm_rect)
 {
-    if (s_framebuffer_size_changed == false)
-        return;
+    ViewportId viewport_id{s_viewport_id_generator.generate()};
 
-    Viewport &full_viewport{s_viewports[FULL_VIEWPORT_ID]};
-    full_viewport.width = static_cast<unsigned int>(s_framebuffer_width);
-    full_viewport.height = static_cast<unsigned int>(s_framebuffer_height);
+    std::size_t viewport_index{to_index(viewport_id)};
+    if (viewport_index >= s_viewports.size())
+        s_viewports.resize(viewport_index + 1);
 
-    s_used_viewport_id = std::numeric_limits<ViewportId>::max();
-}
+    Viewport &viewport{s_viewports[viewport_index]};
+    viewport.norm_rect = norm_rect;
 
-void end_viewports_update()
-{
-    s_framebuffer_size_changed = false;
-}
-
-void create_viewport(ViewportId viewport_id)
-{
-    if (viewport_id >= s_viewports.size())
-        s_viewports.resize(viewport_id + 1);
+    return viewport_id;
 }
 
 Viewport &get_viewport(ViewportId viewport_id)
 {
-    return s_viewports[viewport_id];
+    return s_viewports[to_index(viewport_id)];
 }
 
-const Viewport &use_viewport(ViewportId viewport_id)
+RectangleI calc_viewport_pixel_rect(const Viewport &viewport, const Framebuffer &framebuffer)
 {
-    const Viewport &viewport{s_viewports[viewport_id]};
+    const Rectangle &norm_rect{viewport.norm_rect};
+    return RectangleI{
+        .position{
+            static_cast<int>(std::lround(norm_rect.position.x * framebuffer.width)),
+            static_cast<int>(std::lround(norm_rect.position.y * framebuffer.height))
+        },
+        .size{
+            static_cast<int>(std::lround(norm_rect.size.x * framebuffer.width)),
+            static_cast<int>(std::lround(norm_rect.size.y * framebuffer.height))
+        }
+    };
+}
 
-    if (viewport_id != s_used_viewport_id)
+void use_viewport_pixel_rect(const RectangleI &pixel_rect)
+{
+    if (pixel_rect != s_current_viewport_pixel_rect)
     {
-        glViewport(
-            viewport.origin_x,
-            viewport.origin_y,
-            static_cast<GLsizei>(viewport.width),
-            static_cast<GLsizei>(viewport.height)
-        );
-
-        s_used_viewport_id = viewport_id;
+        OGL::set_viewport(pixel_rect);
+        s_current_viewport_pixel_rect = pixel_rect;
     }
-
-    return viewport;
 }
 } // namespace Age::Gfx

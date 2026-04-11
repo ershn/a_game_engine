@@ -309,16 +309,16 @@ struct Sampler
     TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
 };
 
-struct TextureLoadOptions
+struct TextureCreationOptions
 {
     bool force_srgb_internal_format : 1 {};
 };
 
 void init_texture_system();
 
-void load_texture(TextureId texture_id, const TextureData &texture_data, TextureLoadOptions load_options = {});
+TextureId create_texture(const TextureData &texture_data, TextureCreationOptions creation_options = {});
 
-void create_sampler(SamplerId sampler_id, const SamplerParams &sampler_params);
+SamplerId create_sampler(const SamplerParams &sampler_params);
 const SamplerParams &get_sampler_params(SamplerId sampler_id);
 void set_sampler_params(SamplerId sampler_id, const SamplerParams &sampler_params);
 
