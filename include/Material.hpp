@@ -9,7 +9,7 @@
 
 namespace Age::Gfx
 {
-using MaterialId = std::uint32_t;
+using MaterialId = std::uint16_t;
 
 struct Material
 {

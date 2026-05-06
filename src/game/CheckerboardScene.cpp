@@ -217,7 +217,7 @@ void CheckerBoardScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{},
-            Gfx::LocalToViewMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{},
@@ -228,7 +228,7 @@ void CheckerBoardScene::init() const
             }
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 }
 
@@ -242,5 +242,10 @@ void CheckerBoardScene::update() const
 
     if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
+}
+
+void CheckerBoardScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

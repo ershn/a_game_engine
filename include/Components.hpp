@@ -7,8 +7,7 @@ namespace Age::Core
 enum struct ComponentType : std::uint16_t
 {
     TRANSFORM,
-    LOCAL_TO_VIEW_MATRIX,
-    LOCAL_TO_VIEW_NORMAL_MATRIX,
+    LOCAL_TO_WORLD_MATRIX,
 
     MATERIAL,
 

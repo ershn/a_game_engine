@@ -13,6 +13,8 @@
 # Rendering
 - fix the texture origin mismatch between DDS and OpenGL
 - make depth clamping shader specific instead of camera specific
+- implement frustum culling
+- sort draw calls according to distance from camera
 
 # Shader
 - add a diffuse only shader

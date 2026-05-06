@@ -135,14 +135,13 @@ void ProceduralTextureScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{.scale{1.0f, 1.0f, 1.0f}},
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 }
 
@@ -157,5 +156,10 @@ void ProceduralTextureScene::update() const
 
     if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
+}
+
+void ProceduralTextureScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

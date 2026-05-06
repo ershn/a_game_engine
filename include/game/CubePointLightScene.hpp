@@ -8,5 +8,6 @@ struct CubePointLightScene : public Age::App::IScene
 {
     void init() const override;
     void update() const override;
+    void render() const override;
 };
 } // namespace Game

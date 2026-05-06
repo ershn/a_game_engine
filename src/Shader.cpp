@@ -91,14 +91,15 @@ void update_shader_render_state(ShaderRenderState render_state)
 }
 } // namespace
 
-Shader::Shader(GLuint shader_program, ShaderCommonUniforms common_uniforms, ShaderRenderState render_state)
-    : render_state{render_state}
-    , shader_program{shader_program}
+Shader::Shader(
+    GLuint shader_program, ShaderCommonUniforms common_uniforms, ShaderRenderState render_state, DrawQueue draw_queue
+)
+    : shader_program{shader_program}
     , projection_block{common_uniforms.projection_block ? UniformBlock{OGL::get_uniform_block_index(shader_program, "ProjectionBlock")} : UniformBlock{}}
     , lv_matrix{common_uniforms.lv_matrix ? OGL::get_uniform_location(shader_program, "_localToViewMatrix") : -1}
-    , lv_normal_matrix{
-          common_uniforms.lv_normal_matrix ? OGL::get_uniform_location(shader_program, "_localToViewNormalMatrix") : -1
-      }
+    , lv_normal_matrix{common_uniforms.lv_normal_matrix ? OGL::get_uniform_location(shader_program, "_localToViewNormalMatrix") : -1}
+    , draw_queue{draw_queue}
+    , render_state{render_state}
 {
 }
 

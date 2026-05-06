@@ -233,14 +233,14 @@ void InfinitySymbolScene::init() const
 
         auto point_light_id = Core::create_entity(
             Core::Transform{.position{10.0f, 0.0f, 1.0f}, .scale{0.5f}},
-            Gfx::LocalToViewMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{unlit_color_material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             Gfx::PointLight{.light_intensity{0.4f, 0.4f, 0.4f, 1.0f}}
         );
 
-        Gfx::init_renderer(point_light_id, Gfx::WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_id, Gfx::WITH_LW_MATRIX);
 
         Core::create_entity(
             Gfx::LightGroup{
@@ -285,15 +285,14 @@ void InfinitySymbolScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{.scale{4.0f}},
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{infinity_mesh_id},
             Gfx::Renderer{},
             InfinitySymbol{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 }
 
@@ -309,5 +308,10 @@ void InfinitySymbolScene::update() const
 
     if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
+}
+
+void InfinitySymbolScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

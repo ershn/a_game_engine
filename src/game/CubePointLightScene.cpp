@@ -301,7 +301,7 @@ void CubePointLightScene::init() const
             .orientation{Math::axis_angle_quaternion(Math::Vector3::right, Math::radians(-5.0f))},
             .scale{15.0f}
         },
-        Gfx::LocalToViewMatrix{},
+        Gfx::LocalToWorldMatrix{},
         Gfx::MaterialRef{unlit_material_id},
         Gfx::MeshRef{space_axes_mesh_id},
         Gfx::Renderer{},
@@ -313,7 +313,7 @@ void CubePointLightScene::init() const
         }
     );
 
-    Gfx::init_renderer(cube_point_light_id, Gfx::WITH_LV_MATRIX);
+    Gfx::init_renderer(cube_point_light_id, Gfx::WITH_LW_MATRIX);
 
     // Light group
     Core::create_entity(
@@ -343,14 +343,13 @@ void CubePointLightScene::init() const
                 .orientation{Math::axis_angle_quaternion(Math::Vector3::right, Math::radians(-90.0f))},
                 .scale{47.0f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::PLANE_MESH_ID},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Diorama
@@ -369,14 +368,13 @@ void CubePointLightScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{.position{0.0f, -10.0f, 0.0f}, .scale{47.0f}},
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Leaning bar
@@ -394,14 +392,13 @@ void CubePointLightScene::init() const
             Core::Transform{
                 .position{3.0f, -7.0f, -10.0f}, .orientation{0.76604f, 0.64278f, 0.0f, 0.0f}, .scale{5.0f, 5.0f, 45.0f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Spinning bar
@@ -421,15 +418,14 @@ void CubePointLightScene::init() const
                 .orientation{0.791242f, -0.148446f, 0.554035f, 0.212003f},
                 .scale{4.0f, 4.0f, 35.0f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             RotationOverTime{.axis{Math::Vector3::backward}, .angle{1.0f}}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Right bar
@@ -445,14 +441,13 @@ void CubePointLightScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{.position{13.0f, -2.0f, 0.0f}, .scale{4.0f, 4.0f, 10.0f}},
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Cube
@@ -468,15 +463,14 @@ void CubePointLightScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{.position{0.0f, 1.0f, 0.0f}, .scale{3.0f}},
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
             RotationOverTime{.axis{Math::Vector3::up}, .angle{1.0f}}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 }
 
@@ -492,5 +486,10 @@ void CubePointLightScene::update() const
 
     if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
+}
+
+void CubePointLightScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

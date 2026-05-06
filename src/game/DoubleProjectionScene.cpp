@@ -230,14 +230,13 @@ void DoubleProjectionScene::init() const
 
         auto id = Core::create_entity(
             Core::Transform{},
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     Core::process_components(Gfx::calc_spherical_camera_view_matrix);
@@ -253,5 +252,10 @@ void DoubleProjectionScene::update() const
     process_components(read_view_matrix);
     process_components(Gfx::update_perspective_camera_matrix);
     process_components(rotate_in_post_proj_space);
+}
+
+void DoubleProjectionScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

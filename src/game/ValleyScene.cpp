@@ -364,7 +364,7 @@ void ValleyScene::init() const
 
         point_light_1_id = Core::create_entity(
             Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}},
-            Gfx::LocalToViewMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
@@ -377,7 +377,7 @@ void ValleyScene::init() const
             }
         );
 
-        Gfx::init_renderer(point_light_1_id, Gfx::WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_1_id, Gfx::WITH_LW_MATRIX);
     }
 
     // Point light 2
@@ -393,7 +393,7 @@ void ValleyScene::init() const
                 .orientation{1.00000f, 0.00000f, 0.00000f, 0.00000f},
                 .scale{0.200000f, 0.200000f, 0.200000f}
             },
-            Gfx::LocalToViewMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
@@ -406,7 +406,7 @@ void ValleyScene::init() const
             }
         );
 
-        Gfx::init_renderer(point_light_2_id, Gfx::WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_2_id, Gfx::WITH_LW_MATRIX);
     }
 
     // Point light 3
@@ -422,7 +422,7 @@ void ValleyScene::init() const
                 .orientation{1.00000f, 0.00000f, 0.00000f, 0.00000f},
                 .scale{0.200000f, 0.200000f, 0.200000f}
             },
-            Gfx::LocalToViewMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
@@ -435,7 +435,7 @@ void ValleyScene::init() const
             }
         );
 
-        Gfx::init_renderer(point_light_3_id, Gfx::WITH_LV_MATRIX);
+        Gfx::init_renderer(point_light_3_id, Gfx::WITH_LW_MATRIX);
     }
 
     auto light_buffer = Gfx::create_uniform_buffer<Gfx::LightBlock>();
@@ -472,14 +472,13 @@ void ValleyScene::init() const
             Core::Transform{
                 .orientation{Math::axis_angle_quaternion({1.0f, 0.0f, 0.0f}, Math::radians(-90.0f))}, .scale{0.2f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{ground_mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Cylinder
@@ -501,14 +500,13 @@ void ValleyScene::init() const
                 .orientation{1.00000f, 0.00000f, 0.00000f, 0.00000f},
                 .scale{4.00000f, 4.00000f, 4.00000f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Cube 1
@@ -528,14 +526,13 @@ void ValleyScene::init() const
                 .orientation{0.859259f, -0.268912f, -0.229626f, -0.369666f},
                 .scale{4.40000f, 4.40000f, 4.40000f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     // Cube 2
@@ -555,14 +552,13 @@ void ValleyScene::init() const
                 .orientation{0.594317f, -0.573115f, -0.382432f, -0.414812f},
                 .scale{4.50000f, 4.40000f, 13.1000f}
             },
-            Gfx::LocalToViewMatrix{},
-            Gfx::LocalToViewNormalMatrix{},
+            Gfx::LocalToWorldMatrix{},
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{mesh_id},
             Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX | Gfx::WITH_LV_NORMAL_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 
     material_buffer_writer.apply();
@@ -626,5 +622,10 @@ void ValleyScene::update() const
 
     if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_perspective_camera_matrix);
+}
+
+void ValleyScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

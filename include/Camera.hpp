@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "Components.hpp"
 #include "Framebuffer.hpp"
 #include "Matrix.hpp"
@@ -28,6 +30,10 @@ inline constexpr unsigned int CLEAR_DEPTH_BUFFER{0b10};
 inline constexpr unsigned int DEPTH_CLAMPING{0b100};
 inline constexpr unsigned int DEFAULT_CAMERA_FLAGS{CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER};
 
+enum struct Layer : std::uint8_t
+{
+};
+
 struct CameraRenderState
 {
     static constexpr auto TYPE{Core::ComponentType::CAMERA_RENDER_STATE};
@@ -37,6 +43,7 @@ struct CameraRenderState
     float clear_depth{1.0f};
     FramebufferId framebuffer_id{SYSTEM_FRAMEBUFFER_ID};
     ViewportId viewport_id{FULL_VIEWPORT_ID};
+    Layer layer{};
 };
 
 struct PerspectiveCamera

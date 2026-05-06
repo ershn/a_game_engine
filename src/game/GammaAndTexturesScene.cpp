@@ -152,10 +152,13 @@ void GammaAndTexturesScene::init() const
         material.sampler_id = nearest_clamp_sampler_id;
 
         auto id = Core::create_entity(
-            Gfx::LocalToViewMatrix{.matrix{1.0f}}, Gfx::MaterialRef{material_id}, Gfx::MeshRef{mesh_id}, Gfx::Renderer{}
+            Gfx::LocalToWorldMatrix{.matrix{1.0f}},
+            Gfx::MaterialRef{material_id},
+            Gfx::MeshRef{mesh_id},
+            Gfx::Renderer{}
         );
 
-        Gfx::init_renderer(id, Gfx::WITH_LV_MATRIX);
+        Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
     }
 }
 
@@ -167,5 +170,10 @@ void GammaAndTexturesScene::update() const
 
     if (Gfx::has_system_framebuffer_size_changed())
         process_components(Gfx::update_window_space_camera_matrix);
+}
+
+void GammaAndTexturesScene::render() const
+{
+    Gfx::render_scene();
 }
 } // namespace Game

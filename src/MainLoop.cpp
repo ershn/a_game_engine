@@ -49,6 +49,8 @@ void run_engine(const App::Definitions &definitions, const App::IScene &scene)
 
     Core::log_info("loaded OpenGL {}.{}", GLVersion.major, GLVersion.minor);
 
+    std::function<void()> render_scene{[&] { scene.render(); }};
+
     Core::init_ecs(definitions);
     Input::init_input_system(window);
     Gfx::init_rendering_system(window);
@@ -66,7 +68,7 @@ void run_engine(const App::Definitions &definitions, const App::IScene &scene)
 
         scene.update();
 
-        Gfx::render();
+        Gfx::render(render_scene);
 
         glfwPollEvents();
 
