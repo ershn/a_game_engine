@@ -26,4 +26,6 @@ void update_system_framebuffer_size();
 bool has_system_framebuffer_size_changed();
 
 Framebuffer &get_framebuffer(FramebufferId framebuffer_id);
+
+const Framebuffer &use_framebuffer(FramebufferId framebuffer_id);
 } // namespace Age::Gfx

@@ -162,7 +162,7 @@ void control_material_via_keyboard(const MaterialKeyboardController &, const Gfx
         material.surface_shininess = std::clamp(material.surface_shininess - 0.01f, 0.01f, 1.0f);
 }
 
-void ValleyScene::init() const
+void ValleyScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -607,7 +607,7 @@ void ValleyScene::init() const
     }
 }
 
-void ValleyScene::update() const
+void ValleyScene::update()
 {
     using Core::process_components;
 
@@ -624,7 +624,7 @@ void ValleyScene::update() const
         process_components(Gfx::update_perspective_camera_matrix);
 }
 
-void ValleyScene::render() const
+void ValleyScene::render()
 {
     Gfx::render_scene();
 }

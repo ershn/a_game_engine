@@ -283,6 +283,11 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls(
 //    # after rendering camera
 // # after rendering
 
+void prepare_rendering()
+{
+    Core::process_components(calc_local_to_world_matrix);
+}
+
 void render_scene()
 {
     Core::process_components(
@@ -307,11 +312,10 @@ void render_scene()
     );
 }
 
-void render(std::function<void()> render_scene)
+void complete_rendering()
 {
-    Core::process_components(calc_local_to_world_matrix);
-    render_scene();
     release_used_material();
+
     glfwSwapBuffers(s_window);
 }
 

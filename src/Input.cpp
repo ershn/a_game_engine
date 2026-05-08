@@ -67,7 +67,7 @@ bool is_mouse_button_down(int button)
     return glfwGetMouseButton(s_window, button) == GLFW_PRESS;
 }
 
-bool is_exit_requested()
+bool should_window_close()
 {
     return glfwWindowShouldClose(s_window);
 }

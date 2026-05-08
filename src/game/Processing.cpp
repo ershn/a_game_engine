@@ -11,7 +11,7 @@ using namespace Age;
 void control_game_via_keyboard(const GameKeyboardController &)
 {
     if (Input::is_key_down(GLFW_KEY_ESCAPE))
-        Core::exit();
+        Core::request_exit();
 }
 
 void control_transform_via_keyboard(TransformKeyboardController &controller, Core::Transform &transform)

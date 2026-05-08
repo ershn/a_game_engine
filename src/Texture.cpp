@@ -846,6 +846,8 @@ Util::IdGenerator<SamplerId> s_sampler_id_generator{0};
 std::vector<Sampler> s_samplers;
 std::vector<SamplerParams> s_sampler_params;
 
+void unbind_texture(TextureUnit &texture_unit);
+
 unsigned int get_texture_unit_count()
 {
     return static_cast<unsigned int>(OGL::get_integer(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
@@ -872,7 +874,14 @@ std::pair<TextureUnitId, TextureUnit &> get_least_used_texture_unit()
         }
     }
 
-    return {least_used_tex_unit_id, s_texture_units[least_used_tex_unit_id]};
+    return {least_used_tex_unit_id, *least_used_tex_unit};
+}
+
+void select_temporary_texture_unit()
+{
+    auto [texture_unit_id, texture_unit] = get_least_used_texture_unit();
+    unbind_texture(texture_unit);
+    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
 }
 
 GLint get_pixel_data_unpack_alignment()
@@ -970,9 +979,7 @@ void load_3d_texture_image(
 }
 
 template <GLenum TextureTarget, TextureImageLoader LoadTextureImage>
-GLuint create_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
-)
+GLuint create_texture_from_bytes(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
@@ -982,7 +989,6 @@ GLuint create_texture(
 
     GLuint texture;
     glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
     glBindTexture(TextureTarget, texture);
 
     GLint unpack_alignment{get_pixel_data_unpack_alignment()};
@@ -1029,9 +1035,7 @@ GLuint create_texture(
     return texture;
 }
 
-GLuint create_cube_map_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
-)
+GLuint create_cube_map_texture_from_bytes(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
@@ -1041,7 +1045,6 @@ GLuint create_cube_map_texture(
 
     GLuint texture;
     glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
     GLint unpack_alignment{get_pixel_data_unpack_alignment()};
@@ -1179,9 +1182,7 @@ void load_compressed_3d_texture_image(
 }
 
 template <GLenum TextureTarget, CompressedTextureImageLoader LoadCompressedTextureImage>
-GLuint create_compressed_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
-)
+GLuint create_compressed_texture_from_bytes(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     const TextureDesc &texture_desc{texture_data.desc};
 
@@ -1190,7 +1191,6 @@ GLuint create_compressed_texture(
 
     GLuint texture;
     glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
     glBindTexture(TextureTarget, texture);
 
     if (texture_desc.mipmap_level_count > 1)
@@ -1229,8 +1229,8 @@ GLuint create_compressed_texture(
     return texture;
 }
 
-GLuint create_compressed_cube_map_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
+GLuint create_compressed_cube_map_texture_from_bytes(
+    const TextureData &texture_data, TextureCreationOptions creation_options
 )
 {
     const TextureDesc &texture_desc{texture_data.desc};
@@ -1240,7 +1240,6 @@ GLuint create_compressed_cube_map_texture(
 
     GLuint texture;
     glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + texture_unit_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
     if (texture_desc.mipmap_level_count > 1)
@@ -1291,27 +1290,25 @@ GLuint create_compressed_cube_map_texture(
     return texture;
 }
 
-GLuint create_texture(
-    const TextureData &texture_data, TextureUnitId texture_unit_id, TextureCreationOptions creation_options
-)
+GLuint create_texture_from_bytes(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     if (is_compressed_texture_format(texture_data.desc.format))
     {
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            return create_compressed_texture<GL_TEXTURE_1D, load_compressed_1d_texture_image>(
-                texture_data, texture_unit_id, creation_options
+            return create_compressed_texture_from_bytes<GL_TEXTURE_1D, load_compressed_1d_texture_image>(
+                texture_data, creation_options
             );
         case TextureType::TEXTURE_2D:
-            return create_compressed_texture<GL_TEXTURE_2D, load_compressed_2d_texture_image>(
-                texture_data, texture_unit_id, creation_options
+            return create_compressed_texture_from_bytes<GL_TEXTURE_2D, load_compressed_2d_texture_image>(
+                texture_data, creation_options
             );
         case TextureType::TEXTURE_CUBE_MAP:
-            return create_compressed_cube_map_texture(texture_data, texture_unit_id, creation_options);
+            return create_compressed_cube_map_texture_from_bytes(texture_data, creation_options);
         case TextureType::TEXTURE_3D:
-            return create_compressed_texture<GL_TEXTURE_3D, load_compressed_3d_texture_image>(
-                texture_data, texture_unit_id, creation_options
+            return create_compressed_texture_from_bytes<GL_TEXTURE_3D, load_compressed_3d_texture_image>(
+                texture_data, creation_options
             );
         }
     }
@@ -1320,19 +1317,13 @@ GLuint create_texture(
         switch (texture_data.desc.type)
         {
         case TextureType::TEXTURE_1D:
-            return create_texture<GL_TEXTURE_1D, load_1d_texture_image>(
-                texture_data, texture_unit_id, creation_options
-            );
+            return create_texture_from_bytes<GL_TEXTURE_1D, load_1d_texture_image>(texture_data, creation_options);
         case TextureType::TEXTURE_2D:
-            return create_texture<GL_TEXTURE_2D, load_2d_texture_image>(
-                texture_data, texture_unit_id, creation_options
-            );
+            return create_texture_from_bytes<GL_TEXTURE_2D, load_2d_texture_image>(texture_data, creation_options);
         case TextureType::TEXTURE_CUBE_MAP:
-            return create_cube_map_texture(texture_data, texture_unit_id, creation_options);
+            return create_cube_map_texture_from_bytes(texture_data, creation_options);
         case TextureType::TEXTURE_3D:
-            return create_texture<GL_TEXTURE_3D, load_3d_texture_image>(
-                texture_data, texture_unit_id, creation_options
-            );
+            return create_texture_from_bytes<GL_TEXTURE_3D, load_3d_texture_image>(texture_data, creation_options);
         }
     }
 
@@ -1455,12 +1446,106 @@ TextureId create_texture(const TextureData &texture_data, TextureCreationOptions
     Texture &texture{s_textures[texture_id]};
     texture.type = texture_data.desc.type;
 
-    auto [texture_unit_id, texture_unit] = get_least_used_texture_unit();
-    unbind_texture(texture_unit);
+    select_temporary_texture_unit();
 
-    texture.texture = create_texture(texture_data, texture_unit_id, creation_options);
+    texture.texture = create_texture_from_bytes(texture_data, creation_options);
 
     return texture_id;
+}
+
+TextureId create_texture_from_framebuffer(FramebufferId framebuffer_id, TextureFormat texture_format)
+{
+    TextureId texture_id{s_texture_id_generator.generate()};
+
+    if (texture_id >= s_textures.size())
+    {
+        s_textures.resize(texture_id + 1);
+        s_texture_descs.resize(texture_id + 1);
+    }
+
+    Texture &texture{s_textures[texture_id]};
+    TextureDesc &texture_desc{s_texture_descs[texture_id]};
+
+    const Framebuffer &framebuffer{use_framebuffer(framebuffer_id)};
+    select_temporary_texture_unit();
+
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    GLint tex_format{get_texture_internal_format(texture_format, false)};
+    glCopyTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        static_cast<GLenum>(tex_format),
+        0,
+        0,
+        static_cast<GLsizei>(framebuffer.width),
+        static_cast<GLsizei>(framebuffer.height),
+        0
+    );
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    texture.texture = tex;
+    texture.type = TextureType::TEXTURE_2D;
+
+    texture_desc = {
+        .width = framebuffer.width,
+        .height = framebuffer.height,
+        .depth = 1,
+        .mipmap_level_count = 1,
+        .count = 1,
+        .format = texture_format,
+        .type = TextureType::TEXTURE_2D,
+        .alpha_type = AlphaType::PREMULTIPLIED,
+    };
+
+    return texture_id;
+}
+
+void copy_framebuffer_to_texture(FramebufferId framebuffer_id, TextureId texture_id)
+{
+    Texture &texture{s_textures[texture_id]};
+    TextureDesc &texture_desc{s_texture_descs[texture_id]};
+
+    const Framebuffer &framebuffer{use_framebuffer(framebuffer_id)};
+    select_temporary_texture_unit();
+
+    glBindTexture(GL_TEXTURE_2D, texture.texture);
+
+    if (framebuffer.width == texture_desc.width && framebuffer.height == texture_desc.height)
+    {
+        glCopyTexSubImage2D(
+            GL_TEXTURE_2D,
+            0,
+            0,
+            0,
+            0,
+            0,
+            static_cast<GLsizei>(framebuffer.width),
+            static_cast<GLsizei>(framebuffer.height)
+        );
+    }
+    else
+    {
+        GLint tex_format{get_texture_internal_format(texture_desc.format, false)};
+        glCopyTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            static_cast<GLenum>(tex_format),
+            0,
+            0,
+            static_cast<GLsizei>(framebuffer.width),
+            static_cast<GLsizei>(framebuffer.height),
+            0
+        );
+
+        texture_desc.width = framebuffer.width;
+        texture_desc.height = framebuffer.height;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 SamplerId create_sampler(const SamplerParams &sampler_params)

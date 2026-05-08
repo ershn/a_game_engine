@@ -91,7 +91,7 @@ void control_infinity_symbol_material(const InfinitySymbol &, const Gfx::Materia
         material.use_shininess_texture = false;
 }
 
-void InfinitySymbolScene::init() const
+void InfinitySymbolScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -296,7 +296,7 @@ void InfinitySymbolScene::init() const
     }
 }
 
-void InfinitySymbolScene::update() const
+void InfinitySymbolScene::update()
 {
     using Core::process_components;
 
@@ -310,7 +310,7 @@ void InfinitySymbolScene::update() const
         process_components(Gfx::update_perspective_camera_matrix);
 }
 
-void InfinitySymbolScene::render() const
+void InfinitySymbolScene::render()
 {
     Gfx::render_scene();
 }

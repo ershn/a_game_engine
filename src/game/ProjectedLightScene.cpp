@@ -163,7 +163,7 @@ void calc_spotlight_matrix(Spotlight &spotlight, const Core::Transform &transfor
 }
 } // namespace
 
-void ProjectedLightScene::init() const
+void ProjectedLightScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -486,7 +486,7 @@ void ProjectedLightScene::init() const
     }
 }
 
-void ProjectedLightScene::update() const
+void ProjectedLightScene::update()
 {
     using Core::process_components;
 
@@ -500,7 +500,7 @@ void ProjectedLightScene::update() const
         process_components(Gfx::update_perspective_camera_matrix);
 }
 
-void ProjectedLightScene::render() const
+void ProjectedLightScene::render()
 {
     Gfx::render_scene();
 }

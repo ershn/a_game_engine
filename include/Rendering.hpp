@@ -44,6 +44,8 @@ struct Renderer
     bool enabled{true};
 };
 
+using RenderScene = void (*)();
+
 void init_rendering_system(GLFWwindow *window);
 
 inline constexpr unsigned int WITH_LW_MATRIX{0b1};
@@ -67,8 +69,17 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls(
     const ProjectionUniformBuffer &projection_buffer
 );
 
+void prepare_rendering();
 void render_scene();
+void complete_rendering();
 
-void render(std::function<void()> render_scene);
+template <RenderScene RenderScene>
+void render()
+{
+    prepare_rendering();
+    RenderScene();
+    complete_rendering();
+}
+
 void update_render_state();
 } // namespace Age::Gfx

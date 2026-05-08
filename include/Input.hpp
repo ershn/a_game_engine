@@ -29,7 +29,7 @@ Math::Vector2 get_scroll_delta(const MouseInput &mouse_input);
 bool is_mouse_button_up(int button);
 bool is_mouse_button_down(int button);
 
-bool is_exit_requested();
+bool should_window_close();
 
 void init_input_system(GLFWwindow *window);
 

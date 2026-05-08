@@ -34,11 +34,9 @@ std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets{};
 Util::IdGenerator<EntityId> g_entity_id_generator{1};
 std::vector<EntityLocation> g_entity_locations{};
 
-void init_ecs(const App::Definitions &definitions)
+void init_ecs(std::size_t user_component_type_count)
 {
-    std::size_t component_type_count{
-        static_cast<std::size_t>(ComponentType::LAST_VALUE) + definitions.component_type_count
-    };
+    std::size_t component_type_count{static_cast<std::size_t>(ComponentType::LAST_VALUE) + user_component_type_count};
 
     g_archetypes.reserve(256);
     s_component_types_to_archetype_ids.reserve(256);

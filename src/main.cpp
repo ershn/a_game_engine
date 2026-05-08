@@ -3,7 +3,6 @@
 #include "game/CheckerboardScene.hpp"
 #include "game/CubePointLightScene.hpp"
 #include "game/DoubleProjectionScene.hpp"
-#include "game/Game.hpp"
 #include "game/GammaAndTexturesScene.hpp"
 #include "game/InfinitySymbolScene.hpp"
 #include "game/ProceduralTextureScene.hpp"
@@ -12,14 +11,14 @@
 
 int main()
 {
-    auto scene = Game::ProceduralTextureScene{};
+    using Scene = Game::ValleyScene;
 
 #ifdef _DEBUG
-    Age::Core::run_engine(Game::g_definitions, scene);
+    Age::Core::run_engine<Scene>();
 #else
     try
     {
-        Age::Core::run_engine(Game::g_definitions, scene);
+        Age::Core::run_engine<Scene>();
     }
     catch (const std::exception &e)
     {

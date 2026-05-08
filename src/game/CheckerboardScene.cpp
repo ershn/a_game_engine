@@ -120,7 +120,7 @@ void control_scene(CheckerboardSceneController &scene_controller)
     }
 }
 
-void CheckerBoardScene::init() const
+void CheckerBoardScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -232,7 +232,7 @@ void CheckerBoardScene::init() const
     }
 }
 
-void CheckerBoardScene::update() const
+void CheckerBoardScene::update()
 {
     using Core::process_components;
 
@@ -244,7 +244,7 @@ void CheckerBoardScene::update() const
         process_components(Gfx::update_perspective_camera_matrix);
 }
 
-void CheckerBoardScene::render() const
+void CheckerBoardScene::render()
 {
     Gfx::render_scene();
 }

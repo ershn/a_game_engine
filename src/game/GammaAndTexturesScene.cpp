@@ -99,7 +99,7 @@ struct GammaAndTexturesMaterial : public Gfx::Material
     }
 };
 
-void GammaAndTexturesScene::init() const
+void GammaAndTexturesScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -162,7 +162,7 @@ void GammaAndTexturesScene::init() const
     }
 }
 
-void GammaAndTexturesScene::update() const
+void GammaAndTexturesScene::update()
 {
     using Core::process_components;
 
@@ -172,7 +172,7 @@ void GammaAndTexturesScene::update() const
         process_components(Gfx::update_window_space_camera_matrix);
 }
 
-void GammaAndTexturesScene::render() const
+void GammaAndTexturesScene::render()
 {
     Gfx::render_scene();
 }

@@ -70,4 +70,10 @@ Framebuffer &get_framebuffer(FramebufferId framebuffer_id)
 {
     return s_framebuffers[to_index(framebuffer_id)];
 }
+
+const Framebuffer &use_framebuffer(FramebufferId framebuffer_id)
+{
+    // TODO
+    return get_framebuffer(framebuffer_id);
+}
 } // namespace Age::Gfx

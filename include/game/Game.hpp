@@ -1,8 +1,13 @@
 #pragma once
 
-#include "Definitions.hpp"
+#include "Components.hpp"
 
 namespace Game
 {
-extern const Age::App::Definitions g_definitions;
+struct Scene
+{
+    static constexpr std::size_t component_type_count{
+        ComponentType::LAST_VALUE - static_cast<std::size_t>(Age::Core::ComponentType::LAST_VALUE)
+    };
+};
 } // namespace Game

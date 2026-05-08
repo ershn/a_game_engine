@@ -5,6 +5,7 @@
 #include <memory>
 #include <span>
 
+#include "Framebuffer.hpp"
 #include "OpenGL.hpp"
 
 namespace Age::Gfx
@@ -317,6 +318,8 @@ struct TextureCreationOptions
 void init_texture_system();
 
 TextureId create_texture(const TextureData &texture_data, TextureCreationOptions creation_options = {});
+TextureId create_texture_from_framebuffer(FramebufferId framebuffer_id, TextureFormat texture_format);
+void copy_framebuffer_to_texture(FramebufferId framebuffer_id, TextureId texture_id);
 
 SamplerId create_sampler(const SamplerParams &sampler_params);
 const SamplerParams &get_sampler_params(SamplerId sampler_id);

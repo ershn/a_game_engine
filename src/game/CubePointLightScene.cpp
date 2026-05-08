@@ -149,7 +149,7 @@ void calc_cube_point_light_matrix(CubePointLight &cube_point_light, const Core::
 }
 } // namespace
 
-void CubePointLightScene::init() const
+void CubePointLightScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -474,7 +474,7 @@ void CubePointLightScene::init() const
     }
 }
 
-void CubePointLightScene::update() const
+void CubePointLightScene::update()
 {
     using Core::process_components;
 
@@ -488,7 +488,7 @@ void CubePointLightScene::update() const
         process_components(Gfx::update_perspective_camera_matrix);
 }
 
-void CubePointLightScene::render() const
+void CubePointLightScene::render()
 {
     Gfx::render_scene();
 }

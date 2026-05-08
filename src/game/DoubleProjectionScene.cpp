@@ -96,7 +96,7 @@ void rotate_in_post_proj_space(
 }
 } // namespace
 
-void DoubleProjectionScene::init() const
+void DoubleProjectionScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -242,7 +242,7 @@ void DoubleProjectionScene::init() const
     Core::process_components(Gfx::calc_spherical_camera_view_matrix);
 }
 
-void DoubleProjectionScene::update() const
+void DoubleProjectionScene::update()
 {
     using Core::process_components;
 
@@ -254,7 +254,7 @@ void DoubleProjectionScene::update() const
     process_components(rotate_in_post_proj_space);
 }
 
-void DoubleProjectionScene::render() const
+void DoubleProjectionScene::render()
 {
     Gfx::render_scene();
 }

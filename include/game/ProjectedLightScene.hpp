@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Scene.hpp"
+#include "Game.hpp"
 
 namespace Game
 {
-struct ProjectedLightScene : public Age::App::IScene
+struct ProjectedLightScene : Scene
 {
-    void init() const override;
-    void update() const override;
-    void render() const override;
+    static void init();
+    static void update();
+    static void render();
 };
 } // namespace Game

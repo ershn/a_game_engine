@@ -56,7 +56,7 @@ void update_sun_position(Core::Transform &transform, const Gfx::DirectionalLight
     transform.position = Math::normalize(Math::Vector3{std::cos(time), 1.0f, -std::sin(time)});
 }
 
-void ProceduralTextureScene::init() const
+void ProceduralTextureScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
     Gfx::ShaderId next_shader_id{0};
@@ -145,7 +145,7 @@ void ProceduralTextureScene::init() const
     }
 }
 
-void ProceduralTextureScene::update() const
+void ProceduralTextureScene::update()
 {
     using Core::process_components;
 
@@ -158,7 +158,7 @@ void ProceduralTextureScene::update() const
         process_components(Gfx::update_perspective_camera_matrix);
 }
 
-void ProceduralTextureScene::render() const
+void ProceduralTextureScene::render()
 {
     Gfx::render_scene();
 }

@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "Components.hpp"
-#include "Definitions.hpp"
 #include "IdGenerator.hpp"
 #include "Memory.hpp"
 
@@ -53,7 +52,7 @@ extern std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets;
 extern Util::IdGenerator<EntityId> g_entity_id_generator;
 extern std::vector<EntityLocation> g_entity_locations;
 
-void init_ecs(const App::Definitions &definitions);
+void init_ecs(std::size_t user_component_type_count);
 
 ArchetypeRef get_or_create_archetype(
     std::span<const ComponentType> component_types, std::span<const std::size_t> component_sizes
