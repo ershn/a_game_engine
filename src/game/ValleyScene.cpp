@@ -139,8 +139,7 @@ void update_sphere_impostors(const SphereImpostors &sphere_impostors, const Gfx:
     {
         auto &instance = sphere_impostors.instances[index];
         buffer_values[index] = {
-            .viewPosition{Math::Vector3{wv_matrix * Math::Vector4{instance.worldPosition, 1.0f}}},
-            .radius{instance.radius}
+            .viewPosition{Math::xyz(wv_matrix * Math::Vector4{instance.worldPosition, 1.0f})}, .radius{instance.radius}
         };
     }
 

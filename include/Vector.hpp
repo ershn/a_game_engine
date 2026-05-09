@@ -5,9 +5,6 @@
 
 namespace Age::Math
 {
-struct Vector3;
-struct Vector4;
-
 struct Vector2
 {
     float x;
@@ -31,8 +28,6 @@ struct Vector2
     {
     }
 
-    explicit Vector2(const Vector3 &vec);
-
     explicit operator const float *() const;
 
     float operator[](std::size_t index) const;
@@ -43,6 +38,11 @@ struct Vector2
     static const Vector2 up;
     static const Vector2 down;
 };
+
+inline constexpr Vector2 Vector2::right{1.0f, 0.0f};
+inline constexpr Vector2 Vector2::left{-1.0f, 0.0f};
+inline constexpr Vector2 Vector2::up{0.0f, 1.0f};
+inline constexpr Vector2 Vector2::down{0.0f, -1.0f};
 
 std::ostream &operator<<(std::ostream &out, const Vector2 &vector);
 
@@ -73,8 +73,12 @@ struct Vector3
     {
     }
 
-    Vector3(const Vector2 &vec, float z);
-    explicit Vector3(const Vector4 &vec);
+    constexpr Vector3(const Vector2 &vec, float z)
+        : x{vec.x}
+        , y{vec.y}
+        , z{z}
+    {
+    }
 
     explicit operator const float *() const;
 
@@ -88,6 +92,13 @@ struct Vector3
     static const Vector3 forward;
     static const Vector3 backward;
 };
+
+inline constexpr Vector3 Vector3::right{1.0f, 0.0f, 0.0f};
+inline constexpr Vector3 Vector3::left{-1.0f, 0.0f, 0.0f};
+inline constexpr Vector3 Vector3::up{0.0f, 1.0f, 0.0f};
+inline constexpr Vector3 Vector3::down{0.0f, -1.0f, 0.0f};
+inline constexpr Vector3 Vector3::forward{0.0f, 0.0f, -1.0f};
+inline constexpr Vector3 Vector3::backward{0.0f, 0.0f, 1.0f};
 
 std::ostream &operator<<(std::ostream &out, const Vector3 &vector);
 
@@ -122,7 +133,13 @@ struct Vector4
     {
     }
 
-    Vector4(const Vector3 &vec, float w);
+    constexpr Vector4(const Vector3 &vec, float w)
+        : x{vec.x}
+        , y{vec.y}
+        , z{vec.z}
+        , w{w}
+    {
+    }
 
     explicit operator const float *() const;
 
@@ -136,6 +153,13 @@ struct Vector4
     static const Vector4 forward;
     static const Vector4 backward;
 };
+
+inline constexpr Vector4 Vector4::right{1.0f, 0.0f, 0.0f, 1.0f};
+inline constexpr Vector4 Vector4::left{-1.0f, 0.0f, 0.0f, 1.0f};
+inline constexpr Vector4 Vector4::up{0.0f, 1.0f, 0.0f, 1.0f};
+inline constexpr Vector4 Vector4::down{0.0f, -1.0f, 0.0f, 1.0f};
+inline constexpr Vector4 Vector4::forward{0.0f, 0.0f, -1.0f, 1.0f};
+inline constexpr Vector4 Vector4::backward{0.0f, 0.0f, 1.0f, 1.0f};
 
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector);
 

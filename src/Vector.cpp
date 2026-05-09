@@ -5,12 +5,6 @@
 
 namespace Age::Math
 {
-Vector2::Vector2(const Vector3 &vec)
-    : x{vec.x}
-    , y{vec.y}
-{
-}
-
 Vector2::operator const float *() const
 {
     return &x;
@@ -44,29 +38,10 @@ float &Vector2::operator[](std::size_t index)
     }
 }
 
-const Vector2 Vector2::right{1.0f, 0.0f};
-const Vector2 Vector2::left{-1.0f, 0.0f};
-const Vector2 Vector2::up{0.0f, 1.0f};
-const Vector2 Vector2::down{0.0f, -1.0f};
-
 std::ostream &operator<<(std::ostream &out, const Vector2 &vector)
 {
     out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f}";
     return out;
-}
-
-Vector3::Vector3(const Vector2 &vec, float z)
-    : x{vec.x}
-    , y{vec.y}
-    , z{z}
-{
-}
-
-Vector3::Vector3(const Vector4 &vec)
-    : x{vec.x}
-    , y{vec.y}
-    , z{vec.z}
-{
 }
 
 Vector3::operator const float *() const
@@ -106,25 +81,10 @@ float &Vector3::operator[](std::size_t index)
     }
 }
 
-const Vector3 Vector3::right{1.0f, 0.0f, 0.0f};
-const Vector3 Vector3::left{-1.0f, 0.0f, 0.0f};
-const Vector3 Vector3::up{0.0f, 1.0f, 0.0f};
-const Vector3 Vector3::down{0.0f, -1.0f, 0.0f};
-const Vector3 Vector3::forward{0.0f, 0.0f, -1.0f};
-const Vector3 Vector3::backward{0.0f, 0.0f, 1.0f};
-
 std::ostream &operator<<(std::ostream &out, const Vector3 &vector)
 {
     out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f, " << vector.z << "f}";
     return out;
-}
-
-Vector4::Vector4(const Vector3 &vec, float w)
-    : x{vec.x}
-    , y{vec.y}
-    , z{vec.z}
-    , w{w}
-{
 }
 
 Vector4::operator const float *() const
@@ -167,13 +127,6 @@ float &Vector4::operator[](std::size_t index)
         return w;
     }
 }
-
-const Vector4 Vector4::right{1.0f, 0.0f, 0.0f, 1.0f};
-const Vector4 Vector4::left{-1.0f, 0.0f, 0.0f, 1.0f};
-const Vector4 Vector4::up{0.0f, 1.0f, 0.0f, 1.0f};
-const Vector4 Vector4::down{0.0f, -1.0f, 0.0f, 1.0f};
-const Vector4 Vector4::forward{0.0f, 0.0f, -1.0f, 1.0f};
-const Vector4 Vector4::backward{0.0f, 0.0f, 1.0f, 1.0f};
 
 std::ostream &operator<<(std::ostream &out, const Vector4 &vector)
 {
