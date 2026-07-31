@@ -6,7 +6,9 @@
 #include <string_view>
 #include <vector>
 
+#include "DrawQueue.hpp"
 #include "OpenGL.hpp"
+#include "RenderPipelineState.hpp"
 #include "UniformBuffer.hpp"
 
 namespace Age::Gfx
@@ -19,11 +21,6 @@ struct ShaderAsset
 
 using ShaderId = std::uint16_t;
 
-struct ShaderRenderState
-{
-    bool srgb_rendering : 1 {true};
-};
-
 struct ShaderCommonUniforms
 {
     bool projection_block : 1 {true};
@@ -31,58 +28,19 @@ struct ShaderCommonUniforms
     bool lv_normal_matrix : 1 {false};
 };
 
-struct DrawQueue
-{
-    enum BitWidth
-    {
-        QUEUE = 11,
-        TOTAL = 12,
-    };
-
-    unsigned short transparent : 1 {false};
-    unsigned short queue : BitWidth::QUEUE{1000};
-
-    static constexpr DrawQueue from(unsigned short draw_queue)
-    {
-        return {
-            .transparent = static_cast<unsigned short>(draw_queue >> BitWidth::QUEUE & 0b1),
-            .queue = static_cast<unsigned short>(draw_queue & (1 << BitWidth::QUEUE) - 1)
-        };
-    }
-
-    constexpr operator unsigned short() const
-    {
-        return transparent << BitWidth::QUEUE | queue;
-    }
-
-    static const DrawQueue min_opaque;
-    static const DrawQueue max_opaque;
-    static const DrawQueue min_transparent;
-    static const DrawQueue max_transparent;
-    static const DrawQueue min;
-    static const DrawQueue max;
-};
-
-inline constexpr DrawQueue DrawQueue::min_opaque{.transparent = false, .queue = 0};
-inline constexpr DrawQueue DrawQueue::max_opaque{.transparent = false, .queue = (1 << BitWidth::QUEUE) - 1};
-inline constexpr DrawQueue DrawQueue::min_transparent{.transparent = true, .queue = 0};
-inline constexpr DrawQueue DrawQueue::max_transparent{.transparent = true, .queue = (1 << BitWidth::QUEUE) - 1};
-inline constexpr DrawQueue DrawQueue::min{min_opaque};
-inline constexpr DrawQueue DrawQueue::max{max_transparent};
-
 struct Shader
 {
-    GLuint shader_program{};
+    const GLuint shader_program{};
     UniformBlock projection_block{};
-    GLint lv_matrix{-1};
-    GLint lv_normal_matrix{-1};
-    DrawQueue draw_queue{};
-    ShaderRenderState render_state{};
+    const GLint lv_matrix{-1};
+    const GLint lv_normal_matrix{-1};
+    const RenderPipelineState render_state{};
+    const DrawQueue draw_queue{};
 
     Shader(
         GLuint shader_program,
         ShaderCommonUniforms common_uniforms = {},
-        ShaderRenderState render_state = {},
+        RenderPipelineState render_state = {},
         DrawQueue draw_queue = {}
     );
 };

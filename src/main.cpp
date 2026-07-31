@@ -7,11 +7,12 @@
 #include "game/InfinitySymbolScene.hpp"
 #include "game/ProceduralTextureScene.hpp"
 #include "game/ProjectedLightScene.hpp"
+#include "game/RenderToTextureScene.hpp"
 #include "game/ValleyScene.hpp"
 
 int main()
 {
-    using Scene = Game::ValleyScene;
+    using Scene = Game::RenderToTextureScene;
 
 #ifdef _DEBUG
     Age::Core::run_engine<Scene>();

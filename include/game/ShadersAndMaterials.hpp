@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Material.hpp"
-#include "Shader.hpp"
 #include "UniformBlocks.hpp"
 #include "UniformBuffer.hpp"
 #include "Vector.hpp"
@@ -25,7 +24,9 @@ struct FragmentLightingMaterial : public Age::Gfx::Material
     Age::Gfx::UniformBufferRangeId material_buffer_range_id{};
     int gaussian_texture{};
 
-    FragmentLightingMaterial(Age::Gfx::Shader &shader);
+    FragmentLightingMaterial(
+        Age::Gfx::Shader &shader, Age::Gfx::RenderPipelineState render_state, Age::Gfx::DrawQueue draw_queue
+    );
 
     void apply_properties() const override;
 };
@@ -41,7 +42,9 @@ struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 {
     Age::Math::Vector4 diffuse_color{1.0f};
 
-    FragmentLightingColorMaterial(Age::Gfx::Shader &shader);
+    FragmentLightingColorMaterial(
+        Age::Gfx::Shader &shader, Age::Gfx::RenderPipelineState render_state, Age::Gfx::DrawQueue draw_queue
+    );
 
     void apply_properties() const override;
 };

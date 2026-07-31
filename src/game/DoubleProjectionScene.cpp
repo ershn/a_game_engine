@@ -173,11 +173,7 @@ void DoubleProjectionScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{
-                .flags{Gfx::DEFAULT_CAMERA_FLAGS | Gfx::DEPTH_CLAMPING},
-                .clear_color{0.75f, 0.75f, 1.0f, 1.0f},
-                .viewport_id{right_viewport_id}
-            },
+            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}, .viewport_id{right_viewport_id}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_RIGHT}},
@@ -222,8 +218,12 @@ void DoubleProjectionScene::init()
     // Cube
     {
         auto material_id = next_material_id++;
-        auto &material =
-            Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(material_id, lit_diffuse_texture_shader_id);
+        auto &material = Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(
+            material_id,
+            lit_diffuse_texture_shader_id,
+            Gfx::RenderPipelineStateMask{.depth_clamping = true},
+            Gfx::RenderPipelineState{.depth_clamping = true}
+        );
         material.light_buffer_range_id = light_buffer_range_id;
         material.texture_id = checkerboard_texture_id;
         material.sampler_id = linear_sampler_id;

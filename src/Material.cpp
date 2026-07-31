@@ -11,8 +11,10 @@ constexpr MaterialId NULL_MATERIAL_ID{std::numeric_limits<MaterialId>::max()};
 MaterialId s_used_material_id{NULL_MATERIAL_ID};
 } // namespace
 
-Material::Material(Shader &shader)
+Material::Material(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue)
     : shader{shader}
+    , render_state{render_state}
+    , draw_queue{draw_queue}
 {
 }
 
@@ -34,6 +36,7 @@ const Material &use_material(MaterialId material_id)
 
     if (material_id != s_used_material_id)
     {
+        update_render_pipeline_state(material.render_state);
         use_shader(material.shader);
         material.apply_properties();
         s_used_material_id = material_id;

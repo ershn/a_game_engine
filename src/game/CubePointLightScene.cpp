@@ -94,8 +94,8 @@ struct CubePointLightMaterial : public Gfx::Material
     Gfx::TextureId cube_map_texture_id{Gfx::NULL_TEXTURE_ID};
     Gfx::SamplerId cube_map_sampler_id{Gfx::NULL_SAMPLER_ID};
 
-    CubePointLightMaterial(Gfx::Shader &shader)
-        : Gfx::Material{shader}
+    CubePointLightMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+        : Gfx::Material{shader, render_state, draw_queue}
     {
     }
 

@@ -7,7 +7,7 @@ namespace Age::Gfx
 {
 struct UnlitMaterial : public Material
 {
-    UnlitMaterial(Shader &shader);
+    UnlitMaterial(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue);
 
     void apply_properties() const override;
 };
@@ -16,7 +16,7 @@ struct UnlitColorMaterial : public UnlitMaterial
 {
     Math::Vector3 color{1.0f};
 
-    UnlitColorMaterial(Shader &shader);
+    UnlitColorMaterial(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue);
 
     void apply_properties() const override;
 };
@@ -27,7 +27,7 @@ struct LitDiffuseTextureMaterial : public Material
     TextureId texture_id{NULL_TEXTURE_ID};
     SamplerId sampler_id{NULL_SAMPLER_ID};
 
-    LitDiffuseTextureMaterial(Shader &shader);
+    LitDiffuseTextureMaterial(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue);
 
     void apply_properties() const override;
 };
@@ -37,7 +37,7 @@ struct FragmentLightingMaterial : public Material
     Math::Vector4 specular_color{1.0f};
     float surface_shininess{0.5f};
 
-    FragmentLightingMaterial(Shader &shader);
+    FragmentLightingMaterial(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue);
 
     void apply_properties() const override;
 };
@@ -46,7 +46,7 @@ struct FragmentLightingColorMaterial : public FragmentLightingMaterial
 {
     Math::Vector4 diffuse_color{1.0f};
 
-    FragmentLightingColorMaterial(Shader &shader);
+    FragmentLightingColorMaterial(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue);
 
     void apply_properties() const override;
 };

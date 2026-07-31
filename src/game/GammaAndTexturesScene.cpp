@@ -87,8 +87,8 @@ struct GammaAndTexturesMaterial : public Gfx::Material
     Gfx::TextureId texture_id{Gfx::NULL_TEXTURE_ID};
     Gfx::SamplerId sampler_id{Gfx::NULL_SAMPLER_ID};
 
-    GammaAndTexturesMaterial(Gfx::Shader &shader)
-        : Material{shader}
+    GammaAndTexturesMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+        : Material{shader, render_state, draw_queue}
     {
     }
 

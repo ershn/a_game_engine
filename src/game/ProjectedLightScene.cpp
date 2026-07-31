@@ -95,8 +95,8 @@ struct SpotlightMaterial : public Gfx::Material
     Gfx::TextureId spotlight_texture_id{Gfx::NULL_TEXTURE_ID};
     Gfx::SamplerId spotlight_sampler_id{Gfx::NULL_SAMPLER_ID};
 
-    SpotlightMaterial(Gfx::Shader &shader)
-        : Gfx::Material{shader}
+    SpotlightMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+        : Gfx::Material{shader, render_state, draw_queue}
     {
     }
 

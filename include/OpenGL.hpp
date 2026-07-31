@@ -62,6 +62,7 @@ void bind_uniform_buffer_range(GLuint binding_point, GLuint uniform_buffer, std:
 void bind_vertex_array_object(GLuint vao);
 
 void enable_srgb_rendering(bool enable);
+void enable_depth_clamping(bool enable);
 
 void set_clear_color(const Math::Vector4 &color);
 void set_clear_depth(float depth);

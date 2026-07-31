@@ -2,10 +2,12 @@
 
 #include <cstdint>
 
+#include "Comparisons.hpp"
 #include "Components.hpp"
 #include "Framebuffer.hpp"
 #include "Matrix.hpp"
 #include "Transform.hpp"
+#include "Tuple.hpp"
 #include "UniformBuffer.hpp"
 #include "Viewport.hpp"
 
@@ -25,14 +27,25 @@ struct ViewToClipMatrix
     Math::Matrix4 matrix{};
 };
 
-inline constexpr unsigned int CLEAR_COLOR_BUFFER{0b1};
-inline constexpr unsigned int CLEAR_DEPTH_BUFFER{0b10};
-inline constexpr unsigned int DEPTH_CLAMPING{0b100};
-inline constexpr unsigned int DEFAULT_CAMERA_FLAGS{CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER};
+using CameraStack = std::uint16_t;
+
+struct CameraStackOrder
+{
+    static constexpr auto TYPE{Core::ComponentType::CAMERA_STACK_ORDER};
+
+    CameraStack stack{};
+    std::uint16_t order_in_stack{};
+};
+
+bool operator<(CameraStackOrder lhs, CameraStackOrder rhs);
 
 enum struct Layer : std::uint8_t
 {
 };
+
+inline constexpr unsigned int CLEAR_COLOR_BUFFER{0b1};
+inline constexpr unsigned int CLEAR_DEPTH_BUFFER{0b10};
+inline constexpr unsigned int DEFAULT_CAMERA_FLAGS{CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER};
 
 struct CameraRenderState
 {
@@ -114,4 +127,72 @@ void update_window_space_camera_matrix(
 );
 
 void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix);
+
+template <typename TCameraIterator>
+struct CameraStackIterator
+{
+    TCameraIterator camera_it{};
+    TCameraIterator camera_end{};
+    CameraStack camera_stack{};
+
+    CameraStackIterator(TCameraIterator camera_it, TCameraIterator camera_end)
+        : camera_it{camera_it}
+        , camera_end{camera_end}
+        , camera_stack{Util::get_ref<CameraStackOrder>(*camera_it).stack}
+    {
+    }
+
+    operator bool() const
+    {
+        return camera_it != camera_end && Util::get_ref<CameraStackOrder>(*camera_it).stack == camera_stack;
+    }
+
+    CameraStackIterator &operator++()
+    {
+        ++camera_it;
+        return *this;
+    }
+
+    auto &operator*() const
+    {
+        return *camera_it;
+    }
+};
+
+template <Util::LessComparison TCameraStackCmp, typename TCameraIterator>
+TCameraIterator for_each_camera_stack(
+    CameraStack max_camera_stack, TCameraIterator camera_it, TCameraIterator camera_end, auto callback
+)
+{
+    while (camera_it != camera_end &&
+           TCameraStackCmp{}(Util::get_ref<CameraStackOrder>(*camera_it).stack, max_camera_stack))
+    {
+        CameraStackIterator camera_stack_it{camera_it, camera_end};
+
+        callback(camera_stack_it);
+
+        while (camera_stack_it)
+            ++camera_stack_it;
+
+        camera_it = camera_stack_it.camera_it;
+    }
+
+    return camera_it;
+}
+
+template <typename TCameraIterator>
+void for_each_camera_stack(TCameraIterator camera_it, TCameraIterator camera_end, auto callback)
+{
+    while (camera_it != camera_end)
+    {
+        CameraStackIterator camera_stack_it{camera_it, camera_end};
+
+        callback(camera_stack_it);
+
+        while (camera_stack_it)
+            ++camera_stack_it;
+
+        camera_it = camera_stack_it.camera_it;
+    }
+}
 } // namespace Age::Gfx

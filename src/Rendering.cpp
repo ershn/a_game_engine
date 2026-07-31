@@ -8,6 +8,7 @@
 #include "ECS.hpp"
 #include "Framebuffer.hpp"
 #include "Lighting.hpp"
+#include "MultiSpan.hpp"
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
 #include "Texture.hpp"
@@ -19,11 +20,6 @@ namespace Age::Gfx
 namespace
 {
 GLFWwindow *s_window{};
-
-void calc_local_to_world_matrix(const Core::Transform &transform, LocalToWorldMatrix &lw_matrix)
-{
-    lw_matrix.matrix = Core::transform_matrix(transform);
-}
 
 std::vector<DrawCall> s_draw_calls{};
 
@@ -62,7 +58,7 @@ DrawCallSortKey create_sort_key(MaterialId material_id, MeshId mesh_id)
     bit_offset += sizeof(MeshId) * 8;
     sort_key |= static_cast<DrawCallSortKey>(material_id) << bit_offset;
     bit_offset += sizeof(MaterialId) * 8;
-    DrawQueue draw_queue{get_material(material_id).shader.draw_queue};
+    DrawQueue draw_queue{get_material(material_id).draw_queue};
     sort_key |= static_cast<DrawCallSortKey>(draw_queue) << bit_offset;
     bit_offset += DrawQueue::BitWidth::TOTAL;
 
@@ -71,7 +67,7 @@ DrawCallSortKey create_sort_key(MaterialId material_id, MeshId mesh_id)
 
 DrawQueue get_draw_queue(DrawCallSortKey sort_key)
 {
-    unsigned short draw_queue{static_cast<unsigned short>(sort_key >> (sizeof(MeshId) * 8 + sizeof(MaterialId) * 8))};
+    unsigned int draw_queue{static_cast<unsigned int>(sort_key >> (sizeof(MeshId) * 8 + sizeof(MaterialId) * 8))};
     return DrawQueue::from(draw_queue);
 }
 
@@ -86,6 +82,55 @@ void init_renderer(Renderer &renderer, const Math::Matrix4 *lw_matrix, MaterialI
     };
 
     add_draw_call_to_layer(renderer.draw_call_key, renderer.layer);
+}
+
+void calc_local_to_world_matrix(const Core::Transform &transform, LocalToWorldMatrix &lw_matrix)
+{
+    lw_matrix.matrix = Core::transform_matrix(transform);
+}
+
+void execute_draw_call(
+    DrawCallIndex draw_call_index, const WorldToViewMatrix &wv_matrix, const ProjectionUniformBuffer &projection_buffer
+)
+{
+    const DrawCall &draw_call{s_draw_calls[draw_call_index]};
+    const Material &material{use_material(draw_call.material_id)};
+    Shader &shader{material.shader};
+
+    if (is_uniform_block_defined(shader.projection_block))
+        bind_uniform_buffer_range(shader.shader_program, shader.projection_block, projection_buffer.buffer_range_id);
+
+    if (draw_call.lw_matrix != nullptr)
+    {
+        Math::Matrix4 lv_matrix{wv_matrix.matrix * *draw_call.lw_matrix};
+        OGL::set_uniform(shader.lv_matrix, lv_matrix);
+
+        if (shader.lv_normal_matrix != -1)
+        {
+            Math::Matrix3 lv_normal_matrix{Math::Matrix3{lv_matrix}.invert().transpose()};
+            OGL::set_uniform(shader.lv_normal_matrix, lv_normal_matrix);
+        }
+    }
+
+    MeshDrawCommands mesh_draw_commands{get_mesh_draw_commands(draw_call.mesh_id)};
+    if (mesh_draw_commands.vertex_array_object != s_bound_vao)
+    {
+        OGL::bind_vertex_array_object(mesh_draw_commands.vertex_array_object);
+        s_bound_vao = mesh_draw_commands.vertex_array_object;
+    }
+
+    for (const DrawCommand &draw_command : mesh_draw_commands.draw_commands)
+    {
+        switch (draw_command.type)
+        {
+        case DrawCommandType::DRAW_ARRAYS:
+            OGL::draw_arrays(draw_command.rendering_mode, draw_command.element_count, draw_command.offset);
+            break;
+        case DrawCommandType::DRAW_ELEMENTS:
+            OGL::draw_elements(draw_command.rendering_mode, draw_command.element_count, draw_command.offset);
+            break;
+        }
+    }
 }
 } // namespace
 
@@ -161,9 +206,9 @@ void set_renderer_layer(Renderer &renderer, Layer layer)
 
 void update_lighting(const WorldToViewMatrix &wv_matrix)
 {
-    Core::process_components(std::function{[&](const LightGroup &light_group) {
+    Core::process_components([&](const LightGroup &light_group) {
         update_light_group_buffer(wv_matrix.matrix, light_group);
-    }});
+    });
 }
 
 void setup_viewport(const CameraRenderState &camera_render_state)
@@ -211,65 +256,37 @@ void sort_draw_calls(std::vector<DrawCallKey> &draw_call_keys)
     });
 }
 
-std::vector<DrawCallKey>::const_iterator execute_draw_calls(
+template <>
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
+    DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,
-    DrawQueue until_draw_queue,
     const WorldToViewMatrix &wv_matrix,
     const ProjectionUniformBuffer &projection_buffer
 )
 {
-    for (; dc_key_it != dc_key_end && get_draw_queue(dc_key_it->sort_key) <= until_draw_queue; ++dc_key_it)
-    {
-        const DrawCall &draw_call{s_draw_calls[dc_key_it->index]};
-        const Material &material{use_material(draw_call.material_id)};
-        Shader &shader{material.shader};
+    for (; dc_key_it != dc_key_end && get_draw_queue(dc_key_it->sort_key) < max_draw_queue; ++dc_key_it)
+        execute_draw_call(dc_key_it->index, wv_matrix, projection_buffer);
 
-        if (is_uniform_block_defined(shader.projection_block))
-        {
-            bind_uniform_buffer_range(
-                shader.shader_program, shader.projection_block, projection_buffer.buffer_range_id
-            );
-        }
+    return dc_key_it;
+}
 
-        if (draw_call.lw_matrix != nullptr)
-        {
-            Math::Matrix4 lv_matrix{wv_matrix.matrix * *draw_call.lw_matrix};
-            OGL::set_uniform(shader.lv_matrix, lv_matrix);
-
-            if (shader.lv_normal_matrix != -1)
-            {
-                Math::Matrix3 lv_normal_matrix{Math::Matrix3{lv_matrix}.invert().transpose()};
-                OGL::set_uniform(shader.lv_normal_matrix, lv_normal_matrix);
-            }
-        }
-
-        MeshDrawCommands mesh_draw_commands{get_mesh_draw_commands(draw_call.mesh_id)};
-        if (mesh_draw_commands.vertex_array_object != s_bound_vao)
-        {
-            OGL::bind_vertex_array_object(mesh_draw_commands.vertex_array_object);
-            s_bound_vao = mesh_draw_commands.vertex_array_object;
-        }
-
-        for (const DrawCommand &draw_command : mesh_draw_commands.draw_commands)
-        {
-            switch (draw_command.type)
-            {
-            case DrawCommandType::DRAW_ARRAYS:
-                OGL::draw_arrays(draw_command.rendering_mode, draw_command.element_count, draw_command.offset);
-                break;
-            case DrawCommandType::DRAW_ELEMENTS:
-                OGL::draw_elements(draw_command.rendering_mode, draw_command.element_count, draw_command.offset);
-                break;
-            }
-        }
-    }
+template <>
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessEqual>(
+    DrawQueue max_draw_queue,
+    std::vector<DrawCallKey>::const_iterator dc_key_it,
+    std::vector<DrawCallKey>::const_iterator dc_key_end,
+    const WorldToViewMatrix &wv_matrix,
+    const ProjectionUniformBuffer &projection_buffer
+)
+{
+    for (; dc_key_it != dc_key_end && get_draw_queue(dc_key_it->sort_key) <= max_draw_queue; ++dc_key_it)
+        execute_draw_call(dc_key_it->index, wv_matrix, projection_buffer);
 
     return dc_key_it;
 }
 
 // Rendering flow
-// # before rendering
 // for each camera:
 //    1. select the list of renderers matching the camera layer
 //    2. perform culling on the renderers
@@ -277,11 +294,7 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls(
 //       1. render queue
 //       2. state change
 //       3. distance from camera (front to back, back to front, no sorting)
-//    # before rendering camera
 //    4. render each render queue successively
-//       # before/after rendering a queue range
-//    # after rendering camera
-// # after rendering
 
 void prepare_rendering()
 {
@@ -290,26 +303,22 @@ void prepare_rendering()
 
 void render_scene()
 {
-    Core::process_components(
-        std::function{[](const CameraRenderState &camera_render_state,
-                         const WorldToViewMatrix &wv_matrix,
-                         const ProjectionUniformBuffer &projection_buffer) {
+    using Cameras = Core::MultiSpan<const CameraRenderState, const WorldToViewMatrix, const ProjectionUniformBuffer>;
+
+    Core::execute([](const Cameras &cameras) {
+        for (const auto &[camera_render_state, wv_matrix, projection_buffer] : cameras)
+        {
             update_lighting(wv_matrix);
             setup_viewport(camera_render_state);
-            if (camera_render_state.flags & DEPTH_CLAMPING)
-                glEnable(GL_DEPTH_CLAMP);
 
             auto &draw_call_keys = get_layer_draw_calls(camera_render_state.layer);
             sort_draw_calls(draw_call_keys);
 
             auto dc_key_it = draw_call_keys.cbegin();
             auto dc_key_end = draw_call_keys.cend();
-            execute_draw_calls(dc_key_it, dc_key_end, DrawQueue::max, wv_matrix, projection_buffer);
-
-            if (camera_render_state.flags & DEPTH_CLAMPING)
-                glDisable(GL_DEPTH_CLAMP);
-        }}
-    );
+            execute_draw_calls<Util::LessEqual>(DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer);
+        }
+    });
 }
 
 void complete_rendering()

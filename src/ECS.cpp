@@ -2,6 +2,7 @@
 #include <unordered_map>
 
 #include "ECS.hpp"
+#include "ErrorHandling.hpp"
 #include "Hash.hpp"
 
 #include "game/Game.hpp"
@@ -22,6 +23,64 @@ struct std::hash<std::span<const Age::Core::ComponentType>>
 
 namespace Age::Core
 {
+std::uint32_t ChunkArray::size() const
+{
+    return _size;
+}
+
+std::byte *ChunkArray::operator[](std::uint32_t index) const
+{
+    VBAIL_ERROR_IF(index >= _size, nullptr, "out of bounds index: {} (size is {})", index, _size);
+
+    if (_capacity == 1)
+        return reinterpret_cast<std::byte *>(_chunk_ptrs);
+    else
+        return _chunk_ptrs[index];
+}
+
+std::byte *ChunkArray::back() const
+{
+    VBAIL_ERROR_IF(_size == 0, nullptr, "ChunkArray is empty");
+
+    return (*this)[_size - 1];
+}
+
+void ChunkArray::push_back(std::byte *chunk)
+{
+    if (_capacity == 1 && _size == 0)
+    {
+        _chunk_ptrs = reinterpret_cast<std::byte **>(chunk);
+        _size = 1;
+    }
+    else
+    {
+        if (_size == _capacity)
+            grow_capacity();
+
+        _chunk_ptrs[_size] = chunk;
+        ++_size;
+    }
+}
+
+void ChunkArray::grow_capacity()
+{
+    if (_capacity == 1)
+    {
+        std::byte *stored_chunk{reinterpret_cast<std::byte *>(_chunk_ptrs)};
+        _capacity = DEFAULT_CAPACITY;
+        _chunk_ptrs = new std::byte *[_capacity];
+        _chunk_ptrs[0] = stored_chunk;
+    }
+    else
+    {
+        _capacity = static_cast<std::uint32_t>(_capacity * CAPACITY_GROWTH_FACTOR);
+        std::byte **new_chunk_ptrs{new std::byte *[_capacity]};
+        std::memcpy(new_chunk_ptrs, _chunk_ptrs, _size);
+        delete _chunk_ptrs;
+        _chunk_ptrs = new_chunk_ptrs;
+    }
+}
+
 Memory::PoolAllocator<1U << 18, ARCHETYPE_CHUNK_SIZE> g_chunk_allocator{};
 
 std::vector<Archetype> g_archetypes{};
@@ -108,8 +167,6 @@ Archetype create_archetype(
                 break;
         }
     }
-
-    archetype.chunks.reserve(8);
 
     std::size_t in_chunk_offset{sizeof(EntityId) * archetype.entity_count_per_chunk};
     in_chunk_offset += padding_to<8>(in_chunk_offset);

@@ -14,6 +14,11 @@ float calc_aspect_ratio(const CameraRenderState &camera_render_state)
 }
 } // namespace
 
+bool operator<(CameraStackOrder lhs, CameraStackOrder rhs)
+{
+    return lhs.stack < rhs.stack || lhs.stack == rhs.stack && lhs.order_in_stack < rhs.order_in_stack;
+}
+
 Math::Matrix4 window_space_orthographic_proj_matrix(int viewport_width, int viewport_height)
 {
     Math::Matrix4 matrix{};

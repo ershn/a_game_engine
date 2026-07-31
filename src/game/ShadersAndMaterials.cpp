@@ -14,8 +14,10 @@ FragmentLightingShader::FragmentLightingShader(GLuint shader_program)
 {
 }
 
-FragmentLightingMaterial::FragmentLightingMaterial(Gfx::Shader &shader)
-    : Material{shader}
+FragmentLightingMaterial::FragmentLightingMaterial(
+    Gfx::Shader &shader, Age::Gfx::RenderPipelineState render_state, Age::Gfx::DrawQueue draw_queue
+)
+    : Material{shader, render_state, draw_queue}
 {
 }
 
@@ -33,8 +35,10 @@ FragmentLightingColorShader::FragmentLightingColorShader(GLuint shader_program)
 {
 }
 
-FragmentLightingColorMaterial::FragmentLightingColorMaterial(Gfx::Shader &shader)
-    : FragmentLightingMaterial{shader}
+FragmentLightingColorMaterial::FragmentLightingColorMaterial(
+    Gfx::Shader &shader, Age::Gfx::RenderPipelineState render_state, Age::Gfx::DrawQueue draw_queue
+)
+    : FragmentLightingMaterial{shader, render_state, draw_queue}
 {
 }
 

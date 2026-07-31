@@ -47,8 +47,8 @@ struct SphereImpostorMaterial : public Age::Gfx::Material
     Gfx::UniformBufferRangeId light_buffer_range_id{};
     Gfx::UniformBufferRangeId materials_buffer_range_id{};
 
-    SphereImpostorMaterial(Age::Gfx::Shader &shader)
-        : Material{shader}
+    SphereImpostorMaterial(Age::Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+        : Material{shader, render_state, draw_queue}
     {
     }
 

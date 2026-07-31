@@ -106,7 +106,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;DEVELOPMENT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\Steven\Documents\GameDev\OpenGL\Age\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -127,8 +127,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;RELEASE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,6 +153,7 @@
     <ClCompile Include="src\game\InfinitySymbolScene.cpp" />
     <ClCompile Include="src\game\ProceduralTextureScene.cpp" />
     <ClCompile Include="src\game\ProjectedLightScene.cpp" />
+    <ClCompile Include="src\game\RenderToTextureScene.cpp" />
     <ClCompile Include="src\game\ValleyScene.cpp" />
     <ClCompile Include="src\game\InfinitySymbolMesh.cpp" />
     <ClCompile Include="src\Lighting.cpp" />
@@ -159,6 +164,7 @@
     <ClCompile Include="src\game\ShadersAndMaterials.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\Rectangle.cpp" />
+    <ClCompile Include="src\RenderPipelineState.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\third_parties\glad.c" />
     <ClCompile Include="src\Transform.cpp" />
@@ -192,10 +198,13 @@
     <ClCompile Include="src\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Build.hpp" />
     <ClInclude Include="include\Camera.hpp" />
     <ClInclude Include="include\Color.hpp" />
+    <ClInclude Include="include\Comparisons.hpp" />
     <ClInclude Include="include\Components.hpp" />
     <ClInclude Include="include\DDS.hpp" />
+    <ClInclude Include="include\DrawQueue.hpp" />
     <ClInclude Include="include\ECS.hpp" />
     <ClInclude Include="include\ErrorHandling.hpp" />
     <ClInclude Include="include\FlyCamera.hpp" />
@@ -216,11 +225,13 @@
     <ClInclude Include="include\game\Processing.hpp" />
     <ClInclude Include="include\game\Game.hpp" />
     <ClInclude Include="include\game\ProjectedLightScene.hpp" />
+    <ClInclude Include="include\game\RenderToTextureScene.hpp" />
     <ClInclude Include="include\game\ShadersAndMaterials.hpp" />
     <ClInclude Include="include\game\ValleyScene.hpp" />
     <ClInclude Include="include\GLFW.hpp" />
     <ClInclude Include="include\Hash.hpp" />
     <ClInclude Include="include\IdGenerator.hpp" />
+    <ClInclude Include="include\InplaceList.hpp" />
     <ClInclude Include="include\Input.hpp" />
     <ClInclude Include="include\Lighting.hpp" />
     <ClInclude Include="include\Logging.hpp" />
@@ -232,6 +243,7 @@
     <ClInclude Include="include\Memory.hpp" />
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\DefaultMeshes.hpp" />
+    <ClInclude Include="include\MultiSpan.hpp" />
     <ClInclude Include="include\OpenGL.hpp" />
     <ClInclude Include="include\Packing.hpp" />
     <ClInclude Include="include\Path.hpp" />
@@ -239,6 +251,7 @@
     <ClInclude Include="include\Random.hpp" />
     <ClInclude Include="include\Rectangle.hpp" />
     <ClInclude Include="include\Rendering.hpp" />
+    <ClInclude Include="include\RenderPipelineState.hpp" />
     <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="include\DefaultShaders.hpp" />
     <ClInclude Include="include\SphericalCamera.hpp" />
@@ -247,6 +260,7 @@
     <ClInclude Include="include\Time.hpp" />
     <ClInclude Include="include\Transform.hpp" />
     <ClInclude Include="include\Transformations.hpp" />
+    <ClInclude Include="include\Tuple.hpp" />
     <ClInclude Include="include\UniformBuffer.hpp" />
     <ClInclude Include="include\UniformBlocks.hpp" />
     <ClInclude Include="include\Utils.hpp" />

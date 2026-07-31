@@ -38,8 +38,8 @@ struct TextureMaterial : public Gfx::Material
 {
     Gfx::UniformBufferRangeId light_buffer_range_id{};
 
-    TextureMaterial(Age::Gfx::Shader &shader)
-        : Material{shader}
+    TextureMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+        : Material{shader, render_state, draw_queue}
     {
     }
 

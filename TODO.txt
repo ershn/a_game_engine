@@ -12,18 +12,16 @@
 
 # Rendering
 - fix the texture origin mismatch between DDS and OpenGL
-- make depth clamping shader specific instead of camera specific
 - implement frustum culling
 - sort draw calls according to distance from camera
 
 # Shader
+- auto generate shader and material ids
 - add a diffuse only shader
 - include a diffuse color in the material block
 - add an error shader used in place of a shader that failed to compile
 
 # Mesh
-
-# Uniform buffer
 
 # OpenGL
 - add missing wrapper functions and use them instead
@@ -31,5 +29,9 @@
 # Math
 - make the matrix methods free functions
 
-# Performance improvement
-- pass ranges of components to system functions instead of individual components
+# Performance
+
+# Refactoring
+- use scoped enums instead of plain integers where appropriate
+- use bit-fields instead of bit masks
+- replace usages of Core::process_components with Core::execute and remove Core::process_components

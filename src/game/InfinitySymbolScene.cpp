@@ -57,8 +57,8 @@ struct InfinitySymbolMaterial : public Gfx::Material
     int shininess_texture{};
     bool use_shininess_texture{};
 
-    InfinitySymbolMaterial(Age::Gfx::Shader &shader)
-        : Material{shader}
+    InfinitySymbolMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+        : Material{shader, render_state, draw_queue}
     {
     }
 

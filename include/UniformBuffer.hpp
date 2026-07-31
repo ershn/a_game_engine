@@ -22,7 +22,7 @@ enum struct UniformBufferRangeId : std::uint32_t
 
 struct UniformBlock
 {
-    GLuint block_index{GL_INVALID_INDEX};
+    const GLuint block_index{GL_INVALID_INDEX};
     UniformBufferBinding block_binding{};
 };
 

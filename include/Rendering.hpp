@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "Camera.hpp"
+#include "Comparisons.hpp"
 #include "GLFW.hpp"
 #include "Material.hpp"
 #include "Matrix.hpp"
@@ -61,10 +62,30 @@ void setup_viewport(const CameraRenderState &camera_render_state);
 
 std::vector<DrawCallKey> &get_layer_draw_calls(Layer layer);
 void sort_draw_calls(std::vector<DrawCallKey> &draw_call_keys);
+
+template <typename TDrawQueueCmp>
 std::vector<DrawCallKey>::const_iterator execute_draw_calls(
+    DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,
-    DrawQueue until_draw_queue,
+    const WorldToViewMatrix &wv_matrix,
+    const ProjectionUniformBuffer &projection_buffer
+) = delete;
+
+template <>
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
+    DrawQueue max_draw_queue,
+    std::vector<DrawCallKey>::const_iterator dc_key_it,
+    std::vector<DrawCallKey>::const_iterator dc_key_end,
+    const WorldToViewMatrix &wv_matrix,
+    const ProjectionUniformBuffer &projection_buffer
+);
+
+template <>
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessEqual>(
+    DrawQueue max_draw_queue,
+    std::vector<DrawCallKey>::const_iterator dc_key_it,
+    std::vector<DrawCallKey>::const_iterator dc_key_end,
     const WorldToViewMatrix &wv_matrix,
     const ProjectionUniformBuffer &projection_buffer
 );
