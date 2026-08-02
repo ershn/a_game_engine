@@ -18,6 +18,7 @@ Material::Material(Shader &shader, RenderPipelineState render_state, DrawQueue d
 {
 }
 
+Util::IdGenerator<MaterialId> g_material_id_generator{MaterialId{0}};
 std::vector<std::unique_ptr<Material>> g_materials{};
 
 void init_material_system()
@@ -27,12 +28,12 @@ void init_material_system()
 
 Material &get_material(MaterialId material_id)
 {
-    return *g_materials[material_id];
+    return *g_materials[to_index(material_id)];
 }
 
 const Material &use_material(MaterialId material_id)
 {
-    const Material &material{*g_materials[material_id]};
+    const Material &material{get_material(material_id)};
 
     if (material_id != s_used_material_id)
     {

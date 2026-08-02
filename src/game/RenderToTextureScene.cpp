@@ -1,6 +1,6 @@
+#include <algorithm>
 #include <array>
-#include <functional>
-#include <span>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -15,7 +15,6 @@
 #include "OpenGL.hpp"
 #include "Rendering.hpp"
 #include "SphericalCamera.hpp"
-#include "Time.hpp"
 #include "Transformations.hpp"
 #include "Tuple.hpp"
 
@@ -41,8 +40,6 @@ T &get_global()
 void RenderToTextureScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     auto &render_pipeline_data = get_global<RenderPipelineData>();
 
@@ -114,18 +111,13 @@ void RenderToTextureScene::init()
 
     // Plane
     {
-        auto shader_id = next_shader_id++;
-        {
-            Gfx::ShaderAsset shader_assets[] = {
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/lit_diffuse_texture.vert"},
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/lit_diffuse_texture.frag"}
-            };
-            Gfx::create_shader<Gfx::LitDiffuseTextureShader>(shader_id, shader_assets);
-        }
+        auto [shader_id, _] = Gfx::create_shader<Gfx::LitDiffuseTextureShader>(
+            {{Gfx::OGL::ShaderType::VERTEX, "shaders/lit_diffuse_texture.vert"},
+             {Gfx::OGL::ShaderType::FRAGMENT, "shaders/lit_diffuse_texture.frag"}}
+        );
 
-        auto material_id = next_material_id++;
-        auto &material =
-            Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(material_id, shader_id, Gfx::DrawQueue::max_opaque);
+        auto [material_id, material] =
+            Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(shader_id, Gfx::DrawQueue::max_opaque);
         material.light_buffer_range_id = light_buffer_range_id;
         material.texture_id = render_pipeline_data.framebuffer_texture_id;
         material.sampler_id = linear_sampler_id;
@@ -147,17 +139,12 @@ void RenderToTextureScene::init()
 
     // Cube
     {
-        auto shader_id = next_shader_id++;
-        {
-            Gfx::ShaderAsset shader_assets[] = {
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-            };
-            Gfx::create_shader<Gfx::UnlitShader>(shader_id, shader_assets);
-        }
+        auto [shader_id, _1] = Gfx::create_shader<Gfx::UnlitShader>(
+            {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
+             {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+        );
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::UnlitMaterial>(material_id, shader_id);
+        auto [material_id, _2] = Gfx::create_material<Gfx::UnlitMaterial>(shader_id);
 
         auto id = Core::create_entity(
             Core::Transform{.scale{1.0f, 1.0f, 1.0f}},

@@ -102,8 +102,6 @@ struct GammaAndTexturesMaterial : public Gfx::Material
 void GammaAndTexturesScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     Gfx::TextureData gamma_ramp_texture_data{};
     if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/gamma_ramp.dds", gamma_ramp_texture_data))
@@ -132,22 +130,17 @@ void GammaAndTexturesScene::init()
         );
     }
 
-    auto gamma_and_textures_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/gamma_and_textures.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/gamma_and_textures.frag"}
-        };
-        Gfx::create_shader<GammaAndTexturesShader>(gamma_and_textures_shader_id, shader_assets);
-    }
+    auto [gamma_and_textures_shader_id, _] = Gfx::create_shader<GammaAndTexturesShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/gamma_and_textures.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/gamma_and_textures.frag"}}
+    );
 
     // Plane
     {
         auto mesh_id = next_mesh_id++;
         Gfx::create_mesh(mesh_id, std::function{create_plane_mesh});
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<GammaAndTexturesMaterial>(material_id, gamma_and_textures_shader_id);
+        auto [material_id, material] = Gfx::create_material<GammaAndTexturesMaterial>(gamma_and_textures_shader_id);
         material.texture_id = gamma_ramp_texture_id;
         material.sampler_id = nearest_clamp_sampler_id;
 

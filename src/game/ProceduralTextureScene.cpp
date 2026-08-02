@@ -59,8 +59,6 @@ void update_sun_position(Core::Transform &transform, const Gfx::DirectionalLight
 void ProceduralTextureScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     // Camera
     {
@@ -120,17 +118,12 @@ void ProceduralTextureScene::init()
 
     // Cube
     {
-        auto shader_id = next_shader_id++;
-        {
-            Gfx::ShaderAsset shader_assets[] = {
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/star_texture.vert"},
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/star_texture.frag"}
-            };
-            Gfx::create_shader<TextureShader>(shader_id, shader_assets);
-        }
+        auto [shader_id, _] = Gfx::create_shader<TextureShader>(
+            {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/star_texture.vert"},
+             {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/star_texture.frag"}}
+        );
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<TextureMaterial>(material_id, shader_id);
+        auto [material_id, material] = Gfx::create_material<TextureMaterial>(shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
 
         auto id = Core::create_entity(

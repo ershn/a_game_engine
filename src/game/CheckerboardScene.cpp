@@ -1,8 +1,6 @@
 #include <bit>
 #include <functional>
 #include <span>
-#include <utility>
-#include <vector>
 
 #include "DDS.hpp"
 #include "ECS.hpp"
@@ -123,8 +121,6 @@ void control_scene(CheckerboardSceneController &scene_controller)
 void CheckerBoardScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     float max_anisotropy{Gfx::get_texture_filtering_max_max_anisotropy()};
     Core::log_info("max anisotropy: {}", max_anisotropy);
@@ -196,22 +192,17 @@ void CheckerBoardScene::init()
         );
     }
 
-    auto checkerboard_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/checkerboard.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/checkerboard.frag"}
-        };
-        Gfx::create_shader<CheckerboardShader>(checkerboard_shader_id, shader_assets);
-    }
+    auto [checkerboard_shader_id, _] = Gfx::create_shader<CheckerboardShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/checkerboard.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/checkerboard.frag"}}
+    );
 
     // Plane
     {
         auto mesh_id = next_mesh_id++;
         Gfx::create_mesh<1>(mesh_id, std::function{create_big_plane_mesh});
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CheckerboardMaterial>(material_id, checkerboard_shader_id);
+        auto [material_id, material] = Gfx::create_material<CheckerboardMaterial>(checkerboard_shader_id);
         material.texture_id = checkerboard_texture_id;
         material.sampler_id = mipmap_aniso_sampler_id;
 

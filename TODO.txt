@@ -16,7 +16,6 @@
 - sort draw calls according to distance from camera
 
 # Shader
-- auto generate shader and material ids
 - add a diffuse only shader
 - include a diffuse color in the material block
 - add an error shader used in place of a shader that failed to compile

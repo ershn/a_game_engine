@@ -166,32 +166,20 @@ void calc_spotlight_matrix(Spotlight &spotlight, const Core::Transform &transfor
 void ProjectedLightScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     auto space_axes_mesh_id = next_mesh_id++;
     Gfx::create_mesh<1>(space_axes_mesh_id, std::function{create_space_axes_mesh});
 
-    auto unlit_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-        };
-        Gfx::create_shader<Gfx::UnlitShader>(unlit_shader_id, shader_assets);
-    }
+    auto [unlit_shader_id, _1] = Gfx::create_shader<Gfx::UnlitShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"}, {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+    );
 
-    auto unlit_material_id = next_material_id++;
-    Gfx::create_material<Gfx::UnlitMaterial>(unlit_material_id, unlit_shader_id);
+    auto [unlit_material_id, _] = Gfx::create_material<Gfx::UnlitMaterial>(unlit_shader_id);
 
-    auto spotlight_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/spotlight.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/spotlight.frag"}
-        };
-        Gfx::create_shader<SpotlightShader>(spotlight_shader_id, shader_assets);
-    }
+    auto [spotlight_shader_id, _2] = Gfx::create_shader<SpotlightShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/spotlight.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/spotlight.frag"}}
+    );
 
     Gfx::TextureId concrete_texture_id{};
     {
@@ -340,8 +328,7 @@ void ProjectedLightScene::init()
 
     // Floor
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SpotlightMaterial>(material_id, spotlight_shader_id);
+        auto [material_id, material] = Gfx::create_material<SpotlightMaterial>(spotlight_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.spotlight_buffer_range_id = spotlight_buffer_range_id;
         material.texture_id = dirt_texture_id;
@@ -369,8 +356,7 @@ void ProjectedLightScene::init()
         auto mesh_id = next_mesh_id++;
         Gfx::create_mesh<1>(mesh_id, std::function{create_diorama_mesh});
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SpotlightMaterial>(material_id, spotlight_shader_id);
+        auto [material_id, material] = Gfx::create_material<SpotlightMaterial>(spotlight_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.spotlight_buffer_range_id = spotlight_buffer_range_id;
         material.texture_id = concrete_texture_id;
@@ -391,8 +377,7 @@ void ProjectedLightScene::init()
 
     // Leaning bar
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SpotlightMaterial>(material_id, spotlight_shader_id);
+        auto [material_id, material] = Gfx::create_material<SpotlightMaterial>(spotlight_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.spotlight_buffer_range_id = spotlight_buffer_range_id;
         material.texture_id = wood_texture_id;
@@ -415,8 +400,7 @@ void ProjectedLightScene::init()
 
     // Spinning bar
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SpotlightMaterial>(material_id, spotlight_shader_id);
+        auto [material_id, material] = Gfx::create_material<SpotlightMaterial>(spotlight_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.spotlight_buffer_range_id = spotlight_buffer_range_id;
         material.texture_id = rough_stone_texture_id;
@@ -442,8 +426,7 @@ void ProjectedLightScene::init()
 
     // Right bar
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SpotlightMaterial>(material_id, spotlight_shader_id);
+        auto [material_id, material] = Gfx::create_material<SpotlightMaterial>(spotlight_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.spotlight_buffer_range_id = spotlight_buffer_range_id;
         material.texture_id = stone_texture_id;
@@ -464,8 +447,7 @@ void ProjectedLightScene::init()
 
     // Cube
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SpotlightMaterial>(material_id, spotlight_shader_id);
+        auto [material_id, material] = Gfx::create_material<SpotlightMaterial>(spotlight_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.spotlight_buffer_range_id = spotlight_buffer_range_id;
         material.texture_id = stone_texture_id;

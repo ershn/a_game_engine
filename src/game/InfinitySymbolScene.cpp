@@ -94,20 +94,13 @@ void control_infinity_symbol_material(const InfinitySymbol &, const Gfx::Materia
 void InfinitySymbolScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
-    auto unlit_color_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-        };
-        Gfx::create_shader<Gfx::UnlitColorShader>(unlit_color_shader_id, shader_assets);
-    }
+    auto [unlit_color_shader_id, _1] = Gfx::create_shader<Gfx::UnlitColorShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+    );
 
-    auto unlit_color_material_id = next_material_id++;
-    Gfx::create_material<Gfx::UnlitColorMaterial>(unlit_color_material_id, unlit_color_shader_id);
+    auto [unlit_color_material_id, _2] = Gfx::create_material<Gfx::UnlitColorMaterial>(unlit_color_shader_id);
 
     constexpr std::size_t GAUSSIAN_TEX_ANGLE_RESOLUTION{512};
     constexpr std::size_t GAUSSIAN_TEX_SHININESS_RESOLUTION{128};
@@ -266,17 +259,12 @@ void InfinitySymbolScene::init()
              .surface_shininess{0.125f}}
         );
 
-        auto infinity_shader_id = next_shader_id++;
-        {
-            Gfx::ShaderAsset shader_assets[] = {
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/infinity_symbol.vert"},
-                Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/infinity_symbol.frag"}
-            };
-            Gfx::create_shader<InfinitySymbolShader>(infinity_shader_id, shader_assets);
-        }
+        auto [infinity_shader_id, _] = Gfx::create_shader<InfinitySymbolShader>(
+            {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/infinity_symbol.vert"},
+             {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/infinity_symbol.frag"}}
+        );
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<InfinitySymbolMaterial>(material_id, infinity_shader_id);
+        auto [material_id, material] = Gfx::create_material<InfinitySymbolMaterial>(infinity_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.material_buffer_range_id = material_buffer_range_id;
         material.gaussian_texture = gaussian_texture_image_unit;

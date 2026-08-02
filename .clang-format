@@ -12,3 +12,8 @@ BinPackArguments: false
 AlignAfterOpenBracket: BlockIndent
 AlignOperands: AlignAfterOperator
 AllowShortLambdasOnASingleLine: Empty
+IncludeBlocks: Preserve
+SortIncludes:
+  Enabled: true
+  IgnoreCase: false
+  IgnoreExtension: true

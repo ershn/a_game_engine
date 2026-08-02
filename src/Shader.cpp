@@ -90,6 +90,7 @@ Shader::Shader(
 {
 }
 
+Util::IdGenerator<ShaderId> g_shader_id_generator{ShaderId{0}};
 std::vector<std::unique_ptr<Shader>> g_shaders{};
 
 void init_shader_system()
@@ -114,7 +115,7 @@ GLuint create_shader_program(std::span<const ShaderAsset> shader_assets)
 
 Shader &get_shader(ShaderId shader_id)
 {
-    return *g_shaders[shader_id];
+    return *g_shaders[to_index(shader_id)];
 }
 
 void use_shader(const Shader &shader)

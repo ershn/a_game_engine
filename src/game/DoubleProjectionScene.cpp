@@ -99,26 +99,15 @@ void rotate_in_post_proj_space(
 void DoubleProjectionScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
-    auto unlit_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-        };
-        Gfx::create_shader<Gfx::UnlitShader>(unlit_shader_id, shader_assets);
-    }
+    auto [unlit_shader_id, _1] = Gfx::create_shader<Gfx::UnlitShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"}, {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+    );
 
-    auto lit_diffuse_texture_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/lit_diffuse_texture.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/lit_diffuse_texture.frag"}
-        };
-        Gfx::create_shader<Gfx::LitDiffuseTextureShader>(lit_diffuse_texture_shader_id, shader_assets);
-    }
+    auto [lit_diffuse_texture_shader_id, _2] = Gfx::create_shader<Gfx::LitDiffuseTextureShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/lit_diffuse_texture.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/lit_diffuse_texture.frag"}}
+    );
 
     Gfx::TextureData checkerboard_texture_data{};
     if (!Gfx::read_texture_data_from_dds_file("assets/game/textures/checkerboard.dds", checkerboard_texture_data))
@@ -217,9 +206,7 @@ void DoubleProjectionScene::init()
 
     // Cube
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(
-            material_id,
+        auto [material_id, material] = Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(
             lit_diffuse_texture_shader_id,
             Gfx::RenderPipelineStateMask{.depth_clamping = true},
             Gfx::RenderPipelineState{.depth_clamping = true}

@@ -152,32 +152,20 @@ void calc_cube_point_light_matrix(CubePointLight &cube_point_light, const Core::
 void CubePointLightScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     auto space_axes_mesh_id = next_mesh_id++;
     Gfx::create_mesh<1>(space_axes_mesh_id, std::function{create_space_axes_mesh});
 
-    auto unlit_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-        };
-        Gfx::create_shader<Gfx::UnlitShader>(unlit_shader_id, shader_assets);
-    }
+    auto [unlit_shader_id, _1] = Gfx::create_shader<Gfx::UnlitShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"}, {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+    );
 
-    auto unlit_material_id = next_material_id++;
-    Gfx::create_material<Gfx::UnlitMaterial>(unlit_material_id, unlit_shader_id);
+    auto [unlit_material_id, _2] = Gfx::create_material<Gfx::UnlitMaterial>(unlit_shader_id);
 
-    auto cube_point_light_shader_id = next_shader_id++;
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/cube_point_light.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/cube_point_light.frag"}
-        };
-        Gfx::create_shader<CubePointLightShader>(cube_point_light_shader_id, shader_assets);
-    }
+    auto [cube_point_light_shader_id, _3] = Gfx::create_shader<CubePointLightShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/cube_point_light.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/cube_point_light.frag"}}
+    );
 
     Gfx::TextureId concrete_texture_id{};
     {
@@ -328,8 +316,7 @@ void CubePointLightScene::init()
 
     // Floor
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CubePointLightMaterial>(material_id, cube_point_light_shader_id);
+        auto [material_id, material] = Gfx::create_material<CubePointLightMaterial>(cube_point_light_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.cube_point_light_buffer_range_id = cube_point_light_buffer_range_id;
         material.texture_id = dirt_texture_id;
@@ -357,8 +344,7 @@ void CubePointLightScene::init()
         auto mesh_id = next_mesh_id++;
         Gfx::create_mesh<1>(mesh_id, std::function{create_diorama_mesh});
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CubePointLightMaterial>(material_id, cube_point_light_shader_id);
+        auto [material_id, material] = Gfx::create_material<CubePointLightMaterial>(cube_point_light_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.cube_point_light_buffer_range_id = cube_point_light_buffer_range_id;
         material.texture_id = concrete_texture_id;
@@ -379,8 +365,7 @@ void CubePointLightScene::init()
 
     // Leaning bar
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CubePointLightMaterial>(material_id, cube_point_light_shader_id);
+        auto [material_id, material] = Gfx::create_material<CubePointLightMaterial>(cube_point_light_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.cube_point_light_buffer_range_id = cube_point_light_buffer_range_id;
         material.texture_id = wood_texture_id;
@@ -403,8 +388,7 @@ void CubePointLightScene::init()
 
     // Spinning bar
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CubePointLightMaterial>(material_id, cube_point_light_shader_id);
+        auto [material_id, material] = Gfx::create_material<CubePointLightMaterial>(cube_point_light_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.cube_point_light_buffer_range_id = cube_point_light_buffer_range_id;
         material.texture_id = rough_stone_texture_id;
@@ -430,8 +414,7 @@ void CubePointLightScene::init()
 
     // Right bar
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CubePointLightMaterial>(material_id, cube_point_light_shader_id);
+        auto [material_id, material] = Gfx::create_material<CubePointLightMaterial>(cube_point_light_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.cube_point_light_buffer_range_id = cube_point_light_buffer_range_id;
         material.texture_id = stone_texture_id;
@@ -452,8 +435,7 @@ void CubePointLightScene::init()
 
     // Cube
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<CubePointLightMaterial>(material_id, cube_point_light_shader_id);
+        auto [material_id, material] = Gfx::create_material<CubePointLightMaterial>(cube_point_light_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.cube_point_light_buffer_range_id = cube_point_light_buffer_range_id;
         material.texture_id = stone_texture_id;

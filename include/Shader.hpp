@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <cstdint>
 #include <memory>
 #include <span>
@@ -7,6 +8,7 @@
 #include <vector>
 
 #include "DrawQueue.hpp"
+#include "IdGenerator.hpp"
 #include "OpenGL.hpp"
 #include "RenderPipelineState.hpp"
 #include "UniformBuffer.hpp"
@@ -19,7 +21,14 @@ struct ShaderAsset
     std::string_view file_path;
 };
 
-using ShaderId = std::uint16_t;
+enum struct ShaderId : std::uint32_t
+{
+};
+
+constexpr std::size_t to_index(ShaderId id)
+{
+    return static_cast<std::size_t>(id);
+}
 
 struct ShaderCommonUniforms
 {
@@ -45,20 +54,38 @@ struct Shader
     );
 };
 
+template <std::derived_from<Shader> TShader>
+struct IdentifiedShader
+{
+    ShaderId id{};
+    TShader &shader;
+};
+
+extern Util::IdGenerator<ShaderId> g_shader_id_generator;
 extern std::vector<std::unique_ptr<Shader>> g_shaders;
 
 void init_shader_system();
 
 GLuint create_shader_program(std::span<const ShaderAsset> shader_assets);
 
-template <typename TShader>
-void create_shader(ShaderId shader_id, std::span<const ShaderAsset> shader_assets)
+template <std::derived_from<Shader> TShader>
+IdentifiedShader<TShader> create_shader(std::span<const ShaderAsset> shader_assets)
 {
-    if (shader_id >= g_shaders.size())
-        g_shaders.resize(shader_id + 1);
+    ShaderId shader_id{g_shader_id_generator.generate()};
+    std::size_t shader_index{to_index(shader_id)};
+
+    if (shader_index >= g_shaders.size())
+        g_shaders.resize(shader_index + 1);
 
     GLuint shader_program{create_shader_program(shader_assets)};
-    g_shaders[shader_id] = std::make_unique<TShader>(shader_program);
+    g_shaders[shader_index] = std::make_unique<TShader>(shader_program);
+    return {shader_id, static_cast<TShader &>(*g_shaders[shader_index])};
+}
+
+template <std::derived_from<Shader> TShader>
+IdentifiedShader<TShader> create_shader(std::initializer_list<ShaderAsset> shader_assets)
+{
+    return create_shader<TShader>(std::span{shader_assets.begin(), shader_assets.end()});
 }
 
 Shader &get_shader(ShaderId shader_id);

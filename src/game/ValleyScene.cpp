@@ -164,44 +164,28 @@ void control_material_via_keyboard(const MaterialKeyboardController &, const Gfx
 void ValleyScene::init()
 {
     Gfx::MeshId next_mesh_id{Gfx::USER_MESH_START_ID};
-    Gfx::ShaderId next_shader_id{0};
-    Gfx::MaterialId next_material_id{0};
 
     auto ground_mesh_id = next_mesh_id++;
     Gfx::create_mesh<1>(ground_mesh_id, std::function{create_ground_mesh});
 
-    Gfx::ShaderId unlit_shader{next_shader_id++};
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-        };
-        Gfx::create_shader<Gfx::UnlitShader>(unlit_shader, shader_assets);
-    }
-    Gfx::ShaderId unlit_color_shader{next_shader_id++};
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}
-        };
-        Gfx::create_shader<Gfx::UnlitColorShader>(unlit_color_shader, shader_assets);
-    }
-    Gfx::ShaderId fragment_lighting_shader{next_shader_id++};
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}
-        };
-        Gfx::create_shader<FragmentLightingShader>(fragment_lighting_shader, shader_assets);
-    }
-    Gfx::ShaderId fragment_lighting_color_shader{next_shader_id++};
-    {
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting_color.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}
-        };
-        Gfx::create_shader<FragmentLightingColorShader>(fragment_lighting_color_shader, shader_assets);
-    }
+    auto [unlit_shader_id, _1] = Gfx::create_shader<Gfx::UnlitShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit.vert"}, {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+    );
+
+    auto [unlit_color_shader_id, _2] = Gfx::create_shader<Gfx::UnlitColorShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/unlit_color.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/unlit.frag"}}
+    );
+
+    auto [fragment_lighting_shader_id, _3] = Gfx::create_shader<FragmentLightingShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}}
+    );
+
+    auto [fragment_lighting_color_shader_id, _4] = Gfx::create_shader<FragmentLightingColorShader>(
+        {{Gfx::OGL::ShaderType::VERTEX, "shaders/fragment_lighting_color.vert"},
+         {Gfx::OGL::ShaderType::FRAGMENT, "shaders/fragment_lighting.frag"}}
+    );
 
     auto material_buffer = Gfx::create_uniform_buffer<Gfx::MaterialBlock[4]>();
     auto material_buffer_writer = Gfx::UniformBufferWriter<decltype(material_buffer)>{material_buffer};
@@ -358,8 +342,7 @@ void ValleyScene::init()
     // Point light 1
     Core::EntityId point_light_1_id;
     {
-        auto material_id = next_material_id++;
-        Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader);
+        auto [material_id, _] = Gfx::create_material<Gfx::UnlitColorMaterial>(unlit_color_shader_id);
 
         point_light_1_id = Core::create_entity(
             Core::Transform{.position{10.0f, 3.0f, 1.0f}, .scale{0.2f}},
@@ -382,8 +365,7 @@ void ValleyScene::init()
     // Point light 2
     Core::EntityId point_light_2_id;
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader);
+        auto [material_id, material] = Gfx::create_material<Gfx::UnlitColorMaterial>(unlit_color_shader_id);
         material.color = {0.0f, 0.0f, 1.0f};
 
         point_light_2_id = Core::create_entity(
@@ -411,8 +393,7 @@ void ValleyScene::init()
     // Point light 3
     Core::EntityId point_light_3_id;
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<Gfx::UnlitColorMaterial>(material_id, unlit_color_shader);
+        auto [material_id, material] = Gfx::create_material<Gfx::UnlitColorMaterial>(unlit_color_shader_id);
         material.color = {1.0f, 0.0f, 0.0f};
 
         point_light_3_id = Core::create_entity(
@@ -459,8 +440,7 @@ void ValleyScene::init()
 
     // Ground
     {
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, fragment_lighting_shader);
+        auto [material_id, material] = Gfx::create_material<FragmentLightingMaterial>(fragment_lighting_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.material_buffer_range_id = material_buffer.create_range(0, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
@@ -483,9 +463,8 @@ void ValleyScene::init()
     // Cylinder
     {
         auto mesh_id = Gfx::CYLINDER_MESH_ID;
-        auto material_id = next_material_id++;
-        auto &material =
-            Gfx::create_material<FragmentLightingColorMaterial>(material_id, fragment_lighting_color_shader);
+        auto [material_id, material] =
+            Gfx::create_material<FragmentLightingColorMaterial>(fragment_lighting_color_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.material_buffer_range_id = material_buffer.create_range(1, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
@@ -511,8 +490,7 @@ void ValleyScene::init()
     // Cube 1
     {
         auto mesh_id = Gfx::CUBE_MESH_ID;
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, fragment_lighting_shader);
+        auto [material_id, material] = Gfx::create_material<FragmentLightingMaterial>(fragment_lighting_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.material_buffer_range_id = material_buffer.create_range(2, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
@@ -537,8 +515,7 @@ void ValleyScene::init()
     // Cube 2
     {
         auto mesh_id = Gfx::CUBE_MESH_ID;
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<FragmentLightingMaterial>(material_id, fragment_lighting_shader);
+        auto [material_id, material] = Gfx::create_material<FragmentLightingMaterial>(fragment_lighting_shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.material_buffer_range_id = material_buffer.create_range(3, 1);
         material.gaussian_texture = gaussian_texture_image_unit;
@@ -567,13 +544,11 @@ void ValleyScene::init()
         auto mesh_id = next_mesh_id++;
         Gfx::create_mesh<1>(mesh_id, std::function{create_sphere_impostors_mesh}, 2ULL);
 
-        Gfx::ShaderAsset shader_assets[] = {
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::VERTEX, "shaders/game/sphere_impostor.vert"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::GEOMETRY, "shaders/game/sphere_impostor.geom"},
-            Gfx::ShaderAsset{Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/sphere_impostor.frag"}
-        };
-        auto shader_id = next_shader_id++;
-        Gfx::create_shader<SphereImpostorShader>(shader_id, shader_assets);
+        auto [shader_id, _] = Gfx::create_shader<SphereImpostorShader>(
+            {{Gfx::OGL::ShaderType::VERTEX, "shaders/game/sphere_impostor.vert"},
+             {Gfx::OGL::ShaderType::GEOMETRY, "shaders/game/sphere_impostor.geom"},
+             {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/sphere_impostor.frag"}}
+        );
 
         auto materials_buffer = Gfx::create_uniform_buffer<Age::Gfx::MaterialsBlock<4>>();
         auto materials_buffer_range_id = materials_buffer.create_range();
@@ -584,8 +559,7 @@ void ValleyScene::init()
              }}
         );
 
-        auto material_id = next_material_id++;
-        auto &material = Gfx::create_material<SphereImpostorMaterial>(material_id, shader_id);
+        auto [material_id, material] = Gfx::create_material<SphereImpostorMaterial>(shader_id);
         material.light_buffer_range_id = light_buffer_range_id;
         material.materials_buffer_range_id = materials_buffer_range_id;
 
