@@ -1,0 +1,34 @@
+#pragma once
+
+#include <type_traits>
+
+#include "components.hpp"
+
+namespace Game
+{
+enum ComponentType : std::underlying_type_t<Age::Core::ComponentType>
+{
+    FIRST_VALUE = Age::Core::ComponentType::LAST_VALUE,
+
+    GAME_KEYBOARD_CONTROLLER = FIRST_VALUE,
+    MATERIAL_KEYBOARD_CONTROLLER,
+    TRANSFORM_KEYBOARD_CONTROLLER,
+    SPHERICAL_CAMERA_MOUSE_CONTROLLER,
+
+    SUNLIGHT,
+    SPOTLIGHT,
+    CUBE_POINT_LIGHT,
+
+    SPHERE_IMPOSTOR_MATERIALS_BUFFER_BLOCK,
+    SPHERE_IMPOSTORS,
+
+    INFINITY_SYMBOL,
+    CHECKERBOARD_SCENE_CONTROLLER,
+    SPHERICAL_CAMERA_VIEW_MATRIX_UPDATER,
+    VIEW_MATRIX_READER,
+    POST_PROJECTION_ROTATION,
+    ROTATION_OVER_TIME,
+
+    LAST_VALUE
+};
+} // namespace Game

@@ -1,0 +1,441 @@
+#include <sstream>
+
+#include "logging.hpp"
+#include "vector.hpp"
+
+namespace Age::Math
+{
+Vector2::operator const float *() const
+{
+    return &x;
+}
+
+float Vector2::operator[](std::size_t index) const
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    default:
+        Core::log_error("Vector2 index must be in the range [0, 1]: {}", index);
+        return y;
+    }
+}
+
+float &Vector2::operator[](std::size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    default:
+        Core::log_error("Vector2 index must be in the range [0, 1]: {}", index);
+        return y;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Vector2 &vector)
+{
+    out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f}";
+    return out;
+}
+
+Vector3::operator const float *() const
+{
+    return &x;
+}
+
+float Vector3::operator[](std::size_t index) const
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    default:
+        Core::log_error("Vector3 index must be in the range [0, 2]: {}", index);
+        return z;
+    }
+}
+
+float &Vector3::operator[](std::size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    default:
+        Core::log_error("Vector3 index must be in the range [0, 2]: {}", index);
+        return z;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Vector3 &vector)
+{
+    out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f, " << vector.z << "f}";
+    return out;
+}
+
+Vector4::operator const float *() const
+{
+    return &x;
+}
+
+float Vector4::operator[](std::size_t index) const
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    case 3:
+        return w;
+    default:
+        Core::log_error("Vector4 index must be in the range [0, 3]: {}", index);
+        return w;
+    }
+}
+
+float &Vector4::operator[](std::size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    case 3:
+        return w;
+    default:
+        Core::log_error("Vector4 index must be in the range [0, 3]: {}", index);
+        return w;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Vector4 &vector)
+{
+    out << std::showpoint << '{' << vector.x << "f, " << vector.y << "f, " << vector.z << "f, " << vector.w << "f}";
+    return out;
+}
+
+Vector2I::operator const int *() const
+{
+    return &x;
+}
+
+int Vector2I::operator[](std::size_t index) const
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    default:
+        Core::log_error("Vector2I index must be in the range [0, 1]: {}", index);
+        return y;
+    }
+}
+
+int &Vector2I::operator[](std::size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    default:
+        Core::log_error("Vector2I index must be in the range [0, 1]: {}", index);
+        return y;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Vector2I &vector)
+{
+    out << '{' << vector.x << ", " << vector.y << "}";
+    return out;
+}
+
+bool operator==(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool operator==(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+}
+
+bool operator==(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w;
+}
+
+bool operator==(const Vector2I &lhs, const Vector2I &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool operator!=(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator!=(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator!=(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator!=(const Vector2I &lhs, const Vector2I &rhs)
+{
+    return !(lhs == rhs);
+}
+
+Vector2 operator-(const Vector2 &vector)
+{
+    return Vector2{-vector.x, -vector.y};
+}
+
+Vector3 operator-(const Vector3 &vector)
+{
+    return Vector3{-vector.x, -vector.y, -vector.z};
+}
+
+Vector4 operator-(const Vector4 &vector)
+{
+    return Vector4{-vector.x, -vector.y, -vector.z, -vector.w};
+}
+
+Vector2 operator+(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return Vector2{lhs.x + rhs.x, lhs.y + rhs.y};
+}
+
+Vector3 operator+(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return Vector3{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
+}
+
+Vector4 operator+(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return Vector4{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w};
+}
+
+Vector2 operator-(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return Vector2{lhs.x - rhs.x, lhs.y - rhs.y};
+}
+
+Vector3 operator-(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return Vector3{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
+}
+
+Vector4 operator-(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return Vector4{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w};
+}
+
+Vector2 operator*(const Vector2 &vector, float scalar)
+{
+    return Vector2{vector.x * scalar, vector.y * scalar};
+}
+
+Vector2 operator*(float scalar, const Vector2 &vector)
+{
+    return Vector2{vector.x * scalar, vector.y * scalar};
+}
+
+Vector3 operator*(const Vector3 &vector, float scalar)
+{
+    return Vector3{vector.x * scalar, vector.y * scalar, vector.z * scalar};
+}
+
+Vector3 operator*(float scalar, const Vector3 &vector)
+{
+    return Vector3{vector.x * scalar, vector.y * scalar, vector.z * scalar};
+}
+
+Vector4 operator*(const Vector4 &vector, float scalar)
+{
+    return Vector4{vector.x * scalar, vector.y * scalar, vector.z * scalar, vector.w * scalar};
+}
+
+Vector4 operator*(float scalar, const Vector4 &vector)
+{
+    return Vector4{vector.x * scalar, vector.y * scalar, vector.z * scalar, vector.w * scalar};
+}
+
+Vector2 operator/(const Vector2 &vector, float scalar)
+{
+    return Vector2{vector.x / scalar, vector.y / scalar};
+}
+
+Vector3 operator/(const Vector3 &vector, float scalar)
+{
+    return Vector3{vector.x / scalar, vector.y / scalar, vector.z / scalar};
+}
+
+Vector4 operator/(const Vector4 &vector, float scalar)
+{
+    return Vector4{vector.x / scalar, vector.y / scalar, vector.z / scalar, vector.w / scalar};
+}
+
+Vector2 &operator+=(Vector2 &lhs, const Vector2 &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    return lhs;
+}
+
+Vector3 &operator+=(Vector3 &lhs, const Vector3 &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    return lhs;
+}
+
+Vector4 &operator+=(Vector4 &lhs, const Vector4 &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    lhs.w += rhs.w;
+    return lhs;
+}
+
+Vector2 &operator-=(Vector2 &lhs, const Vector2 &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    return lhs;
+}
+
+Vector3 &operator-=(Vector3 &lhs, const Vector3 &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    return lhs;
+}
+
+Vector4 &operator-=(Vector4 &lhs, const Vector4 &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    lhs.w -= rhs.w;
+    return lhs;
+}
+
+Vector2 &operator*=(Vector2 &lhs, float scalar)
+{
+    lhs.x *= scalar;
+    lhs.y *= scalar;
+    return lhs;
+}
+
+Vector3 &operator*=(Vector3 &lhs, float scalar)
+{
+    lhs.x *= scalar;
+    lhs.y *= scalar;
+    lhs.z *= scalar;
+    return lhs;
+}
+
+Vector4 &operator*=(Vector4 &lhs, float scalar)
+{
+    lhs.x *= scalar;
+    lhs.y *= scalar;
+    lhs.z *= scalar;
+    lhs.w *= scalar;
+    return lhs;
+}
+
+Vector2 &operator/=(Vector2 &lhs, float scalar)
+{
+    lhs.x /= scalar;
+    lhs.y /= scalar;
+    return lhs;
+}
+
+Vector3 &operator/=(Vector3 &lhs, float scalar)
+{
+    lhs.x /= scalar;
+    lhs.y /= scalar;
+    lhs.z /= scalar;
+    return lhs;
+}
+
+Vector4 &operator/=(Vector4 &lhs, float scalar)
+{
+    lhs.x /= scalar;
+    lhs.y /= scalar;
+    lhs.z /= scalar;
+    lhs.w /= scalar;
+    return lhs;
+}
+
+Vector2 pow(const Vector2 &base, const Vector2 &exponent)
+{
+    return {std::pow(base.x, exponent.x), std::pow(base.y, exponent.y)};
+}
+
+Vector3 pow(const Vector3 &base, const Vector3 &exponent)
+{
+    return {std::pow(base.x, exponent.x), std::pow(base.y, exponent.y), std::pow(base.z, exponent.z)};
+}
+
+Vector4 pow(const Vector4 &base, const Vector4 &exponent)
+{
+    return {
+        std::pow(base.x, exponent.x),
+        std::pow(base.y, exponent.y),
+        std::pow(base.z, exponent.z),
+        std::pow(base.w, exponent.w)
+    };
+}
+
+float dot(const Vector2 &lhs, const Vector2 &rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y;
+}
+
+float dot(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+}
+
+float dot(const Vector4 &lhs, const Vector4 &rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;
+}
+
+Vector3 cross(const Vector3 &lhs, const Vector3 &rhs)
+{
+    return Vector3{lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x};
+}
+} // namespace Age::Math
