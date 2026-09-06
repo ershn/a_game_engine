@@ -43,20 +43,20 @@ enum struct Layer : std::uint8_t
 {
 };
 
-inline constexpr unsigned int CLEAR_COLOR_BUFFER{0b1};
-inline constexpr unsigned int CLEAR_DEPTH_BUFFER{0b10};
-inline constexpr unsigned int DEFAULT_CAMERA_FLAGS{CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER};
-
 struct CameraRenderState
 {
     static constexpr auto TYPE{Core::ComponentType::CAMERA_RENDER_STATE};
 
-    unsigned int flags{DEFAULT_CAMERA_FLAGS};
-    Math::Vector4 clear_color{};
-    float clear_depth{1.0f};
     FramebufferId framebuffer_id{SYSTEM_FRAMEBUFFER_ID};
     ViewportId viewport_id{FULL_VIEWPORT_ID};
     Layer layer{};
+};
+
+struct CameraClear
+{
+    static constexpr auto TYPE{Core::ComponentType::CAMERA_CLEAR};
+
+    FramebufferClear framebuffer_clear{};
 };
 
 struct PerspectiveCamera

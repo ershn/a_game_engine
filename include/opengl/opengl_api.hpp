@@ -66,11 +66,12 @@ void enable_depth_clamping(bool enable);
 
 void set_clear_color(const Math::Vector4 &color);
 void set_clear_depth(float depth);
+void set_clear_stencil_index(std::int32_t index);
 
-void set_viewport(const RectangleI &rect);
+void set_viewport(const Math::RectangleI &rect);
 
 void enable_scissor_test(bool enable);
-void set_scissor(const RectangleI &rect);
+void set_scissor(const Math::RectangleI &rect);
 
 void draw_arrays(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t start_index);
 void draw_elements(RenderingMode rendering_mode, std::uint32_t element_count, std::size_t buffer_offset);

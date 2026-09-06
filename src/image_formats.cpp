@@ -62,7 +62,7 @@ unsigned int s_pixel_data_bpp_dxgi[] = {
     0,  // R8G8_SINT
     0,  // R16_TYPELESS
     0,  // R16_FLOAT
-    0,  // D16_UNORM
+    16, // D16_UNORM
     0,  // R16_UNORM
     0,  // R16_UINT
     0,  // R16_SNORM

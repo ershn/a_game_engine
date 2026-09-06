@@ -1,7 +1,6 @@
 #pragma once
 
 #include <concepts>
-#include <cstddef>
 
 #include "default_meshes.hpp"
 #include "ecs.hpp"

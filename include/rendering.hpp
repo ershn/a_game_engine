@@ -57,7 +57,7 @@ void disable_renderer(Renderer &renderer);
 void set_renderer_layer(Renderer &renderer, Layer layer);
 
 void update_lighting(const WorldToViewMatrix &wv_matrix);
-void setup_viewport(const CameraRenderState &camera_render_state);
+void setup_viewport(const CameraRenderState &camera_render_state, const CameraClear &camera_clear);
 
 std::vector<DrawCallKey> &get_layer_draw_calls(Layer layer);
 void sort_draw_calls(std::vector<DrawCallKey> &draw_call_keys);

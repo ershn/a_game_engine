@@ -30,6 +30,7 @@ enum struct ComponentType : std::uint16_t
     LIGHT_GROUP,
 
     CAMERA_RENDER_STATE,
+    CAMERA_CLEAR,
     RENDERER,
 
     SPHERICAL_CAMERA,

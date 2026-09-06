@@ -12,6 +12,7 @@
 #include "texture.hpp"
 #include "time.hpp"
 #include "transformations.hpp"
+#include "utils.hpp"
 
 #include "game/big_plane_mesh.hpp"
 #include "game/checkerboard_scene.hpp"
@@ -34,8 +35,8 @@ struct CheckerboardShader : public Gfx::Shader
 
 struct CheckerboardMaterial : public Gfx::Material
 {
-    Gfx::TextureId texture_id{Gfx::NULL_TEXTURE_ID};
-    Gfx::SamplerId sampler_id{Gfx::NULL_SAMPLER_ID};
+    Gfx::TextureId texture_id{};
+    Gfx::SamplerId sampler_id{};
 
     CheckerboardMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
         : Material{shader, render_state, draw_queue}
@@ -87,7 +88,7 @@ void update_camera(Gfx::WorldToViewMatrix &view_matrix)
     Math::Vector3 target_pos{std::cos(Time::frame_time()) * 0.25f, std::sin(Time::frame_time()) * 0.25f - 5.0f, 20.0f};
     Math::Vector3 camera_pos{std::cos(Time::frame_time()) * 0.25f, 0.5f, 40.0f};
 
-    view_matrix.matrix = Math::look_at_matrix(target_pos, camera_pos, Math::Vector3::up);
+    view_matrix.matrix = Math::look_at_matrix(target_pos, camera_pos, Math::up<Math::Vector3>);
 }
 
 void control_scene(CheckerboardSceneController &scene_controller)
@@ -98,12 +99,12 @@ void control_scene(CheckerboardSceneController &scene_controller)
     if (Input::is_key_pressed(GLFW_KEY_W, scene_controller.pressed_keys))
     {
         material.texture_id = scene_controller.mipmap_texture_id;
-        Core::log_info("Using mipmap texture: id = {}", material.texture_id);
+        Core::log_info("Using mipmap texture: id = {}", Util::to_underlying(material.texture_id));
     }
     else if (Input::is_key_pressed(GLFW_KEY_F, scene_controller.pressed_keys))
     {
         material.texture_id = scene_controller.checkerboard_texture_id;
-        Core::log_info("Using checkerboard texture: id = {}", material.texture_id);
+        Core::log_info("Using checkerboard texture: id = {}", Util::to_underlying(material.texture_id));
     }
 
     if (Input::is_key_pressed(GLFW_KEY_S, scene_controller.pressed_keys))
@@ -186,7 +187,8 @@ void CheckerBoardScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
+            Gfx::CameraRenderState{},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             GameKeyboardController{}
         );

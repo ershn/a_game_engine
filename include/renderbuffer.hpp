@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opengl/opengl_framebuffer.hpp"
+#include "opengl/opengl_renderbuffer.hpp"
 
 namespace Age::Gfx
 {

@@ -8,25 +8,25 @@
 #include "ecs.hpp"
 #include "framebuffer.hpp"
 #include "lighting.hpp"
+#include "opengl/opengl_api.hpp"
 #include "path.hpp"
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
 #include "time.hpp"
 #include "transformations.hpp"
 #include "uniform_blocks.hpp"
-#include "opengl/opengl_api.hpp"
 
+#include "game/game_controllers.hpp"
+#include "game/game_fragment_lighting.hpp"
 #include "game/ground_mesh.hpp"
 #include "game/sphere_impostors.hpp"
 #include "game/valley_scene.hpp"
-#include "game/game_controllers.hpp"
-#include "game/game_fragment_lighting.hpp"
 
 namespace Game
 {
 using namespace Age;
 
-struct SphereImpostorShader : public Age::Gfx::Shader
+struct SphereImpostorShader : public Gfx::Shader
 {
     Gfx::UniformBlock light_block{};
     Gfx::UniformBlock materials_block{};
@@ -39,12 +39,12 @@ struct SphereImpostorShader : public Age::Gfx::Shader
     }
 };
 
-struct SphereImpostorMaterial : public Age::Gfx::Material
+struct SphereImpostorMaterial : public Gfx::Material
 {
     Gfx::UniformBufferRangeId light_buffer_range_id{};
     Gfx::UniformBufferRangeId materials_buffer_range_id{};
 
-    SphereImpostorMaterial(Age::Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
+    SphereImpostorMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
         : Material{shader, render_state, draw_queue}
     {
     }
@@ -59,22 +59,22 @@ struct SphereImpostorMaterial : public Age::Gfx::Material
 
 struct Sunlight
 {
-    static constexpr Age::Core::ComponentType TYPE{ComponentType::SUNLIGHT};
+    static constexpr Core::ComponentType TYPE{ComponentType::SUNLIGHT};
 
     struct LightIntensity
     {
         float normalized_time{};
         float max_intensity{};
-        Age::Math::Vector4 intensity;
-        Age::Math::Vector4 ambient_intensity;
-        Age::Math::Vector4 sky_color;
+        Math::Vector4 intensity;
+        Math::Vector4 ambient_intensity;
+        Math::Vector4 sky_color;
     };
 
     std::vector<LightIntensity> light_intensities;
     float day_length{};
     float time{};
-    Age::Core::EntityId camera_id{};
-    Age::Core::EntityId light_settings_id{};
+    Core::EntityId camera_id{};
+    Core::EntityId light_settings_id{};
 };
 
 void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::DirectionalLight &directional_light)
@@ -100,8 +100,8 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
     float sun_angle{Math::TAU - Math::TAU * normalized_time - Math::PI * 0.5f};
     transform.position = {std::cos(sun_angle), std::sin(sun_angle), 0.0f};
 
-    auto &camera_render_state = Core::get_entity_component<Gfx::CameraRenderState>(sunlight.camera_id);
-    camera_render_state.clear_color =
+    auto &camera_clear = Core::get_entity_component<Gfx::CameraClear>(sunlight.camera_id);
+    camera_clear.framebuffer_clear.clear_colors[0] =
         Math::lerp(intensity_it_1->sky_color, intensity_it_2->sky_color, segment_normalized_time);
 
     auto &light_settings = Core::get_entity_component<Gfx::LightSettings>(sunlight.light_settings_id);
@@ -113,17 +113,17 @@ void update_sunlight(Sunlight &sunlight, Core::Transform &transform, Gfx::Direct
 
 struct SphereImpostors
 {
-    static constexpr Age::Core::ComponentType TYPE{ComponentType::SPHERE_IMPOSTORS};
+    static constexpr Core::ComponentType TYPE{ComponentType::SPHERE_IMPOSTORS};
 
     struct Instance
     {
-        Age::Math::Vector3 worldPosition;
+        Math::Vector3 worldPosition;
         float radius{};
     };
 
     Instance instances[4];
     std::size_t instance_count{};
-    Age::Core::EntityId camera_id{};
+    Core::EntityId camera_id{};
 };
 
 void update_sphere_impostors(const SphereImpostors &sphere_impostors, const Gfx::MeshRef &mesh_ref)
@@ -145,7 +145,7 @@ void update_sphere_impostors(const SphereImpostors &sphere_impostors, const Gfx:
 
 struct MaterialKeyboardController
 {
-    static constexpr Age::Core::ComponentType TYPE{ComponentType::MATERIAL_KEYBOARD_CONTROLLER};
+    static constexpr Core::ComponentType TYPE{ComponentType::MATERIAL_KEYBOARD_CONTROLLER};
 };
 
 void control_material_via_keyboard(const MaterialKeyboardController &, const Gfx::MaterialRef &material_ref)
@@ -304,7 +304,8 @@ void ValleyScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.294f, 0.22f, 0.192f, 1.0f}},
+            Gfx::CameraRenderState{},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.294f, 0.22f, 0.192f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
@@ -547,7 +548,7 @@ void ValleyScene::init()
              {Gfx::OGL::ShaderType::FRAGMENT, "shaders/game/sphere_impostor.frag"}}
         );
 
-        auto materials_buffer = Gfx::create_uniform_buffer<Age::Gfx::MaterialsBlock<4>>();
+        auto materials_buffer = Gfx::create_uniform_buffer<Gfx::MaterialsBlock<4>>();
         auto materials_buffer_range_id = materials_buffer.create_range();
         materials_buffer.update(
             {.materials = {

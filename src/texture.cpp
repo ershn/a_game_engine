@@ -3,6 +3,7 @@
 
 #include "error_handling.hpp"
 #include "id_generator.hpp"
+#include "opengl/opengl_image_formats.hpp"
 #include "texture.hpp"
 #include "utils.hpp"
 
@@ -179,12 +180,12 @@ MipmapLevel begin(const Mipmap &mipmap)
     return {
         .texture = mipmap.texture,
         .byte_offset = mipmap.byte_offset,
-        .pitch = pitch,
-        .row_count = row_count,
         .level = 0,
         .width = texture_desc.width,
         .height = texture_desc.height,
-        .depth = texture_desc.depth
+        .depth = texture_desc.depth,
+        .pitch = pitch,
+        .row_count = row_count
     };
 }
 
@@ -193,15 +194,49 @@ MipmapLevel end(const Mipmap &mipmap)
     return {.texture = mipmap.texture, .level = mipmap.texture.desc.mipmap_level_count};
 }
 
+struct Texture
+{
+    GLuint texture{};
+    TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
+    TextureType type{};
+};
+
+struct Sampler
+{
+    GLuint sampler{};
+    TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
+};
+
 namespace
 {
+struct TextureUnit
+{
+    TextureId bound_texture_id{};
+    std::uint32_t sampler_use_count{};
+    SamplerId bound_sampler_id{};
+};
+
+constexpr auto MAX_RENDER_TARGET_ID{std::numeric_limits<std::underlying_type_t<RenderTargetId>>::max()};
+constexpr TextureId FIRST_TEXTURE_ID{1};
+constexpr TextureId LAST_TEXTURE_ID{MAX_RENDER_TARGET_ID / 2};
+
+constexpr std::size_t to_index(TextureId id)
+{
+    return static_cast<std::size_t>(id) - static_cast<std::size_t>(FIRST_TEXTURE_ID);
+}
+
+constexpr std::size_t to_index(SamplerId id)
+{
+    return static_cast<std::size_t>(id) - 1;
+}
+
 std::vector<TextureUnit> s_texture_units;
 
-Util::IdGenerator<TextureId> s_texture_id_generator{0};
+Util::IdGenerator<TextureId> s_texture_id_generator{FIRST_TEXTURE_ID};
 std::vector<Texture> s_textures;
 std::vector<TextureDesc> s_texture_descs;
 
-Util::IdGenerator<SamplerId> s_sampler_id_generator{0};
+Util::IdGenerator<SamplerId> s_sampler_id_generator{SamplerId{1}};
 std::vector<Sampler> s_samplers;
 std::vector<SamplerParams> s_sampler_params;
 
@@ -221,11 +256,11 @@ std::pair<TextureUnitId, TextureUnit &> get_least_used_texture_unit()
     {
         auto &tex_unit = s_texture_units[tex_unit_id];
 
-        if (least_used_tex_unit->bound_texture_id == NULL_TEXTURE_ID &&
-                (tex_unit.bound_texture_id == NULL_TEXTURE_ID &&
+        if (least_used_tex_unit->bound_texture_id == TextureId{} &&
+                (tex_unit.bound_texture_id == TextureId{} &&
                  tex_unit.sampler_use_count < least_used_tex_unit->sampler_use_count) ||
-            least_used_tex_unit->bound_texture_id != NULL_TEXTURE_ID &&
-                (tex_unit.bound_texture_id == NULL_TEXTURE_ID ||
+            least_used_tex_unit->bound_texture_id != TextureId{} &&
+                (tex_unit.bound_texture_id == TextureId{} ||
                  tex_unit.sampler_use_count < least_used_tex_unit->sampler_use_count))
         {
             least_used_tex_unit_id = tex_unit_id;
@@ -697,11 +732,11 @@ void bind_texture(TextureId texture_id, Texture &texture, TextureUnitId texture_
 
 void unbind_texture(TextureUnit &texture_unit)
 {
-    if (texture_unit.bound_texture_id == NULL_TEXTURE_ID)
+    if (texture_unit.bound_texture_id == TextureId{})
         return;
 
-    s_textures[texture_unit.bound_texture_id].bound_texture_unit_id = NULL_TEXTURE_UNIT_ID;
-    texture_unit.bound_texture_id = NULL_TEXTURE_ID;
+    s_textures[to_index(texture_unit.bound_texture_id)].bound_texture_unit_id = NULL_TEXTURE_UNIT_ID;
+    texture_unit.bound_texture_id = TextureId{};
 }
 
 void bind_sampler_uniform(SamplerUniform &sampler_uniform, TextureUnitId texture_unit_id, TextureUnit &texture_unit)
@@ -767,11 +802,11 @@ void bind_sampler(SamplerId sampler_id, Sampler &sampler, TextureUnitId texture_
 
 void unbind_sampler(TextureUnit &texture_unit)
 {
-    if (texture_unit.bound_sampler_id == NULL_SAMPLER_ID)
+    if (texture_unit.bound_sampler_id == SamplerId{})
         return;
 
-    s_samplers[texture_unit.bound_sampler_id].bound_texture_unit_id = NULL_TEXTURE_UNIT_ID;
-    texture_unit.bound_sampler_id = NULL_SAMPLER_ID;
+    s_samplers[to_index(texture_unit.bound_sampler_id)].bound_texture_unit_id = NULL_TEXTURE_UNIT_ID;
+    texture_unit.bound_sampler_id = SamplerId{};
 }
 } // namespace
 
@@ -786,19 +821,36 @@ void init_texture_system()
     s_sampler_params.reserve(64);
 }
 
+bool is_texture_id(RenderTargetId id)
+{
+    return Util::to_underlying(FIRST_TEXTURE_ID) <= Util::to_underlying(id) &&
+           Util::to_underlying(id) <= Util::to_underlying(LAST_TEXTURE_ID);
+}
+
+RenderTargetId to_render_target_id(TextureId id)
+{
+    return static_cast<RenderTargetId>(id);
+}
+
+TextureId to_texture_id(RenderTargetId id)
+{
+    return static_cast<TextureId>(id);
+}
+
 TextureId create_texture(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     TextureId texture_id{s_texture_id_generator.generate()};
+    std::size_t texture_index{to_index(texture_id)};
 
-    if (texture_id >= s_textures.size())
+    if (texture_index == s_textures.size())
     {
-        s_textures.resize(texture_id + 1);
-        s_texture_descs.resize(texture_id + 1);
+        s_textures.resize(texture_index + 1);
+        s_texture_descs.resize(texture_index + 1);
     }
 
-    s_texture_descs[texture_id] = texture_data.desc;
+    s_texture_descs[texture_index] = texture_data.desc;
 
-    Texture &texture{s_textures[texture_id]};
+    Texture &texture{s_textures[texture_index]};
     texture.type = texture_data.desc.type;
 
     select_temporary_texture_unit();
@@ -808,135 +860,84 @@ TextureId create_texture(const TextureData &texture_data, TextureCreationOptions
     return texture_id;
 }
 
-TextureId create_texture_from_framebuffer(FramebufferId framebuffer_id, ImageFormat image_format)
+TextureId create_texture(TextureType texture_type, std::function<void(const Texture &, TextureDesc &)> specify_texture)
 {
     TextureId texture_id{s_texture_id_generator.generate()};
+    std::size_t texture_index{to_index(texture_id)};
 
-    if (texture_id >= s_textures.size())
+    if (texture_index == s_textures.size())
     {
-        s_textures.resize(texture_id + 1);
-        s_texture_descs.resize(texture_id + 1);
+        s_textures.resize(texture_index + 1);
+        s_texture_descs.resize(texture_index + 1);
     }
 
-    Texture &texture{s_textures[texture_id]};
-    TextureDesc &texture_desc{s_texture_descs[texture_id]};
+    Texture &texture{s_textures[texture_index]};
+    TextureDesc &texture_desc{s_texture_descs[texture_index]};
 
-    const Framebuffer &framebuffer{use_framebuffer(framebuffer_id)};
     select_temporary_texture_unit();
 
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glGenTextures(1, &texture.texture);
 
-    GLint tex_format{OGL::get_internal_format(image_format, false)};
-    glCopyTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        static_cast<GLenum>(tex_format),
-        0,
-        0,
-        static_cast<GLsizei>(framebuffer.width),
-        static_cast<GLsizei>(framebuffer.height),
-        0
-    );
+    glBindTexture(to_gl_enum(texture_type), texture.texture);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    texture.type = texture_type;
 
-    texture.texture = tex;
-    texture.type = TextureType::TEXTURE_2D;
+    specify_texture(texture, texture_desc);
 
-    texture_desc = {
-        .width = framebuffer.width,
-        .height = framebuffer.height,
-        .depth = 1,
-        .mipmap_level_count = 1,
-        .count = 1,
-        .format = image_format,
-        .type = TextureType::TEXTURE_2D,
-        .alpha_type = AlphaType::PREMULTIPLIED,
-    };
+    glBindTexture(to_gl_enum(texture_type), 0);
 
     return texture_id;
 }
 
-void copy_framebuffer_to_texture(FramebufferId framebuffer_id, TextureId texture_id)
+void modify_texture(TextureId texture_id, std::function<void(const Texture &, TextureDesc &)> modify_texture)
 {
-    Texture &texture{s_textures[texture_id]};
-    TextureDesc &texture_desc{s_texture_descs[texture_id]};
+    Texture &texture{s_textures[to_index(texture_id)]};
+    TextureDesc &texture_desc{s_texture_descs[to_index(texture_id)]};
 
-    const Framebuffer &framebuffer{use_framebuffer(framebuffer_id)};
     select_temporary_texture_unit();
 
-    glBindTexture(GL_TEXTURE_2D, texture.texture);
+    glBindTexture(to_gl_enum(texture.type), texture.texture);
 
-    if (framebuffer.width == texture_desc.width && framebuffer.height == texture_desc.height)
-    {
-        glCopyTexSubImage2D(
-            GL_TEXTURE_2D,
-            0,
-            0,
-            0,
-            0,
-            0,
-            static_cast<GLsizei>(framebuffer.width),
-            static_cast<GLsizei>(framebuffer.height)
-        );
-    }
-    else
-    {
-        GLint tex_format{OGL::get_internal_format(texture_desc.format, false)};
-        glCopyTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            static_cast<GLenum>(tex_format),
-            0,
-            0,
-            static_cast<GLsizei>(framebuffer.width),
-            static_cast<GLsizei>(framebuffer.height),
-            0
-        );
+    modify_texture(texture, texture_desc);
 
-        texture_desc.width = framebuffer.width;
-        texture_desc.height = framebuffer.height;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(to_gl_enum(texture.type), 0);
 }
 
 SamplerId create_sampler(const SamplerParams &sampler_params)
 {
     SamplerId sampler_id{s_sampler_id_generator.generate()};
+    std::size_t sampler_index{to_index(sampler_id)};
 
-    if (sampler_id >= s_samplers.size())
+    if (sampler_index == s_samplers.size())
     {
-        s_samplers.resize(sampler_id + 1);
-        s_sampler_params.resize(sampler_id + 1);
+        s_samplers.resize(sampler_index + 1);
+        s_sampler_params.resize(sampler_index + 1);
     }
 
-    Sampler &sampler{s_samplers[sampler_id]};
+    Sampler &sampler{s_samplers[sampler_index]};
     glGenSamplers(1, &sampler.sampler);
     update_sampler_params(sampler.sampler, sampler_params, DEFAULT_SAMPLER_PARAMS);
-    s_sampler_params[sampler_id] = sampler_params;
+    s_sampler_params[sampler_index] = sampler_params;
 
     return sampler_id;
 }
 
 const SamplerParams &get_sampler_params(SamplerId sampler_id)
 {
-    return s_sampler_params[sampler_id];
+    return s_sampler_params[to_index(sampler_id)];
 }
 
 void set_sampler_params(SamplerId sampler_id, const SamplerParams &sampler_params)
 {
-    const Sampler &sampler{s_samplers[sampler_id]};
-    SamplerParams &current_sampler_params{s_sampler_params[sampler_id]};
+    const Sampler &sampler{s_samplers[to_index(sampler_id)]};
+    SamplerParams &current_sampler_params{s_sampler_params[to_index(sampler_id)]};
     update_sampler_params(sampler.sampler, sampler_params, current_sampler_params);
     current_sampler_params = sampler_params;
 }
 
 void bind_texture_and_sampler(SamplerUniform &sampler_uniform, TextureId texture_id, SamplerId sampler_id)
 {
-    Texture &texture{s_textures[texture_id]};
+    Texture &texture{s_textures[to_index(texture_id)]};
     TextureUnitId texture_unit_id{};
     TextureUnit *texture_unit{};
 
@@ -961,7 +962,7 @@ void bind_texture_and_sampler(SamplerUniform &sampler_uniform, TextureId texture
     {
         unbind_sampler(*texture_unit);
 
-        Sampler &sampler{s_samplers[sampler_id]};
+        Sampler &sampler{s_samplers[to_index(sampler_id)]};
         bind_sampler(sampler_id, sampler, texture_unit_id, *texture_unit);
     }
 }

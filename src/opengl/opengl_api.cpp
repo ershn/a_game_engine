@@ -1,5 +1,5 @@
-#include "error_handling.hpp"
 #include "opengl/opengl_api.hpp"
+#include "error_handling.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -151,7 +151,12 @@ void set_clear_depth(float depth)
     glClearDepth(depth);
 }
 
-void set_viewport(const RectangleI &rect)
+void set_clear_stencil_index(std::int32_t index)
+{
+    glClearStencil(index);
+}
+
+void set_viewport(const Math::RectangleI &rect)
 {
     glViewport(
         static_cast<GLint>(rect.position.x),
@@ -169,7 +174,7 @@ void enable_scissor_test(bool enable)
         glDisable(GL_SCISSOR_TEST);
 }
 
-void set_scissor(const RectangleI &rect)
+void set_scissor(const Math::RectangleI &rect)
 {
     glScissor(
         static_cast<GLint>(rect.position.x),

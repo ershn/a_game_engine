@@ -5,10 +5,10 @@
 #include "framebuffer.hpp"
 #include "lighting.hpp"
 #include "multi_span.hpp"
+#include "opengl/opengl_api.hpp"
 #include "rendering.hpp"
 #include "texture.hpp"
 #include "viewport.hpp"
-#include "opengl/opengl_api.hpp"
 
 namespace Age::Gfx
 {
@@ -206,37 +206,28 @@ void update_lighting(const WorldToViewMatrix &wv_matrix)
     });
 }
 
-void setup_viewport(const CameraRenderState &camera_render_state)
+void setup_viewport(const CameraRenderState &camera_render_state, const CameraClear &camera_clear)
 {
-    const Framebuffer &framebuffer{get_framebuffer(camera_render_state.framebuffer_id)};
+    const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
 
     ViewportId viewport_id{camera_render_state.viewport_id};
-    RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(get_viewport(viewport_id), framebuffer)};
+    Math::RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(get_viewport(viewport_id), framebuffer_size)};
     use_viewport_pixel_rect(viewport_pixel_rect);
 
-    bool is_custom_viewport{viewport_id != FULL_VIEWPORT_ID};
-    if (is_custom_viewport)
+    if (camera_clear.framebuffer_clear.buffers)
     {
-        OGL::enable_scissor_test(true);
-        OGL::set_scissor(viewport_pixel_rect);
-    }
+        bool is_custom_viewport{viewport_id != FULL_VIEWPORT_ID};
+        if (is_custom_viewport)
+        {
+            OGL::enable_scissor_test(true);
+            OGL::set_scissor(viewport_pixel_rect);
+        }
 
-    GLbitfield cleared_buffers{};
-    if (camera_render_state.flags & CLEAR_COLOR_BUFFER)
-    {
-        cleared_buffers |= GL_COLOR_BUFFER_BIT;
-        OGL::set_clear_color(camera_render_state.clear_color);
-    }
-    if (camera_render_state.flags & CLEAR_DEPTH_BUFFER)
-    {
-        cleared_buffers |= GL_DEPTH_BUFFER_BIT;
-        OGL::set_clear_depth(camera_render_state.clear_depth);
-    }
-    if (cleared_buffers)
-        glClear(cleared_buffers);
+        clear_framebuffer(camera_render_state.framebuffer_id, camera_clear.framebuffer_clear);
 
-    if (is_custom_viewport)
-        OGL::enable_scissor_test(false);
+        if (is_custom_viewport)
+            OGL::enable_scissor_test(false);
+    }
 }
 
 std::vector<DrawCallKey> &get_layer_draw_calls(Layer layer)
@@ -298,13 +289,14 @@ void prepare_rendering()
 
 void render_scene()
 {
-    using Cameras = Core::MultiSpan<const CameraRenderState, const WorldToViewMatrix, const ProjectionUniformBuffer>;
+    using Cameras = Core::
+        MultiSpan<const CameraRenderState, const CameraClear, const WorldToViewMatrix, const ProjectionUniformBuffer>;
 
     Core::execute([](const Cameras &cameras) {
-        for (const auto &[camera_render_state, wv_matrix, projection_buffer] : cameras)
+        for (const auto &[camera_render_state, camera_clear, wv_matrix, projection_buffer] : cameras)
         {
             update_lighting(wv_matrix);
-            setup_viewport(camera_render_state);
+            setup_viewport(camera_render_state, camera_clear);
 
             auto &draw_call_keys = get_layer_draw_calls(camera_render_state.layer);
             sort_draw_calls(draw_call_keys);

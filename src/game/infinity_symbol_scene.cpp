@@ -11,15 +11,15 @@
 #include "error_handling.hpp"
 #include "framebuffer.hpp"
 #include "lighting.hpp"
+#include "opengl/opengl_api.hpp"
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
 #include "transformations.hpp"
-#include "opengl/opengl_api.hpp"
 
+#include "game/game_controllers.hpp"
 #include "game/infinity_symbol_mesh.hpp"
 #include "game/infinity_symbol_scene.hpp"
 #include "game/sphere_impostors.hpp"
-#include "game/game_controllers.hpp"
 
 namespace Game
 {
@@ -196,7 +196,8 @@ void InfinitySymbolScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
+            Gfx::CameraRenderState{},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{

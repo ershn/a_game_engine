@@ -13,16 +13,16 @@
 #include "framebuffer.hpp"
 #include "input.hpp"
 #include "lighting.hpp"
+#include "opengl/opengl_api.hpp"
 #include "path.hpp"
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
 #include "time.hpp"
 #include "transformations.hpp"
-#include "opengl/opengl_api.hpp"
 
 #include "game/diorama_mesh.hpp"
-#include "game/projected_light_scene.hpp"
 #include "game/game_controllers.hpp"
+#include "game/projected_light_scene.hpp"
 
 namespace Game
 {
@@ -90,10 +90,10 @@ struct SpotlightMaterial : public Gfx::Material
 {
     Gfx::UniformBufferRangeId light_buffer_range_id{};
     Gfx::UniformBufferRangeId spotlight_buffer_range_id{};
-    Gfx::TextureId texture_id{Gfx::NULL_TEXTURE_ID};
-    Gfx::SamplerId sampler_id{Gfx::NULL_SAMPLER_ID};
-    Gfx::TextureId spotlight_texture_id{Gfx::NULL_TEXTURE_ID};
-    Gfx::SamplerId spotlight_sampler_id{Gfx::NULL_SAMPLER_ID};
+    Gfx::TextureId texture_id{};
+    Gfx::SamplerId sampler_id{};
+    Gfx::TextureId spotlight_texture_id{};
+    Gfx::SamplerId spotlight_sampler_id{};
 
     SpotlightMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
         : Gfx::Material{shader, render_state, draw_queue}
@@ -259,7 +259,8 @@ void ProjectedLightScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.8f, 0.8f, 0.8f, 1.0f}},
+            Gfx::CameraRenderState{},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.8f, 0.8f, 0.8f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             Gfx::SphericalCamera{
@@ -298,7 +299,7 @@ void ProjectedLightScene::init()
     auto spotlight_id = Core::create_entity(
         Core::Transform{
             .position{0.0f, 0.0f, 25.0f},
-            .orientation{Math::axis_angle_quaternion(Math::Vector3::right, Math::radians(-5.0f))},
+            .orientation{Math::axis_angle_quaternion(Math::right<Math::Vector3>, Math::radians(-5.0f))},
             .scale{15.0f}
         },
         Gfx::LocalToWorldMatrix{},
@@ -339,7 +340,7 @@ void ProjectedLightScene::init()
         auto id = Core::create_entity(
             Core::Transform{
                 .position{0.0f, -33.5f, 0.0f},
-                .orientation{Math::axis_angle_quaternion(Math::Vector3::right, Math::radians(-90.0f))},
+                .orientation{Math::axis_angle_quaternion(Math::right<Math::Vector3>, Math::radians(-90.0f))},
                 .scale{47.0f}
             },
             Gfx::LocalToWorldMatrix{},
@@ -418,7 +419,7 @@ void ProjectedLightScene::init()
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
-            RotationOverTime{.axis{Math::Vector3::backward}, .angle{1.0f}}
+            RotationOverTime{.axis{Math::backward<Math::Vector3>}, .angle{1.0f}}
         );
 
         Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);
@@ -461,7 +462,7 @@ void ProjectedLightScene::init()
             Gfx::MaterialRef{material_id},
             Gfx::MeshRef{Gfx::CUBE_MESH_ID},
             Gfx::Renderer{},
-            RotationOverTime{.axis{Math::Vector3::up}, .angle{1.0f}}
+            RotationOverTime{.axis{Math::up<Math::Vector3>}, .angle{1.0f}}
         );
 
         Gfx::init_renderer(id, Gfx::WITH_LW_MATRIX);

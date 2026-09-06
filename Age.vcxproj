@@ -144,7 +144,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\framebuffer.cpp" />
+    <ClCompile Include="src\opengl\opengl_errors.cpp" />
+    <ClCompile Include="src\opengl\opengl_framebuffer.cpp" />
     <ClCompile Include="src\game\checkerboard_scene.cpp" />
     <ClCompile Include="src\game\cube_point_light_scene.cpp" />
     <ClCompile Include="src\game\diorama_mesh.cpp" />
@@ -167,7 +168,7 @@
     <ClCompile Include="src\game\game_fragment_lighting.cpp" />
     <ClCompile Include="src\opengl\opengl_image_formats.cpp" />
     <ClCompile Include="src\path.cpp" />
-    <ClCompile Include="src\rectangle.cpp" />
+    <ClCompile Include="src\opengl\opengl_renderbuffer.cpp" />
     <ClCompile Include="src\render_pipeline_state.cpp" />
     <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\third_parties\glad.c" />
@@ -213,6 +214,8 @@
     <ClInclude Include="include\error_handling.hpp" />
     <ClInclude Include="include\fly_camera.hpp" />
     <ClInclude Include="include\framebuffer.hpp" />
+    <ClInclude Include="include\opengl\opengl_errors.hpp" />
+    <ClInclude Include="include\opengl\opengl_framebuffer.hpp" />
     <ClInclude Include="include\game\big_plane_mesh.hpp" />
     <ClInclude Include="include\game\checkerboard_scene.hpp" />
     <ClInclude Include="include\game\corridor_mesh.hpp" />
@@ -251,13 +254,16 @@
     <ClInclude Include="include\multi_span.hpp" />
     <ClInclude Include="include\opengl\opengl_api.hpp" />
     <ClInclude Include="include\opengl\opengl_image_formats.hpp" />
+    <ClInclude Include="include\opengl\opengl_renderbuffer.hpp" />
     <ClInclude Include="include\packing.hpp" />
     <ClInclude Include="include\path.hpp" />
     <ClInclude Include="include\quaternion.hpp" />
     <ClInclude Include="include\random.hpp" />
     <ClInclude Include="include\rectangle.hpp" />
+    <ClInclude Include="include\renderbuffer.hpp" />
     <ClInclude Include="include\rendering.hpp" />
     <ClInclude Include="include\render_pipeline_state.hpp" />
+    <ClInclude Include="include\render_target.hpp" />
     <ClInclude Include="include\shader.hpp" />
     <ClInclude Include="include\default_shaders.hpp" />
     <ClInclude Include="include\spherical_camera.hpp" />

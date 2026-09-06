@@ -11,14 +11,14 @@ struct RenderPipelineStateImpl
     static constexpr RenderPipelineStateImpl<WithDefaults> from(unsigned int render_state)
     {
         return {
-            .depth_clamping = static_cast<bool>(render_state >> 1 & 0b1),
+            .depth_clamping = static_cast<bool>(render_state & 0b10),
             .srgb_rendering = static_cast<bool>(render_state & 0b1)
         };
     }
 
     constexpr operator unsigned int() const
     {
-        return depth_clamping << 1 | static_cast<unsigned int>(srgb_rendering);
+        return depth_clamping << 1 | static_cast<int>(srgb_rendering);
     }
 };
 

@@ -16,7 +16,7 @@ void control_game_via_keyboard(const GameKeyboardController &)
 
 void control_transform_via_keyboard(TransformKeyboardController &controller, Core::Transform &transform)
 {
-    using Math::Vector3;
+    using namespace Math;
     using Controller = TransformKeyboardController;
 
     if (Input::is_key_pressed(GLFW_KEY_F, controller.pressed_keys))
@@ -26,37 +26,37 @@ void control_transform_via_keyboard(TransformKeyboardController &controller, Cor
     {
     case Controller::TRANSLATION:
         if (Input::is_key_down(GLFW_KEY_W))
-            transform.position += Vector3::forward * controller.translation_speed;
+            transform.position += forward<Vector3> * controller.translation_speed;
         if (Input::is_key_down(GLFW_KEY_S))
-            transform.position += Vector3::backward * controller.translation_speed;
+            transform.position += backward<Vector3> * controller.translation_speed;
         if (Input::is_key_down(GLFW_KEY_A))
-            transform.position += Vector3::left * controller.translation_speed;
+            transform.position += left<Vector3> * controller.translation_speed;
         if (Input::is_key_down(GLFW_KEY_D))
-            transform.position += Vector3::right * controller.translation_speed;
+            transform.position += right<Vector3> * controller.translation_speed;
         if (Input::is_key_down(GLFW_KEY_E))
-            transform.position += Vector3::up * controller.translation_speed;
+            transform.position += up<Vector3> * controller.translation_speed;
         if (Input::is_key_down(GLFW_KEY_Q))
-            transform.position += Vector3::down * controller.translation_speed;
+            transform.position += down<Vector3> * controller.translation_speed;
         break;
     case Controller::ORIENTATION:
         if (Input::is_key_down(GLFW_KEY_W))
             transform.orientation =
-                Math::axis_angle_quaternion(Vector3::right, -controller.rotation_speed) * transform.orientation;
+                axis_angle_quaternion(right<Vector3>, -controller.rotation_speed) * transform.orientation;
         if (Input::is_key_down(GLFW_KEY_S))
             transform.orientation =
-                Math::axis_angle_quaternion(Vector3::right, controller.rotation_speed) * transform.orientation;
+                axis_angle_quaternion(right<Vector3>, controller.rotation_speed) * transform.orientation;
         if (Input::is_key_down(GLFW_KEY_A))
             transform.orientation =
-                Math::axis_angle_quaternion(Vector3::up, -controller.rotation_speed) * transform.orientation;
+                axis_angle_quaternion(up<Vector3>, -controller.rotation_speed) * transform.orientation;
         if (Input::is_key_down(GLFW_KEY_D))
             transform.orientation =
-                Math::axis_angle_quaternion(Vector3::up, controller.rotation_speed) * transform.orientation;
+                axis_angle_quaternion(up<Vector3>, controller.rotation_speed) * transform.orientation;
         if (Input::is_key_down(GLFW_KEY_E))
             transform.orientation =
-                Math::axis_angle_quaternion(Vector3::backward, controller.rotation_speed) * transform.orientation;
+                axis_angle_quaternion(backward<Vector3>, controller.rotation_speed) * transform.orientation;
         if (Input::is_key_down(GLFW_KEY_Q))
             transform.orientation =
-                Math::axis_angle_quaternion(Vector3::backward, -controller.rotation_speed) * transform.orientation;
+                axis_angle_quaternion(backward<Vector3>, -controller.rotation_speed) * transform.orientation;
         break;
     case Controller::SCALING:
         if (Input::is_key_down(GLFW_KEY_W))

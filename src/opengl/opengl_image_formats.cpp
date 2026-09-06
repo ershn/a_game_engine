@@ -1,6 +1,6 @@
+#include "opengl/opengl_image_formats.hpp"
 #include "error_handling.hpp"
 #include "utils.hpp"
-#include "opengl/opengl_image_formats.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -62,7 +62,7 @@ GLint s_internal_formats_dxgi[] = {
     0,                                      // R8G8_SINT
     0,                                      // R16_TYPELESS
     0,                                      // R16_FLOAT
-    0,                                      // D16_UNORM
+    GL_DEPTH_COMPONENT16,                   // D16_UNORM
     0,                                      // R16_UNORM
     0,                                      // R16_UINT
     0,                                      // R16_SNORM
@@ -255,122 +255,122 @@ GLint s_srgb_internal_formats_custom[] = {
 };
 
 PixelDataFormat s_pixel_data_formats_dxgi[] = {
-    {},                                                     // UNKNOWN
-    {.format{}, .type{}},                                   // R32G32B32A32_TYPELESS
-    {.format{}, .type{}},                                   // R32G32B32A32_FLOAT
-    {.format{}, .type{}},                                   // R32G32B32A32_UINT
-    {.format{}, .type{}},                                   // R32G32B32A32_SINT
-    {.format{}, .type{}},                                   // R32G32B32_TYPELESS
-    {.format{}, .type{}},                                   // R32G32B32_FLOAT
-    {.format{}, .type{}},                                   // R32G32B32_UINT
-    {.format{}, .type{}},                                   // R32G32B32_SINT
-    {.format{}, .type{}},                                   // R16G16B16A16_TYPELESS
-    {.format{}, .type{}},                                   // R16G16B16A16_FLOAT
-    {.format{}, .type{}},                                   // R16G16B16A16_UNORM
-    {.format{}, .type{}},                                   // R16G16B16A16_UINT
-    {.format{}, .type{}},                                   // R16G16B16A16_SNORM
-    {.format{}, .type{}},                                   // R16G16B16A16_SINT
-    {.format{}, .type{}},                                   // R32G32_TYPELESS
-    {.format{}, .type{}},                                   // R32G32_FLOAT
-    {.format{}, .type{}},                                   // R32G32_UINT
-    {.format{}, .type{}},                                   // R32G32_SINT
-    {.format{}, .type{}},                                   // R32G8X24_TYPELESS
-    {.format{}, .type{}},                                   // D32_FLOAT_S8X24_UINT
-    {.format{}, .type{}},                                   // R32_FLOAT_X8X24_TYPELESS
-    {.format{}, .type{}},                                   // X32_TYPELESS_G8X24_UINT
-    {.format{}, .type{}},                                   // R10G10B10A2_TYPELESS
-    {.format{}, .type{}},                                   // R10G10B10A2_UNORM
-    {.format{}, .type{}},                                   // R10G10B10A2_UINT
-    {.format{}, .type{}},                                   // R11G11B10_FLOAT
-    {.format{}, .type{}},                                   // R8G8B8A8_TYPELESS
-    {.format{GL_RGBA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // R8G8B8A8_UNORM
-    {.format{GL_RGBA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // R8G8B8A8_UNORM_SRGB
-    {.format{}, .type{}},                                   // R8G8B8A8_UINT
-    {.format{}, .type{}},                                   // R8G8B8A8_SNORM
-    {.format{}, .type{}},                                   // R8G8B8A8_SINT
-    {.format{}, .type{}},                                   // R16G16_TYPELESS
-    {.format{}, .type{}},                                   // R16G16_FLOAT
-    {.format{}, .type{}},                                   // R16G16_UNORM
-    {.format{}, .type{}},                                   // R16G16_UINT
-    {.format{}, .type{}},                                   // R16G16_SNORM
-    {.format{}, .type{}},                                   // R16G16_SINT
-    {.format{}, .type{}},                                   // R32_TYPELESS
-    {.format{}, .type{}},                                   // D32_FLOAT
-    {.format{}, .type{}},                                   // R32_FLOAT
-    {.format{}, .type{}},                                   // R32_UINT
-    {.format{}, .type{}},                                   // R32_SINT
-    {.format{}, .type{}},                                   // R24G8_TYPELESS
-    {.format{}, .type{}},                                   // D24_UNORM_S8_UINT
-    {.format{}, .type{}},                                   // R24_UNORM_X8_TYPELESS
-    {.format{}, .type{}},                                   // X24_TYPELESS_G8_UINT
-    {.format{}, .type{}},                                   // R8G8_TYPELESS
-    {.format{}, .type{}},                                   // R8G8_UNORM
-    {.format{}, .type{}},                                   // R8G8_UINT
-    {.format{}, .type{}},                                   // R8G8_SNORM
-    {.format{}, .type{}},                                   // R8G8_SINT
-    {.format{}, .type{}},                                   // R16_TYPELESS
-    {.format{}, .type{}},                                   // R16_FLOAT
-    {.format{}, .type{}},                                   // D16_UNORM
-    {.format{}, .type{}},                                   // R16_UNORM
-    {.format{}, .type{}},                                   // R16_UINT
-    {.format{}, .type{}},                                   // R16_SNORM
-    {.format{}, .type{}},                                   // R16_SINT
-    {.format{}, .type{}},                                   // R8_TYPELESS
-    {.format{GL_RED}, .type{GL_UNSIGNED_BYTE}},             // R8_UNORM
-    {.format{}, .type{}},                                   // R8_UINT
-    {.format{}, .type{}},                                   // R8_SNORM
-    {.format{}, .type{}},                                   // R8_SINT
-    {.format{}, .type{}},                                   // A8_UNORM
-    {.format{}, .type{}},                                   // R1_UNORM
-    {.format{}, .type{}},                                   // R9G9B9E5_SHAREDEXP
-    {.format{}, .type{}},                                   // R8G8_B8G8_UNORM
-    {.format{}, .type{}},                                   // G8R8_G8B8_UNORM
-    {},                                                     // BC1_TYPELESS
-    {},                                                     // BC1_UNORM
-    {},                                                     // BC1_UNORM_SRGB
-    {},                                                     // BC2_TYPELESS
-    {},                                                     // BC2_UNORM
-    {},                                                     // BC2_UNORM_SRGB
-    {},                                                     // BC3_TYPELESS
-    {},                                                     // BC3_UNORM
-    {},                                                     // BC3_UNORM_SRGB
-    {},                                                     // BC4_TYPELESS
-    {},                                                     // BC4_UNORM
-    {},                                                     // BC4_SNORM
-    {},                                                     // BC5_TYPELESS
-    {},                                                     // BC5_UNORM
-    {},                                                     // BC5_SNORM
-    {.format{}, .type{}},                                   // B5G6R5_UNORM
-    {.format{}, .type{}},                                   // B5G5R5A1_UNORM
-    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // B8G8R8A8_UNORM
-    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // B8G8R8X8_UNORM
-    {.format{}, .type{}},                                   // R10G10B10_XR_BIAS_A2_UNORM
-    {.format{}, .type{}},                                   // B8G8R8A8_TYPELESS
-    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // B8G8R8A8_UNORM_SRGB
-    {.format{}, .type{}},                                   // B8G8R8X8_TYPELESS
-    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}}, // B8G8R8X8_UNORM_SRGB
-    {},                                                     // BC6H_TYPELESS
-    {},                                                     // BC6H_UF16
-    {},                                                     // BC6H_SF16
-    {},                                                     // BC7_TYPELESS
-    {},                                                     // BC7_UNORM
-    {},                                                     // BC7_UNORM_SRGB
-    {.format{}, .type{}},                                   // AYUV
-    {.format{}, .type{}},                                   // Y410
-    {.format{}, .type{}},                                   // Y416
-    {.format{}, .type{}},                                   // NV12
-    {.format{}, .type{}},                                   // P010
-    {.format{}, .type{}},                                   // P016
-    {.format{}, .type{}},                                   // YUV_420_OPAQUE
-    {.format{}, .type{}},                                   // YUY2
-    {.format{}, .type{}},                                   // Y210
-    {.format{}, .type{}},                                   // Y216
-    {.format{}, .type{}},                                   // NV11
-    {.format{}, .type{}},                                   // AI44
-    {.format{}, .type{}},                                   // IA44
-    {.format{}, .type{}},                                   // P8
-    {.format{}, .type{}},                                   // A8P8
-    {.format{}, .type{}},                                   // B4G4R4A4_UNORM
+    {},                                                      // UNKNOWN
+    {.format{}, .type{}},                                    // R32G32B32A32_TYPELESS
+    {.format{}, .type{}},                                    // R32G32B32A32_FLOAT
+    {.format{}, .type{}},                                    // R32G32B32A32_UINT
+    {.format{}, .type{}},                                    // R32G32B32A32_SINT
+    {.format{}, .type{}},                                    // R32G32B32_TYPELESS
+    {.format{}, .type{}},                                    // R32G32B32_FLOAT
+    {.format{}, .type{}},                                    // R32G32B32_UINT
+    {.format{}, .type{}},                                    // R32G32B32_SINT
+    {.format{}, .type{}},                                    // R16G16B16A16_TYPELESS
+    {.format{}, .type{}},                                    // R16G16B16A16_FLOAT
+    {.format{}, .type{}},                                    // R16G16B16A16_UNORM
+    {.format{}, .type{}},                                    // R16G16B16A16_UINT
+    {.format{}, .type{}},                                    // R16G16B16A16_SNORM
+    {.format{}, .type{}},                                    // R16G16B16A16_SINT
+    {.format{}, .type{}},                                    // R32G32_TYPELESS
+    {.format{}, .type{}},                                    // R32G32_FLOAT
+    {.format{}, .type{}},                                    // R32G32_UINT
+    {.format{}, .type{}},                                    // R32G32_SINT
+    {.format{}, .type{}},                                    // R32G8X24_TYPELESS
+    {.format{}, .type{}},                                    // D32_FLOAT_S8X24_UINT
+    {.format{}, .type{}},                                    // R32_FLOAT_X8X24_TYPELESS
+    {.format{}, .type{}},                                    // X32_TYPELESS_G8X24_UINT
+    {.format{}, .type{}},                                    // R10G10B10A2_TYPELESS
+    {.format{}, .type{}},                                    // R10G10B10A2_UNORM
+    {.format{}, .type{}},                                    // R10G10B10A2_UINT
+    {.format{}, .type{}},                                    // R11G11B10_FLOAT
+    {.format{}, .type{}},                                    // R8G8B8A8_TYPELESS
+    {.format{GL_RGBA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}},  // R8G8B8A8_UNORM
+    {.format{GL_RGBA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}},  // R8G8B8A8_UNORM_SRGB
+    {.format{}, .type{}},                                    // R8G8B8A8_UINT
+    {.format{}, .type{}},                                    // R8G8B8A8_SNORM
+    {.format{}, .type{}},                                    // R8G8B8A8_SINT
+    {.format{}, .type{}},                                    // R16G16_TYPELESS
+    {.format{}, .type{}},                                    // R16G16_FLOAT
+    {.format{}, .type{}},                                    // R16G16_UNORM
+    {.format{}, .type{}},                                    // R16G16_UINT
+    {.format{}, .type{}},                                    // R16G16_SNORM
+    {.format{}, .type{}},                                    // R16G16_SINT
+    {.format{}, .type{}},                                    // R32_TYPELESS
+    {.format{}, .type{}},                                    // D32_FLOAT
+    {.format{}, .type{}},                                    // R32_FLOAT
+    {.format{}, .type{}},                                    // R32_UINT
+    {.format{}, .type{}},                                    // R32_SINT
+    {.format{}, .type{}},                                    // R24G8_TYPELESS
+    {.format{}, .type{}},                                    // D24_UNORM_S8_UINT
+    {.format{}, .type{}},                                    // R24_UNORM_X8_TYPELESS
+    {.format{}, .type{}},                                    // X24_TYPELESS_G8_UINT
+    {.format{}, .type{}},                                    // R8G8_TYPELESS
+    {.format{}, .type{}},                                    // R8G8_UNORM
+    {.format{}, .type{}},                                    // R8G8_UINT
+    {.format{}, .type{}},                                    // R8G8_SNORM
+    {.format{}, .type{}},                                    // R8G8_SINT
+    {.format{}, .type{}},                                    // R16_TYPELESS
+    {.format{}, .type{}},                                    // R16_FLOAT
+    {.format{GL_DEPTH_COMPONENT}, .type{GL_UNSIGNED_SHORT}}, // D16_UNORM
+    {.format{}, .type{}},                                    // R16_UNORM
+    {.format{}, .type{}},                                    // R16_UINT
+    {.format{}, .type{}},                                    // R16_SNORM
+    {.format{}, .type{}},                                    // R16_SINT
+    {.format{}, .type{}},                                    // R8_TYPELESS
+    {.format{GL_RED}, .type{GL_UNSIGNED_BYTE}},              // R8_UNORM
+    {.format{}, .type{}},                                    // R8_UINT
+    {.format{}, .type{}},                                    // R8_SNORM
+    {.format{}, .type{}},                                    // R8_SINT
+    {.format{}, .type{}},                                    // A8_UNORM
+    {.format{}, .type{}},                                    // R1_UNORM
+    {.format{}, .type{}},                                    // R9G9B9E5_SHAREDEXP
+    {.format{}, .type{}},                                    // R8G8_B8G8_UNORM
+    {.format{}, .type{}},                                    // G8R8_G8B8_UNORM
+    {},                                                      // BC1_TYPELESS
+    {},                                                      // BC1_UNORM
+    {},                                                      // BC1_UNORM_SRGB
+    {},                                                      // BC2_TYPELESS
+    {},                                                      // BC2_UNORM
+    {},                                                      // BC2_UNORM_SRGB
+    {},                                                      // BC3_TYPELESS
+    {},                                                      // BC3_UNORM
+    {},                                                      // BC3_UNORM_SRGB
+    {},                                                      // BC4_TYPELESS
+    {},                                                      // BC4_UNORM
+    {},                                                      // BC4_SNORM
+    {},                                                      // BC5_TYPELESS
+    {},                                                      // BC5_UNORM
+    {},                                                      // BC5_SNORM
+    {.format{}, .type{}},                                    // B5G6R5_UNORM
+    {.format{}, .type{}},                                    // B5G5R5A1_UNORM
+    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}},  // B8G8R8A8_UNORM
+    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}},  // B8G8R8X8_UNORM
+    {.format{}, .type{}},                                    // R10G10B10_XR_BIAS_A2_UNORM
+    {.format{}, .type{}},                                    // B8G8R8A8_TYPELESS
+    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}},  // B8G8R8A8_UNORM_SRGB
+    {.format{}, .type{}},                                    // B8G8R8X8_TYPELESS
+    {.format{GL_BGRA}, .type{GL_UNSIGNED_INT_8_8_8_8_REV}},  // B8G8R8X8_UNORM_SRGB
+    {},                                                      // BC6H_TYPELESS
+    {},                                                      // BC6H_UF16
+    {},                                                      // BC6H_SF16
+    {},                                                      // BC7_TYPELESS
+    {},                                                      // BC7_UNORM
+    {},                                                      // BC7_UNORM_SRGB
+    {.format{}, .type{}},                                    // AYUV
+    {.format{}, .type{}},                                    // Y410
+    {.format{}, .type{}},                                    // Y416
+    {.format{}, .type{}},                                    // NV12
+    {.format{}, .type{}},                                    // P010
+    {.format{}, .type{}},                                    // P016
+    {.format{}, .type{}},                                    // YUV_420_OPAQUE
+    {.format{}, .type{}},                                    // YUY2
+    {.format{}, .type{}},                                    // Y210
+    {.format{}, .type{}},                                    // Y216
+    {.format{}, .type{}},                                    // NV11
+    {.format{}, .type{}},                                    // AI44
+    {.format{}, .type{}},                                    // IA44
+    {.format{}, .type{}},                                    // P8
+    {.format{}, .type{}},                                    // A8P8
+    {.format{}, .type{}},                                    // B4G4R4A4_UNORM
 };
 
 PixelDataFormat s_pixel_data_formats_custom[] = {

@@ -24,8 +24,8 @@ struct UnlitColorMaterial : public UnlitMaterial
 struct LitDiffuseTextureMaterial : public Material
 {
     UniformBufferRangeId light_buffer_range_id{};
-    TextureId texture_id{NULL_TEXTURE_ID};
-    SamplerId sampler_id{NULL_SAMPLER_ID};
+    TextureId texture_id{};
+    SamplerId sampler_id{};
 
     LitDiffuseTextureMaterial(Shader &shader, RenderPipelineState render_state, DrawQueue draw_queue);
 

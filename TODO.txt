@@ -14,6 +14,7 @@
 - fix the texture origin mismatch between DDS and OpenGL
 - implement frustum culling
 - sort draw calls according to distance from camera
+- remove dependencies to OpenGL from the public API
 
 # Shader
 - add a diffuse only shader

@@ -1,18 +1,17 @@
-#include <cmath>
 #include <vector>
 
 #include "id_generator.hpp"
-#include "viewport.hpp"
 #include "opengl/opengl_api.hpp"
+#include "viewport.hpp"
 
 namespace Age::Gfx
 {
 namespace
 {
 Util::IdGenerator<ViewportId> s_viewport_id_generator{ViewportId{2}};
-std::vector<Viewport> s_viewports{Viewport{.norm_rect{.position{0.0f, 0.0f}, .size{1.0f, 1.0f}}}};
+std::vector<Viewport> s_viewports{Viewport{.norm_rect{{0.0f, 0.0f}, {1.0f, 1.0f}}}};
 
-RectangleI s_current_viewport_pixel_rect{};
+Math::RectangleI s_current_viewport_pixel_rect{};
 
 constexpr std::size_t to_index(ViewportId id)
 {
@@ -25,7 +24,7 @@ void init_viewport_system()
     s_viewports.reserve(8);
 }
 
-ViewportId create_viewport(const Rectangle &norm_rect)
+ViewportId create_viewport(const Math::Rectangle &norm_rect)
 {
     ViewportId viewport_id{s_viewport_id_generator.generate()};
 
@@ -44,22 +43,12 @@ Viewport &get_viewport(ViewportId viewport_id)
     return s_viewports[to_index(viewport_id)];
 }
 
-RectangleI calc_viewport_pixel_rect(const Viewport &viewport, const Framebuffer &framebuffer)
+Math::RectangleI calc_viewport_pixel_rect(const Viewport &viewport, const Math::Vector2U &framebuffer_size)
 {
-    const Rectangle &norm_rect{viewport.norm_rect};
-    return RectangleI{
-        .position{
-            static_cast<int>(std::lround(norm_rect.position.x * framebuffer.width)),
-            static_cast<int>(std::lround(norm_rect.position.y * framebuffer.height))
-        },
-        .size{
-            static_cast<int>(std::lround(norm_rect.size.x * framebuffer.width)),
-            static_cast<int>(std::lround(norm_rect.size.y * framebuffer.height))
-        }
-    };
+    return Math::RectangleI{Math::scale(viewport.norm_rect, framebuffer_size)};
 }
 
-void use_viewport_pixel_rect(const RectangleI &pixel_rect)
+void use_viewport_pixel_rect(const Math::RectangleI &pixel_rect)
 {
     if (pixel_rect != s_current_viewport_pixel_rect)
     {

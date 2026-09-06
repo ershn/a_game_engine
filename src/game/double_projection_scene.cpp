@@ -13,13 +13,13 @@
 #include "error_handling.hpp"
 #include "input.hpp"
 #include "lighting.hpp"
+#include "opengl/opengl_api.hpp"
 #include "path.hpp"
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
 #include "time.hpp"
 #include "transformations.hpp"
 #include "uniform_blocks.hpp"
-#include "opengl/opengl_api.hpp"
 
 #include "game/double_projection_scene.hpp"
 #include "game/game_controllers.hpp"
@@ -121,8 +121,8 @@ void DoubleProjectionScene::init()
         }}
     );
 
-    Gfx::ViewportId left_viewport_id{Gfx::create_viewport({.position{0.0f, 0.0f}, .size{0.5f, 1.0f}})};
-    Gfx::ViewportId right_viewport_id{Gfx::create_viewport({.position{0.5f, 0.0f}, .size{0.5f, 1.0f}})};
+    Gfx::ViewportId left_viewport_id{Gfx::create_viewport({{0.0f, 0.0f}, {0.5f, 1.0f}})};
+    Gfx::ViewportId right_viewport_id{Gfx::create_viewport({{0.5f, 0.0f}, {0.5f, 1.0f}})};
 
     // Left camera
     Core::EntityId left_camera_id;
@@ -137,7 +137,8 @@ void DoubleProjectionScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}, .viewport_id{left_viewport_id}},
+            Gfx::CameraRenderState{.viewport_id{left_viewport_id}},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_LEFT}},
@@ -162,7 +163,8 @@ void DoubleProjectionScene::init()
             Gfx::ViewToClipMatrix{
                 Math::perspective_proj_matrix(camera.near_plane_z, camera.far_plane_z, 1.0f, camera.vertical_fov)
             },
-            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}, .viewport_id{right_viewport_id}},
+            Gfx::CameraRenderState{.viewport_id{right_viewport_id}},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity{0.005f}},
             SphericalCameraMouseController{.motion_activation_button{GLFW_MOUSE_BUTTON_RIGHT}},

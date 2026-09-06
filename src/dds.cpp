@@ -331,13 +331,13 @@ bool detect_texture_format(
                         header.ddspf.bBitMask == 0x000000ff && header.ddspf.aBitMask == 0xff000000)
                     {
                         texture_desc.format = ImageFormat::B8G8R8A8_UNORM;
-                        texture_desc.alpha_type = AlphaType::STRAIGHT;
                     }
-                    else if (header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
-                             header.ddspf.bBitMask == 0x00ff0000 && header.ddspf.aBitMask == 0xff000000)
+                    else if (
+                        header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
+                        header.ddspf.bBitMask == 0x00ff0000 && header.ddspf.aBitMask == 0xff000000
+                    )
                     {
                         texture_desc.format = ImageFormat::R8G8B8A8_UNORM;
-                        texture_desc.alpha_type = AlphaType::STRAIGHT;
                     }
                 }
             }
@@ -349,13 +349,13 @@ bool detect_texture_format(
                         header.ddspf.bBitMask == 0x000000ff)
                     {
                         texture_desc.format = ImageFormat::B8G8R8X8_UNORM;
-                        texture_desc.alpha_type = AlphaType::STRAIGHT;
                     }
-                    else if (header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
-                             header.ddspf.bBitMask == 0x00ff0000)
+                    else if (
+                        header.ddspf.rBitMask == 0x000000ff && header.ddspf.gBitMask == 0x0000ff00 &&
+                        header.ddspf.bBitMask == 0x00ff0000
+                    )
                     {
                         texture_desc.format = ImageFormat::R8G8B8X8_UNORM;
-                        texture_desc.alpha_type = AlphaType::STRAIGHT;
                     }
                 }
             }
@@ -432,22 +432,14 @@ bool detect_texture_dimensions(const DDS_HEADER &header, TextureDesc &texture_de
 void detect_texture_count(const DDS_HEADER &header, const DDS_HEADER_DXT10 &header_extension, TextureDesc &texture_desc)
 {
     if (header.caps & DDSCAPS_MIPMAP) // mipmap texture
-    {
         texture_desc.mipmap_level_count = header.mipMapCount;
-    }
     else
-    {
         texture_desc.mipmap_level_count = 1;
-    }
 
     if (is_extended_header_format(header) && texture_desc.type != TextureType::TEXTURE_3D)
-    {
         texture_desc.count = header_extension.arraySize;
-    }
     else
-    {
         texture_desc.count = 1;
-    }
 }
 
 bool read_texture_bytes(

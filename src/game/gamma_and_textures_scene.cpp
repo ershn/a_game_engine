@@ -11,16 +11,16 @@
 #include "error_handling.hpp"
 #include "framebuffer.hpp"
 #include "input.hpp"
+#include "opengl/opengl_api.hpp"
 #include "path.hpp"
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
 #include "time.hpp"
 #include "transformations.hpp"
 #include "uniform_blocks.hpp"
-#include "opengl/opengl_api.hpp"
 
-#include "game/gamma_and_textures_scene.hpp"
 #include "game/game_controllers.hpp"
+#include "game/gamma_and_textures_scene.hpp"
 
 namespace Game
 {
@@ -84,8 +84,8 @@ struct GammaAndTexturesShader : public Gfx::Shader
 
 struct GammaAndTexturesMaterial : public Gfx::Material
 {
-    Gfx::TextureId texture_id{Gfx::NULL_TEXTURE_ID};
-    Gfx::SamplerId sampler_id{Gfx::NULL_SAMPLER_ID};
+    Gfx::TextureId texture_id{};
+    Gfx::SamplerId sampler_id{};
 
     GammaAndTexturesMaterial(Gfx::Shader &shader, Gfx::RenderPipelineState render_state, Gfx::DrawQueue draw_queue)
         : Material{shader, render_state, draw_queue}
@@ -124,7 +124,8 @@ void GammaAndTexturesScene::init()
             Gfx::WindowSpaceCamera{},
             Gfx::WorldToViewMatrix{.matrix{1.0f}},
             Gfx::ViewToClipMatrix{Gfx::window_space_orthographic_proj_matrix(1, 1)},
-            Gfx::CameraRenderState{.clear_color{0.75f, 0.75f, 1.0f, 1.0f}},
+            Gfx::CameraRenderState{},
+            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}}}},
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             GameKeyboardController{}
         );

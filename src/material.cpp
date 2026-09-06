@@ -1,4 +1,5 @@
 #include <limits>
+#include <type_traits>
 
 #include "material.hpp"
 
@@ -6,7 +7,7 @@ namespace Age::Gfx
 {
 namespace
 {
-constexpr MaterialId NULL_MATERIAL_ID{std::numeric_limits<MaterialId>::max()};
+constexpr MaterialId NULL_MATERIAL_ID{std::numeric_limits<std::underlying_type_t<MaterialId>>::max()};
 
 MaterialId s_used_material_id{NULL_MATERIAL_ID};
 } // namespace

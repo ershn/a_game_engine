@@ -1,12 +1,14 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <memory>
+#include <type_traits>
 
-#include "framebuffer.hpp"
+#include "image_formats.hpp"
 #include "opengl/opengl_api.hpp"
-#include "opengl/opengl_image_formats.hpp"
+#include "render_target.hpp"
 
 namespace Age::Gfx
 {
@@ -22,7 +24,7 @@ enum struct TextureType : std::uint8_t
 
 enum struct AlphaType : std::uint8_t
 {
-    NO_ALPHA,
+    UNKNOWN,
     STRAIGHT,
     PREMULTIPLIED
 };
@@ -82,12 +84,12 @@ struct MipmapLevel
 {
     const TextureData &texture;
     std::uint32_t byte_offset{};
-    std::uint32_t pitch{};
-    std::uint32_t row_count{};
     std::uint32_t level{};
     std::uint32_t width{};
     std::uint32_t height{};
     std::uint32_t depth{};
+    std::uint32_t pitch{};
+    std::uint32_t row_count{};
 };
 
 Mipmap get_mipmap(const TextureData &texture);
@@ -102,26 +104,20 @@ MipmapLevel begin(const Mipmap &mipmap);
 MipmapLevel end(const Mipmap &mipmap);
 
 using TextureUnitId = std::uint16_t;
-using TextureId = std::uint32_t;
-using SamplerId = std::uint16_t;
 
 inline constexpr TextureUnitId NULL_TEXTURE_UNIT_ID{std::numeric_limits<TextureUnitId>::max()};
-inline constexpr TextureId NULL_TEXTURE_ID{std::numeric_limits<TextureId>::max()};
-inline constexpr SamplerId NULL_SAMPLER_ID{std::numeric_limits<SamplerId>::max()};
 
-struct TextureUnit
+enum struct TextureId : std::underlying_type_t<RenderTargetId>
 {
-    TextureId bound_texture_id{NULL_TEXTURE_ID};
-    std::uint32_t sampler_use_count{};
-    SamplerId bound_sampler_id{NULL_SAMPLER_ID};
 };
 
-struct Texture
+struct Texture;
+
+enum struct SamplerId : std::uint16_t
 {
-    GLuint texture{};
-    TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
-    TextureType type{};
 };
+
+struct Sampler;
 
 struct SamplerUniform
 {
@@ -169,12 +165,6 @@ struct SamplerParams
     SamplerFlags flags{};
 };
 
-struct Sampler
-{
-    GLuint sampler{};
-    TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
-};
-
 struct TextureCreationOptions
 {
     bool force_srgb_internal_format : 1 {};
@@ -182,9 +172,14 @@ struct TextureCreationOptions
 
 void init_texture_system();
 
+bool is_texture_id(RenderTargetId id);
+RenderTargetId to_render_target_id(TextureId id);
+TextureId to_texture_id(RenderTargetId id);
+
 TextureId create_texture(const TextureData &texture_data, TextureCreationOptions creation_options = {});
-TextureId create_texture_from_framebuffer(FramebufferId framebuffer_id, ImageFormat image_format);
-void copy_framebuffer_to_texture(FramebufferId framebuffer_id, TextureId texture_id);
+TextureId create_texture(TextureType texture_type, std::function<void(const Texture &, TextureDesc &)> specify_texture);
+
+void modify_texture(TextureId texture_id, std::function<void(const Texture &, TextureDesc &)> modify_texture);
 
 SamplerId create_sampler(const SamplerParams &sampler_params);
 const SamplerParams &get_sampler_params(SamplerId sampler_id);

@@ -1,24 +1,45 @@
 #pragma once
 
+#include <cmath>
+
 #include "vector.hpp"
 
-namespace Age::Gfx
+namespace Age::Math
 {
-struct Rectangle
+template <typename T>
+struct RectangleX
 {
-    Math::Vector2 position{};
-    Math::Vector2 size{};
+    Vector2X<T> position;
+    Vector2X<T> size;
+
+    constexpr RectangleX() = default;
+
+    constexpr RectangleX(const Vector2X<T> &position, const Vector2X<T> &size)
+        : position{position}
+        , size{size}
+    {
+    }
+
+    template <typename U>
+    explicit constexpr RectangleX(const RectangleX<U> &rect)
+        : position{static_cast<Vector2X<T>>(rect.position)}
+        , size{static_cast<Vector2X<T>>(rect.size)}
+    {
+    }
+
+    constexpr bool operator==(const RectangleX<T> &rhs) const = default;
 };
 
-struct RectangleI
+using Rectangle = RectangleX<float>;
+using RectangleI = RectangleX<int>;
+using RectangleU = RectangleX<unsigned int>;
+
+template <typename T>
+constexpr Rectangle scale(const Rectangle &rect, const Vector2X<T> &scaling)
 {
-    Math::Vector2I position{};
-    Math::Vector2I size{};
-};
-
-bool operator==(const Rectangle &lhs, const Rectangle &rhs);
-bool operator==(const RectangleI &lhs, const RectangleI &rhs);
-
-bool operator!=(const Rectangle &lhs, const Rectangle &rhs);
-bool operator!=(const RectangleI &lhs, const RectangleI &rhs);
-} // namespace Age::Gfx
+    return {
+        {std::round(rect.position.x * scaling.x), std::round(rect.position.y * scaling.y)},
+        {std::round(rect.size.x * scaling.x), std::round(rect.size.y * scaling.y)}
+    };
+}
+} // namespace Age::Math

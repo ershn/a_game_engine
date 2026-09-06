@@ -7,9 +7,9 @@ namespace
 {
 float calc_aspect_ratio(const CameraRenderState &camera_render_state)
 {
-    const Framebuffer &framebuffer{get_framebuffer(camera_render_state.framebuffer_id)};
+    const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
     const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
-    RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(viewport, framebuffer)};
+    Math::RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(viewport, framebuffer_size)};
     return static_cast<float>(viewport_pixel_rect.size.x) / viewport_pixel_rect.size.y;
 }
 } // namespace
@@ -78,8 +78,10 @@ void update_window_space_camera_matrix(
     const ProjectionUniformBuffer &projection_uniform_buffer
 )
 {
-    const Framebuffer &framebuffer{get_framebuffer(camera_render_state.framebuffer_id)};
-    RectangleI viewport_rect{calc_viewport_pixel_rect(get_viewport(camera_render_state.viewport_id), framebuffer)};
+    const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
+    Math::RectangleI viewport_rect{
+        calc_viewport_pixel_rect(get_viewport(camera_render_state.viewport_id), framebuffer_size)
+    };
 
     camera.viewport_width = viewport_rect.size.x;
     camera.viewport_height = viewport_rect.size.y;
