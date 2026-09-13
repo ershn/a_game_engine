@@ -578,6 +578,10 @@ void ValleyScene::init()
     }
 }
 
+void ValleyScene::update_render_state()
+{
+}
+
 void ValleyScene::update()
 {
     using Core::process_components;
@@ -597,6 +601,6 @@ void ValleyScene::update()
 
 void ValleyScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

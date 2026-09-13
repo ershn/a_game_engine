@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <limits>
 #include <span>
 #include <tuple>
 #include <utility>
@@ -277,6 +276,8 @@ void execute_impl(TFunctor functor)
     );
 }
 
+// Pointer variants
+
 template <typename... TComponents, typename TFunctor>
 void execute_functor_impl(TFunctor functor, void (TFunctor::*)(std::uint32_t, TComponents *...) const)
 {
@@ -304,6 +305,42 @@ void execute_functor_impl(TFunctor functor, void (TFunctor::*)(std::uint32_t, co
 {
     execute_impl<TComponents...>(functor);
 }
+
+// std::span variants
+
+template <typename TComponent, typename TFunctor>
+void execute_functor_impl(TFunctor functor, void (TFunctor::*)(std::span<TComponent>) const)
+{
+    execute_impl<TComponent>([functor](std::uint32_t entity_count, const EntityId *, TComponent *components) {
+        functor(std::span{components, entity_count});
+    });
+}
+
+template <typename TComponent, typename TFunctor>
+void execute_functor_impl(TFunctor functor, void (TFunctor::*)(std::span<TComponent>))
+{
+    execute_impl<TComponent>([functor](std::uint32_t entity_count, const EntityId *, TComponent *components) {
+        functor(std::span{components, entity_count});
+    });
+}
+
+template <typename TComponent, typename TFunctor>
+void execute_functor_impl(TFunctor functor, void (TFunctor::*)(std::span<const EntityId>) const)
+{
+    execute_impl<TComponent>([functor](std::uint32_t entity_count, const EntityId *entity_ids, TComponent *) {
+        functor(std::span{entity_ids, entity_count});
+    });
+}
+
+template <typename TComponent, typename TFunctor>
+void execute_functor_impl(TFunctor functor, void (TFunctor::*)(std::span<const EntityId>))
+{
+    execute_impl<TComponent>([functor](std::uint32_t entity_count, const EntityId *entity_ids, TComponent *) {
+        functor(std::span{entity_ids, entity_count});
+    });
+}
+
+// MultiSpan variants
 
 template <typename... TComponents, typename TFunctor>
 void execute_functor_impl(TFunctor functor, void (TFunctor::*)(const MultiSpan<TComponents...> &) const)

@@ -49,6 +49,7 @@ struct CameraRenderState
 
     FramebufferId framebuffer_id{SYSTEM_FRAMEBUFFER_ID};
     ViewportId viewport_id{FULL_VIEWPORT_ID};
+    ColorBufferMask color_buffers{0b1};
     Layer layer{};
 };
 
@@ -195,4 +196,6 @@ void for_each_camera_stack(TCameraIterator camera_it, TCameraIterator camera_end
         camera_it = camera_stack_it.camera_it;
     }
 }
+
+Math::RectangleI calc_camera_viewport_rect(const CameraRenderState &camera_render_state);
 } // namespace Age::Gfx

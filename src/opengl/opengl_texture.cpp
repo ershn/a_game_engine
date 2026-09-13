@@ -3,11 +3,14 @@
 
 #include "error_handling.hpp"
 #include "id_generator.hpp"
+#include "opengl/opengl_api.hpp"
 #include "opengl/opengl_image_formats.hpp"
-#include "texture.hpp"
+#include "opengl/opengl_texture.hpp"
 #include "utils.hpp"
 
-namespace Age::Gfx
+namespace Age::Gfx::OGL
+{
+namespace Api
 {
 float get_texture_filtering_max_max_anisotropy()
 {
@@ -15,6 +18,7 @@ float get_texture_filtering_max_max_anisotropy()
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
     return static_cast<float>(max_anisotropy);
 }
+} // namespace Api
 
 namespace
 {
@@ -54,167 +58,6 @@ constexpr GLenum to_gl_enum(TextureMagFilter texture_mag_filter)
 {
     return s_texture_mag_filter_to_gl_enum[static_cast<std::size_t>(texture_mag_filter)];
 }
-
-std::uint32_t get_base_image_pixel_data_size(const TextureDesc &texture_desc)
-{
-    unsigned int pitch, row_count;
-    calc_pixel_data_pitch(texture_desc.format, texture_desc.width, texture_desc.height, pitch, row_count);
-
-    return pitch * row_count * texture_desc.depth;
-}
-
-std::uint32_t get_mipmap_level_pixel_data_size(const MipmapLevel &mipmap_level)
-{
-    return mipmap_level.pitch * mipmap_level.row_count * mipmap_level.depth;
-}
-
-std::uint32_t get_mipmap_pixel_data_size(const TextureData &texture)
-{
-    std::uint32_t mipmap_size{0};
-    for (const auto &mipmap_level : get_mipmap(texture))
-        mipmap_size += get_mipmap_level_pixel_data_size(mipmap_level);
-    return mipmap_size;
-}
-} // namespace
-
-CubeMapFace CubeMap::operator[](std::size_t index) const
-{
-    if (index > 5)
-    {
-        Core::log_error("Cube map face index must be in the range [0, 5]: {}", index);
-        index = 5;
-    }
-    return {
-        .cube_map = *this,
-        .byte_offset = this->face_size * static_cast<std::uint32_t>(index),
-        .face_index = static_cast<std::uint32_t>(index)
-    };
-}
-
-CubeMap get_cube_map(const TextureData &texture)
-{
-    return {.texture = texture, .face_size = get_mipmap_pixel_data_size(texture)};
-}
-
-bool operator==(const CubeMapFace &it1, const CubeMapFace &it2)
-{
-    return &it1.cube_map == &it2.cube_map && it1.face_index == it2.face_index;
-}
-
-bool operator!=(const CubeMapFace &it1, const CubeMapFace &it2)
-{
-    return !(it1 == it2);
-}
-
-CubeMapFace &operator++(CubeMapFace &it)
-{
-    it.byte_offset += it.cube_map.face_size;
-    ++it.face_index;
-    return it;
-}
-
-const CubeMapFace &operator*(const CubeMapFace &it)
-{
-    return it;
-}
-
-CubeMapFace begin(const CubeMap &cube_map)
-{
-    return {.cube_map = cube_map, .byte_offset = 0, .face_index = 0};
-}
-
-CubeMapFace end(const CubeMap &cube_map)
-{
-    return {.cube_map = cube_map, .face_index = 6};
-}
-
-Mipmap get_mipmap(const TextureData &texture)
-{
-    return {.texture = texture, .byte_offset = 0};
-}
-
-Mipmap get_mipmap(const CubeMapFace &cube_map_face)
-{
-    return {.texture = cube_map_face.cube_map.texture, .byte_offset = cube_map_face.byte_offset};
-}
-
-bool operator==(const MipmapLevel &it1, const MipmapLevel &it2)
-{
-    return &it1.texture == &it2.texture && it1.level == it2.level;
-}
-
-bool operator!=(const MipmapLevel &it1, const MipmapLevel &it2)
-{
-    return !(it1 == it2);
-}
-
-MipmapLevel &operator++(MipmapLevel &it)
-{
-    it.byte_offset += it.pitch * it.row_count * it.depth;
-    ++it.level;
-
-    it.width = std::max(1U, it.width >> 1);
-    it.height = std::max(1U, it.height >> 1);
-    it.depth = std::max(1U, it.depth >> 1);
-
-    unsigned int pitch, row_count;
-    calc_pixel_data_pitch(it.texture.desc.format, it.width, it.height, pitch, row_count);
-
-    it.pitch = pitch;
-    it.row_count = row_count;
-    return it;
-}
-
-const MipmapLevel &operator*(const MipmapLevel &it)
-{
-    return it;
-}
-
-MipmapLevel begin(const Mipmap &mipmap)
-{
-    const TextureDesc &texture_desc{mipmap.texture.desc};
-
-    unsigned int pitch, row_count;
-    calc_pixel_data_pitch(texture_desc.format, texture_desc.width, texture_desc.height, pitch, row_count);
-
-    return {
-        .texture = mipmap.texture,
-        .byte_offset = mipmap.byte_offset,
-        .level = 0,
-        .width = texture_desc.width,
-        .height = texture_desc.height,
-        .depth = texture_desc.depth,
-        .pitch = pitch,
-        .row_count = row_count
-    };
-}
-
-MipmapLevel end(const Mipmap &mipmap)
-{
-    return {.texture = mipmap.texture, .level = mipmap.texture.desc.mipmap_level_count};
-}
-
-struct Texture
-{
-    GLuint texture{};
-    TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
-    TextureType type{};
-};
-
-struct Sampler
-{
-    GLuint sampler{};
-    TextureUnitId bound_texture_unit_id{NULL_TEXTURE_UNIT_ID};
-};
-
-namespace
-{
-struct TextureUnit
-{
-    TextureId bound_texture_id{};
-    std::uint32_t sampler_use_count{};
-    SamplerId bound_sampler_id{};
-};
 
 constexpr auto MAX_RENDER_TARGET_ID{std::numeric_limits<std::underlying_type_t<RenderTargetId>>::max()};
 constexpr TextureId FIRST_TEXTURE_ID{1};
@@ -293,7 +136,7 @@ void update_pixel_data_unpack_alignment(unsigned int pitch, GLint &unpack_alignm
     }
 }
 
-using TextureImageLoader = void (*)(
+using LoadTextureImage = void (*)(
     std::uint32_t level,
     GLint internal_format,
     std::uint32_t width,
@@ -372,7 +215,7 @@ void load_3d_texture_image(
     );
 }
 
-template <GLenum TextureTarget, TextureImageLoader LoadTextureImage>
+template <GLenum TextureTarget, LoadTextureImage LoadTextureImage>
 GLuint create_texture_from_bytes(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     const TextureDesc &texture_desc{texture_data.desc};
@@ -497,7 +340,7 @@ GLuint create_cube_map_texture_from_bytes(const TextureData &texture_data, Textu
     return texture;
 }
 
-using CompressedTextureImageLoader = void (*)(
+using LoadCompressedTextureImage = void (*)(
     std::uint32_t level,
     GLenum internal_format,
     std::uint32_t width,
@@ -573,7 +416,7 @@ void load_compressed_3d_texture_image(
     );
 }
 
-template <GLenum TextureTarget, CompressedTextureImageLoader LoadCompressedTextureImage>
+template <GLenum TextureTarget, LoadCompressedTextureImage LoadCompressedTextureImage>
 GLuint create_compressed_texture_from_bytes(const TextureData &texture_data, TextureCreationOptions creation_options)
 {
     const TextureDesc &texture_desc{texture_data.desc};
@@ -724,7 +567,7 @@ GLuint create_texture_from_bytes(const TextureData &texture_data, TextureCreatio
 void bind_texture(TextureId texture_id, Texture &texture, TextureUnitId texture_unit_id, TextureUnit &texture_unit)
 {
     glActiveTexture(GL_TEXTURE0 + texture_unit_id);
-    glBindTexture(to_gl_enum(texture.type), texture.texture);
+    glBindTexture(to_gl_enum(texture.type), texture.gl_object);
 
     texture.bound_texture_unit_id = texture_unit_id;
     texture_unit.bound_texture_id = texture_id;
@@ -794,7 +637,7 @@ void update_sampler_params(GLuint sampler, const SamplerParams &params, const Sa
 
 void bind_sampler(SamplerId sampler_id, Sampler &sampler, TextureUnitId texture_unit_id, TextureUnit &texture_unit)
 {
-    glBindSampler(static_cast<GLuint>(texture_unit_id), sampler.sampler);
+    glBindSampler(static_cast<GLuint>(texture_unit_id), sampler.gl_object);
 
     sampler.bound_texture_unit_id = texture_unit_id;
     texture_unit.bound_sampler_id = sampler_id;
@@ -810,6 +653,8 @@ void unbind_sampler(TextureUnit &texture_unit)
 }
 } // namespace
 
+namespace Api
+{
 void init_texture_system()
 {
     auto texture_unit_count = get_texture_unit_count();
@@ -855,52 +700,9 @@ TextureId create_texture(const TextureData &texture_data, TextureCreationOptions
 
     select_temporary_texture_unit();
 
-    texture.texture = create_texture_from_bytes(texture_data, creation_options);
+    texture.gl_object = create_texture_from_bytes(texture_data, creation_options);
 
     return texture_id;
-}
-
-TextureId create_texture(TextureType texture_type, std::function<void(const Texture &, TextureDesc &)> specify_texture)
-{
-    TextureId texture_id{s_texture_id_generator.generate()};
-    std::size_t texture_index{to_index(texture_id)};
-
-    if (texture_index == s_textures.size())
-    {
-        s_textures.resize(texture_index + 1);
-        s_texture_descs.resize(texture_index + 1);
-    }
-
-    Texture &texture{s_textures[texture_index]};
-    TextureDesc &texture_desc{s_texture_descs[texture_index]};
-
-    select_temporary_texture_unit();
-
-    glGenTextures(1, &texture.texture);
-
-    glBindTexture(to_gl_enum(texture_type), texture.texture);
-
-    texture.type = texture_type;
-
-    specify_texture(texture, texture_desc);
-
-    glBindTexture(to_gl_enum(texture_type), 0);
-
-    return texture_id;
-}
-
-void modify_texture(TextureId texture_id, std::function<void(const Texture &, TextureDesc &)> modify_texture)
-{
-    Texture &texture{s_textures[to_index(texture_id)]};
-    TextureDesc &texture_desc{s_texture_descs[to_index(texture_id)]};
-
-    select_temporary_texture_unit();
-
-    glBindTexture(to_gl_enum(texture.type), texture.texture);
-
-    modify_texture(texture, texture_desc);
-
-    glBindTexture(to_gl_enum(texture.type), 0);
 }
 
 SamplerId create_sampler(const SamplerParams &sampler_params)
@@ -915,8 +717,8 @@ SamplerId create_sampler(const SamplerParams &sampler_params)
     }
 
     Sampler &sampler{s_samplers[sampler_index]};
-    glGenSamplers(1, &sampler.sampler);
-    update_sampler_params(sampler.sampler, sampler_params, DEFAULT_SAMPLER_PARAMS);
+    glGenSamplers(1, &sampler.gl_object);
+    update_sampler_params(sampler.gl_object, sampler_params, DEFAULT_SAMPLER_PARAMS);
     s_sampler_params[sampler_index] = sampler_params;
 
     return sampler_id;
@@ -931,7 +733,7 @@ void set_sampler_params(SamplerId sampler_id, const SamplerParams &sampler_param
 {
     const Sampler &sampler{s_samplers[to_index(sampler_id)]};
     SamplerParams &current_sampler_params{s_sampler_params[to_index(sampler_id)]};
-    update_sampler_params(sampler.sampler, sampler_params, current_sampler_params);
+    update_sampler_params(sampler.gl_object, sampler_params, current_sampler_params);
     current_sampler_params = sampler_params;
 }
 
@@ -966,4 +768,48 @@ void bind_texture_and_sampler(SamplerUniform &sampler_uniform, TextureId texture
         bind_sampler(sampler_id, sampler, texture_unit_id, *texture_unit);
     }
 }
-} // namespace Age::Gfx
+} // namespace Api
+
+TextureId create_texture(TextureType texture_type, std::function<void(const Texture &, TextureDesc &)> specify_texture)
+{
+    TextureId texture_id{s_texture_id_generator.generate()};
+    std::size_t texture_index{to_index(texture_id)};
+
+    if (texture_index == s_textures.size())
+    {
+        s_textures.resize(texture_index + 1);
+        s_texture_descs.resize(texture_index + 1);
+    }
+
+    Texture &texture{s_textures[texture_index]};
+    TextureDesc &texture_desc{s_texture_descs[texture_index]};
+
+    select_temporary_texture_unit();
+
+    glGenTextures(1, &texture.gl_object);
+
+    glBindTexture(to_gl_enum(texture_type), texture.gl_object);
+
+    texture.type = texture_type;
+
+    specify_texture(texture, texture_desc);
+
+    glBindTexture(to_gl_enum(texture_type), 0);
+
+    return texture_id;
+}
+
+void modify_texture(TextureId texture_id, std::function<void(const Texture &, TextureDesc &)> modify_texture)
+{
+    Texture &texture{s_textures[to_index(texture_id)]};
+    TextureDesc &texture_desc{s_texture_descs[to_index(texture_id)]};
+
+    select_temporary_texture_unit();
+
+    glBindTexture(to_gl_enum(texture.type), texture.gl_object);
+
+    modify_texture(texture, texture_desc);
+
+    glBindTexture(to_gl_enum(texture.type), 0);
+}
+} // namespace Age::Gfx::OGL

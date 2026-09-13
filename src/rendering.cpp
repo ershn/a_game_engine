@@ -1,8 +1,8 @@
 #include <algorithm>
+#include <span>
 #include <vector>
 
 #include "ecs.hpp"
-#include "framebuffer.hpp"
 #include "lighting.hpp"
 #include "multi_span.hpp"
 #include "opengl/opengl_api.hpp"
@@ -201,33 +201,10 @@ void set_renderer_layer(Renderer &renderer, Layer layer)
 
 void update_lighting(const WorldToViewMatrix &wv_matrix)
 {
-    Core::process_components([&](const LightGroup &light_group) {
-        update_light_group_buffer(wv_matrix.matrix, light_group);
+    Core::execute([&](std::span<const LightGroup> light_groups) {
+        for (auto &light_group : light_groups)
+            update_light_group_buffer(wv_matrix.matrix, light_group);
     });
-}
-
-void setup_viewport(const CameraRenderState &camera_render_state, const CameraClear &camera_clear)
-{
-    const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
-
-    ViewportId viewport_id{camera_render_state.viewport_id};
-    Math::RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(get_viewport(viewport_id), framebuffer_size)};
-    use_viewport_pixel_rect(viewport_pixel_rect);
-
-    if (camera_clear.framebuffer_clear.buffers)
-    {
-        bool is_custom_viewport{viewport_id != FULL_VIEWPORT_ID};
-        if (is_custom_viewport)
-        {
-            OGL::enable_scissor_test(true);
-            OGL::set_scissor(viewport_pixel_rect);
-        }
-
-        clear_framebuffer(camera_render_state.framebuffer_id, camera_clear.framebuffer_clear);
-
-        if (is_custom_viewport)
-            OGL::enable_scissor_test(false);
-    }
 }
 
 std::vector<DrawCallKey> &get_layer_draw_calls(Layer layer)
@@ -287,7 +264,7 @@ void prepare_rendering()
     Core::process_components(calc_local_to_world_matrix);
 }
 
-void render_scene()
+void default_render()
 {
     using Cameras = Core::
         MultiSpan<const CameraRenderState, const CameraClear, const WorldToViewMatrix, const ProjectionUniformBuffer>;
@@ -296,7 +273,11 @@ void render_scene()
         for (const auto &[camera_render_state, camera_clear, wv_matrix, projection_buffer] : cameras)
         {
             update_lighting(wv_matrix);
-            setup_viewport(camera_render_state, camera_clear);
+
+            Math::RectangleI viewport_rect{Gfx::calc_camera_viewport_rect(camera_render_state)};
+            Gfx::clear_framebuffer(camera_render_state.framebuffer_id, camera_clear.framebuffer_clear, viewport_rect);
+            Gfx::use_viewport_rect(viewport_rect);
+            Gfx::set_render_targets(camera_render_state.framebuffer_id, camera_render_state.color_buffers);
 
             auto &draw_call_keys = get_layer_draw_calls(camera_render_state.layer);
             sort_draw_calls(draw_call_keys);

@@ -139,6 +139,10 @@ void ProceduralTextureScene::init()
     }
 }
 
+void ProceduralTextureScene::update_render_state()
+{
+}
+
 void ProceduralTextureScene::update()
 {
     using Core::process_components;
@@ -154,6 +158,6 @@ void ProceduralTextureScene::update()
 
 void ProceduralTextureScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

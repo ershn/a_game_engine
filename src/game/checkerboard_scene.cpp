@@ -225,6 +225,10 @@ void CheckerBoardScene::init()
     }
 }
 
+void CheckerBoardScene::update_render_state()
+{
+}
+
 void CheckerBoardScene::update()
 {
     using Core::process_components;
@@ -239,6 +243,6 @@ void CheckerBoardScene::update()
 
 void CheckerBoardScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

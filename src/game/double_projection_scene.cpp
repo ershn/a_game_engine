@@ -231,6 +231,10 @@ void DoubleProjectionScene::init()
     Core::process_components(Gfx::calc_spherical_camera_view_matrix);
 }
 
+void DoubleProjectionScene::update_render_state()
+{
+}
+
 void DoubleProjectionScene::update()
 {
     using Core::process_components;
@@ -245,6 +249,6 @@ void DoubleProjectionScene::update()
 
 void DoubleProjectionScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

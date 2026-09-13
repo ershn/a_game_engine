@@ -457,6 +457,10 @@ void CubePointLightScene::init()
     }
 }
 
+void CubePointLightScene::update_render_state()
+{
+}
+
 void CubePointLightScene::update()
 {
     using Core::process_components;
@@ -473,6 +477,6 @@ void CubePointLightScene::update()
 
 void CubePointLightScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

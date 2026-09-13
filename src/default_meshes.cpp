@@ -14,22 +14,22 @@ namespace
 // clang-format off
 const std::uint32_t s_plane_vertex_attrs[] = {
     in_uint32(normalized_int16(-0.5f), normalized_int16(0.5f)), in_uint32(std::int16_t{0}, 0),
-    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_uint(0.716f, 0.250f, 0.145f, 0.0f),
     packed_int(0.0f, 0.0f, 1.0f, 0.0f),
     in_uint32(std::uint16_t{0}, normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(0.5f), normalized_int16(0.5f)), in_uint32(std::int16_t{0}, 0),
-    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_uint(0.716f, 0.250f, 0.145f, 0.0f),
     packed_int(0.0f, 0.0f, 1.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(std::int16_t{0}, 0),
-    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_uint(0.716f, 0.250f, 0.145f, 0.0f),
     packed_int(0.0f, 0.0f, 1.0f, 0.0f),
     in_uint32(std::uint16_t{0}, 0),
 
     in_uint32(normalized_int16(0.5f), normalized_int16(-0.5f)), in_uint32(std::int16_t{0}, 0),
-    packed_uint(0.859f, 0.533f, 0.416f, 0.0f),
+    packed_uint(0.716f, 0.250f, 0.145f, 0.0f),
     packed_int(0.0f, 0.0f, 1.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), 0),
 };
@@ -41,132 +41,132 @@ const std::uint16_t s_plane_vertex_indices[] = {
 
 const std::uint32_t s_cube_vertex_attrs[] = {
     in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_uint(0.000f, 0.957f, 0.246f, 0.0f),
     packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_uint(0.000f, 0.957f, 0.246f, 0.0f),
     packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_uint(0.000f, 0.957f, 0.246f, 0.0f),
     packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.000f, 0.980f, 0.529f, 0.0f),
+    packed_uint(0.000f, 0.957f, 0.246f, 0.0f),
     packed_int( 0.0f,  0.0f,  1.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
 
 
     in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_uint(0.487f, 0.053f, 0.028f, 0.0f),
     packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_uint(0.487f, 0.053f, 0.028f, 0.0f),
     packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_uint(0.487f, 0.053f, 0.028f, 0.0f),
     packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.721f, 0.262f, 0.196f, 0.0f),
+    packed_uint(0.487f, 0.053f, 0.028f, 0.0f),
     packed_int( 0.0f,  0.0f, -1.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 
 
 
     in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_uint(0.931f, 0.014f, 0.000f, 0.0f),
     packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_uint(0.931f, 0.014f, 0.000f, 0.0f),
     packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_uint(0.931f, 0.014f, 0.000f, 0.0f),
     packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.968f, 0.141f, 0.019f, 0.0f),
+    packed_uint(0.931f, 0.014f, 0.000f, 0.0f),
     packed_int( 0.0f,  1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
 
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_uint(0.037f, 0.368f, 0.166f, 0.0f),
     packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_uint(0.037f, 0.368f, 0.166f, 0.0f),
     packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_uint(0.037f, 0.368f, 0.166f, 0.0f),
     packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.223f, 0.635f, 0.443f, 0.0f),
+    packed_uint(0.037f, 0.368f, 0.166f, 0.0f),
     packed_int( 0.0f, -1.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
 
 
     in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_uint(0.190f, 0.058f, 0.045f, 0.0f),
     packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_uint(0.190f, 0.058f, 0.045f, 0.0f),
     packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_uint(0.190f, 0.058f, 0.045f, 0.0f),
     packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16( 0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.470f, 0.274f, 0.243f, 0.0f),
+    packed_uint(0.190f, 0.058f, 0.045f, 0.0f),
     packed_int( 1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
 
 
     in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_uint(0.043f, 0.076f, 0.060f, 0.0f),
     packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16( 0.5f), 0),
-    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_uint(0.043f, 0.076f, 0.060f, 0.0f),
     packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(1.0f), normalized_uint16(0.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16( 0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_uint(0.043f, 0.076f, 0.060f, 0.0f),
     packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(1.0f)),
 
     in_uint32(normalized_int16(-0.5f), normalized_int16(-0.5f)), in_uint32(normalized_int16(-0.5f), 0),
-    packed_uint(0.239f, 0.309f, 0.278f, 0.0f),
+    packed_uint(0.043f, 0.076f, 0.060f, 0.0f),
     packed_int(-1.0f,  0.0f,  0.0f, 0.0f),
     in_uint32(normalized_uint16(0.0f), normalized_uint16(0.0f)),
 };

@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "ecs.hpp"
+#include "components.hpp"
 #include "opengl/opengl_api.hpp"
 
 namespace Age::Gfx

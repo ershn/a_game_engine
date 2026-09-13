@@ -79,20 +79,20 @@ const RenderbufferDesc &get_renderbuffer_desc(RenderbufferId id)
     return s_renderbuffer_descs[to_index(id)];
 }
 
-void resize_renderbuffer(RenderbufferId id, std::uint32_t width, std::uint32_t height)
+void resize_renderbuffer(RenderbufferId id, const Math::Vector2U &size)
 {
     std::size_t renderbuffer_index{to_index(id)};
 
     RenderbufferDesc &renderbuffer_desc{s_renderbuffer_descs[renderbuffer_index]};
-    renderbuffer_desc.width = width;
-    renderbuffer_desc.height = height;
+    renderbuffer_desc.width = size.x;
+    renderbuffer_desc.height = size.y;
 
     const Renderbuffer &renderbuffer{s_renderbuffers[renderbuffer_index]};
 
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer.gl_object);
 
     GLint internal_format{get_internal_format(renderbuffer_desc.format, false)};
-    glRenderbufferStorage(GL_RENDERBUFFER, internal_format, width, height);
+    glRenderbufferStorage(GL_RENDERBUFFER, internal_format, size.x, size.y);
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }

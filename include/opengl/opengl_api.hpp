@@ -68,8 +68,6 @@ void set_clear_color(const Math::Vector4 &color);
 void set_clear_depth(float depth);
 void set_clear_stencil_index(std::int32_t index);
 
-void set_viewport(const Math::RectangleI &rect);
-
 void enable_scissor_test(bool enable);
 void set_scissor(const Math::RectangleI &rect);
 

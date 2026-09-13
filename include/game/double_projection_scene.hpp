@@ -7,6 +7,7 @@ namespace Game
 struct DoubleProjectionScene : Scene
 {
     static void init();
+    static void update_render_state();
     static void update();
     static void render();
 };

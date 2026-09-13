@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "vector.hpp"
 
 namespace Age::Math
@@ -54,6 +56,21 @@ std::ostream &operator<<(std::ostream &out, const Vector4U &vector)
 {
     out << '{' << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << "}";
     return out;
+}
+
+Vector2 round(const Vector2 &vector)
+{
+    return {std::round(vector.x), std::round(vector.y)};
+}
+
+Vector3 round(const Vector3 &vector)
+{
+    return {std::round(vector.x), std::round(vector.y), std::round(vector.z)};
+}
+
+Vector4 round(const Vector4 &vector)
+{
+    return {std::round(vector.x), std::round(vector.y), std::round(vector.z), std::round(vector.w)};
 }
 
 Vector2 pow(const Vector2 &base, const Vector2 &exponent)

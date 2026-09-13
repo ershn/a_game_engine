@@ -6,6 +6,7 @@
 #include "image_formats.hpp"
 #include "opengl/opengl_api.hpp"
 #include "render_target.hpp"
+#include "vector.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -40,7 +41,7 @@ RenderbufferId create_renderbuffer(const RenderbufferDesc &renderbuffer_desc);
 
 const RenderbufferDesc &get_renderbuffer_desc(RenderbufferId id);
 
-void resize_renderbuffer(RenderbufferId id, std::uint32_t width, std::uint32_t height);
+void resize_renderbuffer(RenderbufferId id, const Math::Vector2U &size);
 } // namespace Api
 
 const Renderbuffer &get_renderbuffer(RenderbufferId id);

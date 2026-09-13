@@ -562,6 +562,10 @@ constexpr Vector4X<T> max(const Vector4X<T> &a, const Vector4X<T> &b)
     return {std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z), std::max(a.w, b.w)};
 }
 
+Vector2 round(const Vector2 &vector);
+Vector3 round(const Vector3 &vector);
+Vector4 round(const Vector4 &vector);
+
 Vector2 pow(const Vector2 &base, const Vector2 &exponent);
 Vector3 pow(const Vector3 &base, const Vector3 &exponent);
 Vector4 pow(const Vector4 &base, const Vector4 &exponent);

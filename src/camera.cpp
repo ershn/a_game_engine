@@ -9,8 +9,8 @@ float calc_aspect_ratio(const CameraRenderState &camera_render_state)
 {
     const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
     const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
-    Math::RectangleI viewport_pixel_rect{calc_viewport_pixel_rect(viewport, framebuffer_size)};
-    return static_cast<float>(viewport_pixel_rect.size.x) / viewport_pixel_rect.size.y;
+    Math::RectangleI viewport_rect{calc_viewport_rect(viewport, framebuffer_size)};
+    return static_cast<float>(viewport_rect.size.x) / viewport_rect.size.y;
 }
 } // namespace
 
@@ -79,9 +79,7 @@ void update_window_space_camera_matrix(
 )
 {
     const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
-    Math::RectangleI viewport_rect{
-        calc_viewport_pixel_rect(get_viewport(camera_render_state.viewport_id), framebuffer_size)
-    };
+    Math::RectangleI viewport_rect{calc_viewport_rect(get_viewport(camera_render_state.viewport_id), framebuffer_size)};
 
     camera.viewport_width = viewport_rect.size.x;
     camera.viewport_height = viewport_rect.size.y;
@@ -94,5 +92,11 @@ void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToVie
 {
     view_matrix.matrix = Math::affine_rotation_matrix(camera_transform.orientation).transpose() *
                          Math::translation_matrix(-camera_transform.position);
+}
+
+Math::RectangleI calc_camera_viewport_rect(const CameraRenderState &camera_render_state)
+{
+    const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
+    return calc_viewport_rect(get_viewport(camera_render_state.viewport_id), framebuffer_size);
 }
 } // namespace Age::Gfx

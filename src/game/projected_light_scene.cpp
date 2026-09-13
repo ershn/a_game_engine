@@ -469,6 +469,10 @@ void ProjectedLightScene::init()
     }
 }
 
+void ProjectedLightScene::update_render_state()
+{
+}
+
 void ProjectedLightScene::update()
 {
     using Core::process_components;
@@ -485,6 +489,6 @@ void ProjectedLightScene::update()
 
 void ProjectedLightScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

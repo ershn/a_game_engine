@@ -5,9 +5,9 @@
 #include <limits>
 
 #include "glfw.hpp"
+#include "opengl/opengl_texture.hpp"
 #include "rectangle.hpp"
 #include "render_target.hpp"
-#include "texture.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -35,16 +35,18 @@ struct FramebufferAttachments
     FramebufferAttachment stencil_attachment{};
 };
 
+using ColorBufferMask = std::uint8_t;
+
 struct FramebufferMask
 {
-    std::uint8_t color_buffers{};
+    ColorBufferMask color_buffers{};
     bool depth_buffer : 1 {};
     bool stencil_buffer : 1 {};
 
     static constexpr FramebufferMask from(unsigned int mask)
     {
         return {
-            .color_buffers = static_cast<std::uint8_t>(mask >> 8 & 0xFF),
+            .color_buffers = static_cast<ColorBufferMask>(mask >> 8),
             .depth_buffer = static_cast<bool>(mask & 0b10),
             .stencil_buffer = static_cast<bool>(mask & 0b1)
         };
@@ -55,7 +57,15 @@ struct FramebufferMask
         return color_buffers << 8 | depth_buffer << 1 | static_cast<int>(stencil_buffer);
     }
 };
+} // namespace Api
 
+struct Framebuffer
+{
+    GLuint gl_object{};
+};
+
+inline namespace Api
+{
 void init_framebuffer_system(GLFWwindow *window);
 
 FramebufferId create_framebuffer(const FramebufferAttachments &attachments);
@@ -67,14 +77,12 @@ const Math::Vector2U &get_framebuffer_size(FramebufferId framebuffer_id);
 void update_system_framebuffer_size();
 void update_user_framebuffer_size(FramebufferId framebuffer_id, const Math::Vector2U &size);
 
-void set_render_targets(FramebufferId framebuffer_id, std::uint8_t color_buffers);
+void set_render_targets(FramebufferId framebuffer_id, ColorBufferMask color_buffers);
 
 struct FramebufferClear
 {
     FramebufferMask buffers{
-        .color_buffers = std::numeric_limits<decltype(FramebufferMask::color_buffers)>::max(),
-        .depth_buffer = true,
-        .stencil_buffer = true
+        .color_buffers = std::numeric_limits<ColorBufferMask>::max(), .depth_buffer = true, .stencil_buffer = true
     };
     std::array<Math::Vector4, COLOR_ATTACHMENT_POINT_COUNT> clear_colors{};
     float clear_depth{1.0f};
@@ -82,6 +90,7 @@ struct FramebufferClear
 };
 
 void clear_framebuffer(FramebufferId framebuffer_id, const FramebufferClear &clear);
+void clear_framebuffer(FramebufferId framebuffer_id, const FramebufferClear &clear, const Math::RectangleI &rect);
 
 enum struct BlitFilter : std::uint8_t
 {
@@ -94,8 +103,8 @@ void blit_framebuffer(
     const Math::Rectangle &source_rect,
     FramebufferId dest_id,
     const Math::Rectangle &dest_rect,
-    std::uint8_t source_color_buffer,
-    std::uint8_t dest_color_buffers,
+    ColorBufferMask source_color_buffer,
+    ColorBufferMask dest_color_buffers,
     bool blit_depth_buffer,
     bool blit_stencil_buffer,
     BlitFilter filter

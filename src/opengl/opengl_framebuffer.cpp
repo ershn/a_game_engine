@@ -1,6 +1,4 @@
-#include <algorithm>
 #include <bit>
-#include <limits>
 #include <vector>
 
 #include "error_handling.hpp"
@@ -21,11 +19,6 @@ constexpr GLenum to_gl_enum(BlitFilter blit_filter)
 {
     return s_blit_filter_to_gl_enum[static_cast<std::size_t>(blit_filter)];
 }
-
-struct Framebuffer
-{
-    GLuint gl_object{};
-};
 
 int s_framebuffer_real_width{};
 int s_framebuffer_real_height{};
@@ -75,7 +68,7 @@ void set_draw_framebuffer(FramebufferId framebuffer_id)
     }
 }
 
-void set_read_color_buffer(std::uint8_t color_buffer)
+void set_read_color_buffer(ColorBufferMask color_buffer)
 {
     if (color_buffer == 0)
     {
@@ -99,7 +92,7 @@ void set_read_color_buffer(std::uint8_t color_buffer)
     }
 }
 
-void set_draw_color_buffers(std::uint8_t color_buffers)
+void set_draw_color_buffers(ColorBufferMask color_buffers)
 {
     if (s_bound_draw_framebuffer_id == SYSTEM_FRAMEBUFFER_ID)
     {
@@ -153,13 +146,8 @@ void init_framebuffer_system(GLFWwindow *window)
 {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    Math::Vector2U &system_framebuffer_size{s_framebuffer_sizes[to_index(SYSTEM_FRAMEBUFFER_ID)]};
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    system_framebuffer_size.x = static_cast<unsigned int>(width);
-    system_framebuffer_size.y = static_cast<unsigned int>(height);
-
-    s_system_framebuffer_size_changed = true;
+    glfwGetFramebufferSize(window, &s_framebuffer_real_width, &s_framebuffer_real_height);
+    s_framebuffer_real_size_changed = true;
 }
 
 FramebufferId create_framebuffer(const FramebufferAttachments &attachments)
@@ -258,7 +246,7 @@ void update_user_framebuffer_size(FramebufferId framebuffer_id, const Math::Vect
     s_framebuffer_sizes[to_index(framebuffer_id)] = size;
 }
 
-void set_render_targets(FramebufferId framebuffer_id, std::uint8_t color_buffers)
+void set_render_targets(FramebufferId framebuffer_id, ColorBufferMask color_buffers)
 {
     set_draw_framebuffer(framebuffer_id);
     set_draw_color_buffers(color_buffers);
@@ -266,6 +254,7 @@ void set_render_targets(FramebufferId framebuffer_id, std::uint8_t color_buffers
 
 void clear_framebuffer(FramebufferId framebuffer_id, const FramebufferClear &clear)
 {
+    // TODO: make it so GL_FRAMEBUFFER_SRGB is always active before a clear ?
     std::size_t framebuffer_index{to_index(framebuffer_id)};
     FramebufferMask framebuffer_mask{FramebufferMask::from(clear.buffers & s_framebuffer_masks[framebuffer_index])};
 
@@ -285,13 +274,30 @@ void clear_framebuffer(FramebufferId framebuffer_id, const FramebufferClear &cle
         glClearBufferiv(GL_STENCIL, 0, &clear.clear_stencil_index);
 }
 
+void clear_framebuffer(FramebufferId framebuffer_id, const FramebufferClear &clear, const Math::RectangleI &rect)
+{
+    if (rect.position == Math::Vector2I{0} && rect.size == Math::Vector2I{get_framebuffer_size(framebuffer_id)})
+    {
+        clear_framebuffer(framebuffer_id, clear);
+    }
+    else
+    {
+        OGL::enable_scissor_test(true);
+        OGL::set_scissor(rect);
+
+        clear_framebuffer(framebuffer_id, clear);
+
+        OGL::enable_scissor_test(false);
+    }
+}
+
 void blit_framebuffer(
     FramebufferId source_id,
     const Math::Rectangle &source_rect,
     FramebufferId dest_id,
     const Math::Rectangle &dest_rect,
-    std::uint8_t source_color_buffer,
-    std::uint8_t dest_color_buffers,
+    ColorBufferMask source_color_buffer,
+    ColorBufferMask dest_color_buffers,
     bool blit_depth_buffer,
     bool blit_stencil_buffer,
     BlitFilter filter
@@ -340,9 +346,11 @@ TextureId create_texture_from_framebuffer(FramebufferId framebuffer_id, ImageFor
     return create_texture(TextureType::TEXTURE_2D, [&](const Texture &, TextureDesc &texture_desc) {
         const Math::Vector2U &framebuffer_size{get_framebuffer_size(framebuffer_id)};
 
+        // TODO: allow to select the read buffer
         set_read_framebuffer(framebuffer_id);
 
         GLint internal_format{get_internal_format(image_format, false)};
+        // TODO: log an error if the read buffer is srgb and image_format is not or vice versa
         glCopyTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -371,8 +379,10 @@ void copy_framebuffer_to_texture(FramebufferId framebuffer_id, TextureId texture
     modify_texture(texture_id, [&](const Texture &, TextureDesc &texture_desc) {
         const Math::Vector2U &framebuffer_size{get_framebuffer_size(framebuffer_id)};
 
+        // TODO: allow to select the read buffer
         set_read_framebuffer(framebuffer_id);
 
+        // TODO: log an error if the read buffer is srgb and image_format is not or vice versa
         if (framebuffer_size.x == texture_desc.width && framebuffer_size.y == texture_desc.height)
         {
             glCopyTexSubImage2D(

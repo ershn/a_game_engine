@@ -156,6 +156,10 @@ void GammaAndTexturesScene::init()
     }
 }
 
+void GammaAndTexturesScene::update_render_state()
+{
+}
+
 void GammaAndTexturesScene::update()
 {
     using Core::process_components;
@@ -168,6 +172,6 @@ void GammaAndTexturesScene::update()
 
 void GammaAndTexturesScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

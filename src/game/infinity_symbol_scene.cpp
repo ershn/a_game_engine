@@ -285,6 +285,10 @@ void InfinitySymbolScene::init()
     }
 }
 
+void InfinitySymbolScene::update_render_state()
+{
+}
+
 void InfinitySymbolScene::update()
 {
     using Core::process_components;
@@ -301,6 +305,6 @@ void InfinitySymbolScene::update()
 
 void InfinitySymbolScene::render()
 {
-    Gfx::render_scene();
+    Gfx::default_render();
 }
 } // namespace Game

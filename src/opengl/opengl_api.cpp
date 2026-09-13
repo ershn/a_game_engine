@@ -156,16 +156,6 @@ void set_clear_stencil_index(std::int32_t index)
     glClearStencil(index);
 }
 
-void set_viewport(const Math::RectangleI &rect)
-{
-    glViewport(
-        static_cast<GLint>(rect.position.x),
-        static_cast<GLint>(rect.position.y),
-        static_cast<GLsizei>(rect.size.x),
-        static_cast<GLsizei>(rect.size.y)
-    );
-}
-
 void enable_scissor_test(bool enable)
 {
     if (enable)

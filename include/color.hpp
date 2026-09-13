@@ -4,5 +4,6 @@
 
 namespace Age::Gfx
 {
-Math::Vector4 gamma_correct_color(const Math::Vector4 &color, float gamma_reciprocal);
+Math::Vector4 linear_to_srgb(const Math::Vector4 &color, float gamma);
+Math::Vector4 srgb_to_linear(const Math::Vector4 &color, float gamma);
 } // namespace Age::Gfx

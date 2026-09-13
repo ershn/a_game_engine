@@ -5,6 +5,7 @@
 
 #include "camera.hpp"
 #include "comparisons.hpp"
+#include "framebuffer.hpp"
 #include "glfw.hpp"
 #include "material.hpp"
 #include "matrix.hpp"
@@ -44,8 +45,6 @@ struct Renderer
     bool enabled{true};
 };
 
-using RenderScene = void (*)();
-
 void init_rendering_system(GLFWwindow *window);
 
 inline constexpr unsigned int WITH_LW_MATRIX{0b1};
@@ -57,7 +56,6 @@ void disable_renderer(Renderer &renderer);
 void set_renderer_layer(Renderer &renderer, Layer layer);
 
 void update_lighting(const WorldToViewMatrix &wv_matrix);
-void setup_viewport(const CameraRenderState &camera_render_state, const CameraClear &camera_clear);
 
 std::vector<DrawCallKey> &get_layer_draw_calls(Layer layer);
 void sort_draw_calls(std::vector<DrawCallKey> &draw_call_keys);
@@ -90,14 +88,16 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessEqual>(
 );
 
 void prepare_rendering();
-void render_scene();
+void default_render();
 void complete_rendering();
 
-template <RenderScene RenderScene>
+using Render = void (*)();
+
+template <Render Render>
 void render()
 {
     prepare_rendering();
-    RenderScene();
+    Render();
     complete_rendering();
 }
 

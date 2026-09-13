@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cmath>
-
 #include "vector.hpp"
 
 namespace Age::Math
@@ -38,8 +36,9 @@ template <typename T>
 constexpr Rectangle scale(const Rectangle &rect, const Vector2X<T> &scaling)
 {
     return {
-        {std::round(rect.position.x * scaling.x), std::round(rect.position.y * scaling.y)},
-        {std::round(rect.size.x * scaling.x), std::round(rect.size.y * scaling.y)}
+        {rect.position.x * scaling.x, rect.position.y * scaling.y}, {rect.size.x * scaling.x, rect.size.y * scaling.y}
     };
 }
+
+Rectangle round(const Rectangle &rect);
 } // namespace Age::Math

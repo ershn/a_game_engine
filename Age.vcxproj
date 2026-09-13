@@ -144,6 +144,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\common_viewport.cpp" />
+    <ClCompile Include="src\opengl\opengl_texture.cpp" />
+    <ClCompile Include="src\opengl\opengl_viewport.cpp" />
+    <ClCompile Include="src\common_texture.cpp" />
+    <ClCompile Include="src\rectangle.cpp" />
     <ClCompile Include="src\opengl\opengl_errors.cpp" />
     <ClCompile Include="src\opengl\opengl_framebuffer.cpp" />
     <ClCompile Include="src\game\checkerboard_scene.cpp" />
@@ -170,7 +175,6 @@
     <ClCompile Include="src\path.cpp" />
     <ClCompile Include="src\opengl\opengl_renderbuffer.cpp" />
     <ClCompile Include="src\render_pipeline_state.cpp" />
-    <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\third_parties\glad.c" />
     <ClCompile Include="src\transform.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -200,12 +204,12 @@
     <ClCompile Include="src\transformations.cpp" />
     <ClCompile Include="src\uniform_buffer.cpp" />
     <ClCompile Include="src\vector.cpp" />
-    <ClCompile Include="src\viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\build.hpp" />
     <ClInclude Include="include\camera.hpp" />
     <ClInclude Include="include\color.hpp" />
+    <ClInclude Include="include\common_viewport.hpp" />
     <ClInclude Include="include\comparisons.hpp" />
     <ClInclude Include="include\components.hpp" />
     <ClInclude Include="include\dds.hpp" />
@@ -255,8 +259,11 @@
     <ClInclude Include="include\opengl\opengl_api.hpp" />
     <ClInclude Include="include\opengl\opengl_image_formats.hpp" />
     <ClInclude Include="include\opengl\opengl_renderbuffer.hpp" />
+    <ClInclude Include="include\opengl\opengl_texture.hpp" />
+    <ClInclude Include="include\opengl\opengl_viewport.hpp" />
     <ClInclude Include="include\packing.hpp" />
     <ClInclude Include="include\path.hpp" />
+    <ClInclude Include="include\common_texture.hpp" />
     <ClInclude Include="include\quaternion.hpp" />
     <ClInclude Include="include\random.hpp" />
     <ClInclude Include="include\rectangle.hpp" />

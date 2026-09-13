@@ -16,6 +16,7 @@ template <typename T>
 concept IsScene = requires {
     { T::component_type_count } -> std::convertible_to<std::size_t>;
     T::init();
+    T::update_render_state();
     T::update();
     T::render();
 };
@@ -40,24 +41,29 @@ void run_engine()
     Gfx::init_rendering_system(window);
 
     Gfx::load_primitive_meshes();
+
     T::init();
 
     GLFW::poll_events();
 
     Input::init_input_state();
+
     Time::init_frame_time();
+
     while (Input::should_window_close() == false && is_exit_requested() == false)
     {
         Time::update_frame_time();
 
-        T::update();
-
-        Gfx::render<T::render>();
-
         GLFW::poll_events();
 
         Input::update_input_state();
+
         Gfx::update_render_state();
+        T::update_render_state();
+
+        T::update();
+
+        Gfx::render<T::render>();
     }
 
     destroy_window(window);

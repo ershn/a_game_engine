@@ -4,15 +4,14 @@
 #include <utility>
 #include <vector>
 
+#include "color.hpp"
 #include "default_materials.hpp"
 #include "default_meshes.hpp"
 #include "default_shaders.hpp"
 #include "ecs.hpp"
-#include "error_handling.hpp"
 #include "framebuffer.hpp"
 #include "inplace_list.hpp"
 #include "lighting.hpp"
-#include "opengl/opengl_api.hpp"
 #include "renderbuffer.hpp"
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
@@ -48,19 +47,20 @@ void RenderToTextureScene::init()
     auto &render_pipeline_data = get_global<RenderPipelineData>();
 
     render_pipeline_data.color_renderbuffer_id =
-        Gfx::create_renderbuffer({.width = 1280, .height = 720, .format = Gfx::ImageFormat::R8G8B8A8_UNORM});
+        Gfx::create_renderbuffer({.width = 1280, .height = 720, .format = Gfx::ImageFormat::R8G8B8A8_UNORM_SRGB});
     render_pipeline_data.depth_renderbuffer_id =
         Gfx::create_renderbuffer({.width = 1280, .height = 720, .format = Gfx::ImageFormat::D16_UNORM});
 
     render_pipeline_data.framebuffer_id = Gfx::create_framebuffer(
         {.color_attachments = {Gfx::FramebufferAttachment{
-             static_cast<Gfx::RenderTargetId>(render_pipeline_data.color_renderbuffer_id)
+             Gfx::to_render_target_id(render_pipeline_data.color_renderbuffer_id)
          }},
-         .depth_attachment = {static_cast<Gfx::RenderTargetId>(render_pipeline_data.depth_renderbuffer_id)}}
+         .depth_attachment = {Gfx::to_render_target_id(render_pipeline_data.depth_renderbuffer_id)}}
     );
 
-    render_pipeline_data.color_texture_id =
-        Gfx::create_texture_from_framebuffer(render_pipeline_data.framebuffer_id, Gfx::ImageFormat::R8G8B8A8_UNORM);
+    render_pipeline_data.color_texture_id = Gfx::create_texture_from_framebuffer(
+        render_pipeline_data.framebuffer_id, Gfx::ImageFormat::R8G8B8A8_UNORM_SRGB
+    );
 
     auto linear_sampler_id = Gfx::create_sampler(
         Gfx::SamplerParams{.flags{
@@ -84,7 +84,9 @@ void RenderToTextureScene::init()
             },
             Gfx::CameraStackOrder{.stack = 0, .order_in_stack = 0},
             Gfx::CameraRenderState{.framebuffer_id = render_pipeline_data.framebuffer_id},
-            Gfx::CameraClear{.framebuffer_clear{.clear_colors{Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}}}},
+            Gfx::CameraClear{
+                .framebuffer_clear{.clear_colors{Gfx::srgb_to_linear(Math::Vector4{0.75f, 0.75f, 1.0f, 1.0f}, 2.2f)}}
+            },
             Gfx::ProjectionUniformBuffer{projection_buffer, projection_buffer.create_range()},
             Input::MouseInput{.motion_sensitivity = 0.005f, .scroll_sensitivity = 0.2f},
             Gfx::SphericalCamera{
@@ -175,6 +177,19 @@ void RenderToTextureScene::init()
     }
 }
 
+void RenderToTextureScene::update_render_state()
+{
+    if (Gfx::has_system_framebuffer_size_changed())
+    {
+        const Math::Vector2U &system_framebuffer_size{Gfx::get_framebuffer_size(Gfx::SYSTEM_FRAMEBUFFER_ID)};
+
+        auto &pipeline_data = get_global<RenderPipelineData>();
+        Gfx::resize_renderbuffer(pipeline_data.color_renderbuffer_id, system_framebuffer_size);
+        Gfx::resize_renderbuffer(pipeline_data.depth_renderbuffer_id, system_framebuffer_size);
+        Gfx::update_user_framebuffer_size(pipeline_data.framebuffer_id, system_framebuffer_size);
+    }
+}
+
 void RenderToTextureScene::update()
 {
     using Core::process_components;
@@ -203,21 +218,22 @@ void RenderToTextureScene::render()
         return Util::get_ref<Gfx::CameraStackOrder>(camera1) < Util::get_ref<Gfx::CameraStackOrder>(camera2);
     });
 
-    auto &render_pipeline_data = get_global<RenderPipelineData>();
-
-    Gfx::for_each_camera_stack(cameras.cbegin(), cameras.cend(), [&render_pipeline_data](auto &camera_it) {
+    auto &pipeline_data = get_global<RenderPipelineData>();
+    Gfx::for_each_camera_stack(cameras.cbegin(), cameras.cend(), [&pipeline_data](auto &camera_it) {
         auto &camera_render_state = *std::get<const Gfx::CameraRenderState *>(*camera_it);
         auto &camera_clear = *std::get<const Gfx::CameraClear *>(*camera_it);
         auto &wv_matrix = *std::get<const Gfx::WorldToViewMatrix *>(*camera_it);
         auto &projection_buffer = *std::get<const Gfx::ProjectionUniformBuffer *>(*camera_it);
 
         Gfx::update_lighting(wv_matrix);
-        Gfx::setup_viewport(camera_render_state, camera_clear);
+
+        Math::RectangleI viewport_rect{Gfx::calc_camera_viewport_rect(camera_render_state)};
+        Gfx::clear_framebuffer(camera_render_state.framebuffer_id, camera_clear.framebuffer_clear, viewport_rect);
+        Gfx::use_viewport_rect(viewport_rect);
+        Gfx::set_render_targets(camera_render_state.framebuffer_id, camera_render_state.color_buffers);
 
         auto &draw_call_keys = Gfx::get_layer_draw_calls(camera_render_state.layer);
         Gfx::sort_draw_calls(draw_call_keys);
-
-        Gfx::set_render_targets(render_pipeline_data.framebuffer_id, 0b1);
 
         auto dc_key_it = draw_call_keys.cbegin();
         auto dc_key_end = draw_call_keys.cend();
@@ -225,7 +241,7 @@ void RenderToTextureScene::render()
             Gfx::DrawQueue::max_opaque, dc_key_it, dc_key_end, wv_matrix, projection_buffer
         );
 
-        Gfx::copy_framebuffer_to_texture(render_pipeline_data.framebuffer_id, render_pipeline_data.color_texture_id);
+        Gfx::copy_framebuffer_to_texture(camera_render_state.framebuffer_id, pipeline_data.color_texture_id);
 
         Gfx::execute_draw_calls<Util::LessEqual>(
             Gfx::DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer
@@ -233,7 +249,7 @@ void RenderToTextureScene::render()
     });
 
     Gfx::blit_framebuffer(
-        render_pipeline_data.framebuffer_id,
+        pipeline_data.framebuffer_id,
         Math::Rectangle{{}, {1.0f, 1.0f}},
         Gfx::SYSTEM_FRAMEBUFFER_ID,
         Math::Rectangle{{}, {1.0f, 1.0f}},

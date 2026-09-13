@@ -1,8 +1,7 @@
 #include <vector>
 
+#include "common_viewport.hpp"
 #include "id_generator.hpp"
-#include "opengl/opengl_api.hpp"
-#include "viewport.hpp"
 
 namespace Age::Gfx
 {
@@ -10,8 +9,6 @@ namespace
 {
 Util::IdGenerator<ViewportId> s_viewport_id_generator{ViewportId{2}};
 std::vector<Viewport> s_viewports{Viewport{.norm_rect{{0.0f, 0.0f}, {1.0f, 1.0f}}}};
-
-Math::RectangleI s_current_viewport_pixel_rect{};
 
 constexpr std::size_t to_index(ViewportId id)
 {
@@ -43,17 +40,8 @@ Viewport &get_viewport(ViewportId viewport_id)
     return s_viewports[to_index(viewport_id)];
 }
 
-Math::RectangleI calc_viewport_pixel_rect(const Viewport &viewport, const Math::Vector2U &framebuffer_size)
+Math::RectangleI calc_viewport_rect(const Viewport &viewport, const Math::Vector2U &framebuffer_size)
 {
-    return Math::RectangleI{Math::scale(viewport.norm_rect, framebuffer_size)};
-}
-
-void use_viewport_pixel_rect(const Math::RectangleI &pixel_rect)
-{
-    if (pixel_rect != s_current_viewport_pixel_rect)
-    {
-        OGL::set_viewport(pixel_rect);
-        s_current_viewport_pixel_rect = pixel_rect;
-    }
+    return Math::RectangleI{Math::round(Math::scale(viewport.norm_rect, framebuffer_size))};
 }
 } // namespace Age::Gfx
