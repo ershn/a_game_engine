@@ -148,6 +148,9 @@ void init_framebuffer_system(GLFWwindow *window)
 
     glfwGetFramebufferSize(window, &s_framebuffer_real_width, &s_framebuffer_real_height);
     s_framebuffer_real_size_changed = true;
+
+    // Always enable sRGB rendering (matching OpenGL ES and Vulkan behavior)
+    glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 FramebufferId create_framebuffer(const FramebufferAttachments &attachments)
@@ -254,7 +257,6 @@ void set_render_targets(FramebufferId framebuffer_id, ColorBufferMask color_buff
 
 void clear_framebuffer(FramebufferId framebuffer_id, const FramebufferClear &clear)
 {
-    // TODO: make it so GL_FRAMEBUFFER_SRGB is always active before a clear ?
     std::size_t framebuffer_index{to_index(framebuffer_id)};
     FramebufferMask framebuffer_mask{FramebufferMask::from(clear.buffers & s_framebuffer_masks[framebuffer_index])};
 

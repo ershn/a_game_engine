@@ -125,14 +125,6 @@ void bind_vertex_array_object(GLuint vao)
     glBindVertexArray(vao);
 }
 
-void enable_srgb_rendering(bool enable)
-{
-    if (enable)
-        glEnable(GL_FRAMEBUFFER_SRGB);
-    else
-        glDisable(GL_FRAMEBUFFER_SRGB);
-}
-
 void enable_depth_clamping(bool enable)
 {
     if (enable)
