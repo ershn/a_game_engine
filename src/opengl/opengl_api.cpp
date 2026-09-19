@@ -125,14 +125,6 @@ void bind_vertex_array_object(GLuint vao)
     glBindVertexArray(vao);
 }
 
-void enable_depth_clamping(bool enable)
-{
-    if (enable)
-        glEnable(GL_DEPTH_CLAMP);
-    else
-        glDisable(GL_DEPTH_CLAMP);
-}
-
 void set_clear_color(const Math::Vector4 &color)
 {
     glClearColor(color.x, color.y, color.z, color.w);

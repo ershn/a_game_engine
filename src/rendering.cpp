@@ -7,7 +7,6 @@
 #include "multi_span.hpp"
 #include "opengl/opengl_api.hpp"
 #include "rendering.hpp"
-#include "texture.hpp"
 #include "viewport.hpp"
 
 namespace Age::Gfx
@@ -50,9 +49,9 @@ DrawCallSortKey create_sort_key(MaterialId material_id, MeshId mesh_id)
     unsigned int bit_offset{0};
 
     sort_key |= static_cast<DrawCallSortKey>(mesh_id) << bit_offset;
-    bit_offset += sizeof(MeshId) * 8;
+    bit_offset += sizeof(mesh_id) * 8;
     sort_key |= static_cast<DrawCallSortKey>(material_id) << bit_offset;
-    bit_offset += sizeof(MaterialId) * 8;
+    bit_offset += sizeof(material_id) * 8;
     DrawQueue draw_queue{get_material(material_id).draw_queue};
     sort_key |= static_cast<DrawCallSortKey>(draw_queue) << bit_offset;
     bit_offset += DrawQueue::BitWidth::TOTAL;
@@ -145,14 +144,10 @@ void init_rendering_system(GLFWwindow *window)
 
     glfwSwapInterval(1);
 
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);
-    glCullFace(GL_BACK);
-
     glEnable(GL_DEPTH_TEST);
-    glDepthMask(true);
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0, 1.0);
+    glDepthMask(true);
 }
 
 void init_renderer(Core::EntityId entity_id, unsigned int options)
