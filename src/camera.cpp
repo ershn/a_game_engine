@@ -8,9 +8,8 @@ namespace
 float calc_aspect_ratio(const CameraRenderState &camera_render_state)
 {
     const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
-    const Viewport &viewport{get_viewport(camera_render_state.viewport_id)};
-    Math::RectangleI viewport_rect{calc_viewport_rect(viewport, framebuffer_size)};
-    return static_cast<float>(viewport_rect.size.x) / viewport_rect.size.y;
+    Math::Vector2I viewport_size{mapped_viewport_size(camera_render_state.viewport_id, framebuffer_size)};
+    return static_cast<float>(viewport_size.x) / viewport_size.y;
 }
 } // namespace
 
@@ -79,24 +78,23 @@ void update_window_space_camera_matrix(
 )
 {
     const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
-    Math::RectangleI viewport_rect{calc_viewport_rect(get_viewport(camera_render_state.viewport_id), framebuffer_size)};
+    Math::Vector2I viewport_size{mapped_viewport_size(camera_render_state.viewport_id, framebuffer_size)};
 
-    camera.viewport_width = viewport_rect.size.x;
-    camera.viewport_height = viewport_rect.size.y;
-    view_to_clip_matrix.matrix = window_space_orthographic_proj_matrix(viewport_rect.size.x, viewport_rect.size.y);
+    camera.viewport_width = viewport_size.x;
+    camera.viewport_height = viewport_size.y;
+    view_to_clip_matrix.matrix = window_space_orthographic_proj_matrix(viewport_size.x, viewport_size.y);
 
     projection_uniform_buffer.buffer.update({.view_to_clip_matrix{view_to_clip_matrix.matrix}});
 }
 
 void calc_camera_view_matrix(const Core::Transform &camera_transform, WorldToViewMatrix &view_matrix)
 {
-    view_matrix.matrix = Math::affine_rotation_matrix(camera_transform.orientation).transpose() *
+    view_matrix.matrix = Math::transpose(Math::affine_rotation_matrix(camera_transform.orientation)) *
                          Math::translation_matrix(-camera_transform.position);
 }
 
-Math::RectangleI calc_camera_viewport_rect(const CameraRenderState &camera_render_state)
+MappedViewport mapped_camera_viewport(const CameraRenderState &camera_render_state)
 {
-    const Math::Vector2U &framebuffer_size{get_framebuffer_size(camera_render_state.framebuffer_id)};
-    return calc_viewport_rect(get_viewport(camera_render_state.viewport_id), framebuffer_size);
+    return mapped_viewport(camera_render_state.viewport_id, get_framebuffer_size(camera_render_state.framebuffer_id));
 }
 } // namespace Age::Gfx

@@ -324,8 +324,8 @@ void blit_framebuffer(
 
     OGL_CLEAR_ERRORS();
 
-    Math::RectangleI source_rect_i{Math::scale(source_rect, get_framebuffer_size(source_id))};
-    Math::RectangleI dest_rect_i{Math::scale(dest_rect, get_framebuffer_size(dest_id))};
+    Math::RectangleI source_rect_i{Math::scale(source_rect, Math::Vector2{get_framebuffer_size(source_id)})};
+    Math::RectangleI dest_rect_i{Math::scale(dest_rect, Math::Vector2{get_framebuffer_size(dest_id)})};
 
     glBlitFramebuffer(
         source_rect_i.position.x,

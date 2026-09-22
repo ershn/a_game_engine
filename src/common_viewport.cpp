@@ -8,7 +8,7 @@ namespace Age::Gfx
 namespace
 {
 Util::IdGenerator<ViewportId> s_viewport_id_generator{ViewportId{2}};
-std::vector<Viewport> s_viewports{Viewport{.norm_rect{{0.0f, 0.0f}, {1.0f, 1.0f}}}};
+std::vector<Viewport> s_viewports{Viewport{.rect{{0.0f, 0.0f}, {1.0f, 1.0f}}}};
 
 constexpr std::size_t to_index(ViewportId id)
 {
@@ -16,12 +16,12 @@ constexpr std::size_t to_index(ViewportId id)
 }
 } // namespace
 
-void init_viewport_system()
+void init_viewport_storage()
 {
     s_viewports.reserve(8);
 }
 
-ViewportId create_viewport(const Math::Rectangle &norm_rect)
+ViewportId create_viewport(const Viewport &viewport)
 {
     ViewportId viewport_id{s_viewport_id_generator.generate()};
 
@@ -29,19 +29,24 @@ ViewportId create_viewport(const Math::Rectangle &norm_rect)
     if (viewport_index >= s_viewports.size())
         s_viewports.resize(viewport_index + 1);
 
-    Viewport &viewport{s_viewports[viewport_index]};
-    viewport.norm_rect = norm_rect;
+    s_viewports[viewport_index] = viewport;
 
     return viewport_id;
 }
 
-Viewport &get_viewport(ViewportId viewport_id)
+Math::Vector2I mapped_viewport_size(ViewportId viewport_id, const Math::Vector2U &framebuffer_size)
 {
-    return s_viewports[to_index(viewport_id)];
+    const Math::Vector2 &viewport_size{s_viewports[to_index(viewport_id)].rect.size};
+    return Math::Vector2I{Math::round(Math::scale(viewport_size, Math::Vector2{framebuffer_size}))};
 }
 
-Math::RectangleI calc_viewport_rect(const Viewport &viewport, const Math::Vector2U &framebuffer_size)
+MappedViewport mapped_viewport(ViewportId viewport_id, const Math::Vector2U &framebuffer_size)
 {
-    return Math::RectangleI{Math::round(Math::scale(viewport.norm_rect, framebuffer_size))};
+    const Viewport &viewport{s_viewports[to_index(viewport_id)]};
+    return {
+        .rect{Math::round(Math::scale(viewport.rect, Math::Vector2{framebuffer_size}))},
+        .near_depth{viewport.near_depth},
+        .far_depth{viewport.far_depth}
+    };
 }
 } // namespace Age::Gfx

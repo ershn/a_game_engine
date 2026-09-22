@@ -6,6 +6,8 @@ namespace Age::Gfx::OGL
 {
 inline namespace Api
 {
-void use_viewport_rect(const Math::RectangleI &rect);
-}
+void init_viewport_system();
+
+void set_viewport_transformation(const MappedViewport &mapped_viewport);
+} // namespace Api
 } // namespace Age::Gfx::OGL

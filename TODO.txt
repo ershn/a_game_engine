@@ -27,11 +27,10 @@
 - add missing wrapper functions and use them instead
 
 # Math
-- make the matrix methods free functions
 
 # Performance
 
 # Refactoring
 - use scoped enums instead of plain integers where appropriate
 - use bit-fields instead of bit masks
-- replace usages of Core::process_components with Core::execute and remove Core::process_components
+- replace uses of Core::process_components with Core::execute and remove Core::process_components

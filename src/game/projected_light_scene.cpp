@@ -150,8 +150,8 @@ void calc_spotlight_matrix(Spotlight &spotlight, const Core::Transform &transfor
         Math::Vector4{0.0f, 0.0f, -1.0f, 0.0f}
     };
 
-    Math::Matrix4 view_to_world_matrix{world_to_view_matrix.inverted()};
-    Math::Matrix4 world_to_spotlight_matrix{Core::transform_matrix(transform).invert()};
+    Math::Matrix4 view_to_world_matrix{Math::inverse(world_to_view_matrix)};
+    Math::Matrix4 world_to_spotlight_matrix{Math::inverse(Core::transform_matrix(transform))};
     Math::Matrix4 proj_tex_matrix = projective_texturing_matrix(Math::radians(spotlight.vertical_fov)) *
                                     world_to_spotlight_matrix * view_to_world_matrix;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <string_view>
 
@@ -33,6 +34,14 @@ enum struct RenderingMode : std::uint16_t
 };
 
 GLint get_integer(GLenum param_name);
+
+template <std::size_t N>
+std::array<GLint, N> get_integers(GLenum param_name)
+{
+    std::array<GLint, N> values;
+    glGetIntegerv(param_name, values.data());
+    return values;
+}
 
 GLuint create_shader(ShaderType shader_type);
 void use_shader(GLuint shader_program);

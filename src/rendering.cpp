@@ -101,7 +101,7 @@ void execute_draw_call(
 
         if (shader.lv_normal_matrix != -1)
         {
-            Math::Matrix3 lv_normal_matrix{Math::Matrix3{lv_matrix}.invert().transpose()};
+            Math::Matrix3 lv_normal_matrix{Math::transpose(Math::inverse(Math::Matrix3{lv_matrix}))};
             OGL::set_uniform(shader.lv_normal_matrix, lv_normal_matrix);
         }
     }
@@ -146,7 +146,6 @@ void init_rendering_system(GLFWwindow *window)
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glDepthRange(0.0, 1.0);
     glDepthMask(true);
 }
 
@@ -269,9 +268,11 @@ void default_render()
         {
             update_lighting(wv_matrix);
 
-            Math::RectangleI viewport_rect{Gfx::calc_camera_viewport_rect(camera_render_state)};
-            Gfx::clear_framebuffer(camera_render_state.framebuffer_id, camera_clear.framebuffer_clear, viewport_rect);
-            Gfx::use_viewport_rect(viewport_rect);
+            Gfx::MappedViewport mapped_viewport{Gfx::mapped_camera_viewport(camera_render_state)};
+            Gfx::clear_framebuffer(
+                camera_render_state.framebuffer_id, camera_clear.framebuffer_clear, mapped_viewport.rect
+            );
+            Gfx::set_viewport_transformation(mapped_viewport);
             Gfx::set_render_targets(camera_render_state.framebuffer_id, camera_render_state.color_buffers);
 
             auto &draw_call_keys = get_layer_draw_calls(camera_render_state.layer);

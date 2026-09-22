@@ -89,7 +89,7 @@ void rotate_in_post_proj_space(
     const Math::Vector2 &rotation_angles{spherical_camera.spherical_coord.angles};
     view_to_clip_matrix.matrix =
         // Clip space is left-handed so we need to transpose the matrix to keep the same rotation directions
-        Math::affine_yx_rotation_matrix(rotation_angles.y, rotation_angles.x - Math::PI * 0.5f).transpose() *
+        Math::transpose(Math::affine_yx_rotation_matrix(rotation_angles.y, rotation_angles.x - Math::PI * 0.5f)) *
         view_to_clip_matrix.matrix;
 
     projection_uniform_buffer.buffer.update({view_to_clip_matrix.matrix});
@@ -121,8 +121,8 @@ void DoubleProjectionScene::init()
         }}
     );
 
-    Gfx::ViewportId left_viewport_id{Gfx::create_viewport({{0.0f, 0.0f}, {0.5f, 1.0f}})};
-    Gfx::ViewportId right_viewport_id{Gfx::create_viewport({{0.5f, 0.0f}, {0.5f, 1.0f}})};
+    Gfx::ViewportId left_viewport_id{Gfx::create_viewport({.rect{{0.0f, 0.0f}, {0.5f, 1.0f}}})};
+    Gfx::ViewportId right_viewport_id{Gfx::create_viewport({.rect{{0.5f, 0.0f}, {0.5f, 1.0f}}})};
 
     // Left camera
     Core::EntityId left_camera_id;

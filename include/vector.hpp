@@ -14,8 +14,8 @@ struct Vector2X
 {
     using value_type = T;
 
-    T x;
-    T y;
+    T x{};
+    T y{};
 
     constexpr Vector2X() = default;
 
@@ -38,25 +38,39 @@ struct Vector2X
     {
     }
 
-    constexpr bool operator==(const Vector2X &rhs) const = default;
-
     explicit operator const T *() const
     {
         return &x;
     }
 
-    T operator[](std::size_t index) const
-    {
-        LOG_ERROR_IF(index > 1, "Vector2X index must be in the range [0, 1]: {}", index);
+    constexpr bool operator==(const Vector2X &rhs) const = default;
 
-        return *(&x + index % 2);
+    constexpr T operator[](std::size_t index) const
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        default:
+            Core::log_error("Vector2X index must be in the range [0, 1]: {}", index);
+            return x;
+        }
     }
 
-    T &operator[](std::size_t index)
+    constexpr T &operator[](std::size_t index)
     {
-        LOG_ERROR_IF(index > 1, "Vector2X index must be in the range [0, 1]: {}", index);
-
-        return *(&x + index % 2);
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        default:
+            Core::log_error("Vector2X index must be in the range [0, 1]: {}", index);
+            return x;
+        }
     }
 };
 
@@ -73,9 +87,9 @@ struct Vector3X
 {
     using value_type = T;
 
-    T x;
-    T y;
-    T z;
+    T x{};
+    T y{};
+    T z{};
 
     constexpr Vector3X() = default;
 
@@ -108,25 +122,43 @@ struct Vector3X
     {
     }
 
-    constexpr bool operator==(const Vector3X<T> &rhs) const = default;
-
     explicit operator const T *() const
     {
         return &x;
     }
 
-    T operator[](std::size_t index) const
-    {
-        LOG_ERROR_IF(index > 2, "Vector3X index must be in the range [0, 2]: {}", index);
+    constexpr bool operator==(const Vector3X<T> &rhs) const = default;
 
-        return *(&x + index % 3);
+    constexpr T operator[](std::size_t index) const
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        default:
+            Core::log_error("Vector3X index must be in the range [0, 2]: {}", index);
+            return x;
+        }
     }
 
-    T &operator[](std::size_t index)
+    constexpr T &operator[](std::size_t index)
     {
-        LOG_ERROR_IF(index > 2, "Vector3X index must be in the range [0, 2]: {}", index);
-
-        return *(&x + index % 3);
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        default:
+            Core::log_error("Vector3X index must be in the range [0, 2]: {}", index);
+            return x;
+        }
     }
 };
 
@@ -143,10 +175,10 @@ struct Vector4X
 {
     using value_type = T;
 
-    T x;
-    T y;
-    T z;
-    T w;
+    T x{};
+    T y{};
+    T z{};
+    T w{};
 
     constexpr Vector4X() = default;
 
@@ -183,25 +215,47 @@ struct Vector4X
     {
     }
 
-    constexpr bool operator==(const Vector4X<T> &rhs) const = default;
-
     explicit operator const T *() const
     {
         return &x;
     }
 
-    T operator[](std::size_t index) const
-    {
-        LOG_ERROR_IF(index > 3, "Vector4X index must be in the range [0, 3]: {}", index);
+    constexpr bool operator==(const Vector4X<T> &rhs) const = default;
 
-        return *(&x + index % 4);
+    constexpr T operator[](std::size_t index) const
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        default:
+            Core::log_error("Vector4X index must be in the range [0, 3]: {}", index);
+            return x;
+        }
     }
 
-    T &operator[](std::size_t index)
+    constexpr T &operator[](std::size_t index)
     {
-        LOG_ERROR_IF(index > 3, "Vector4X index must be in the range [0, 3]: {}", index);
-
-        return *(&x + index % 4);
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        default:
+            Core::log_error("Vector4X index must be in the range [0, 3]: {}", index);
+            return x;
+        }
     }
 };
 
@@ -347,6 +401,33 @@ constexpr Vector4X<T> operator+(const Vector4X<T> &lhs, const Vector4X<T> &rhs)
 }
 
 template <typename T>
+constexpr Vector2X<T> &operator+=(Vector2X<T> &lhs, const Vector2X<T> &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    return lhs;
+}
+
+template <typename T>
+constexpr Vector3X<T> &operator+=(Vector3X<T> &lhs, const Vector3X<T> &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    return lhs;
+}
+
+template <typename T>
+constexpr Vector4X<T> &operator+=(Vector4X<T> &lhs, const Vector4X<T> &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    lhs.w += rhs.w;
+    return lhs;
+}
+
+template <typename T>
 constexpr Vector2X<T> operator-(const Vector2X<T> &lhs, const Vector2X<T> &rhs)
 {
     return {lhs.x - rhs.x, lhs.y - rhs.y};
@@ -362,6 +443,33 @@ template <typename T>
 constexpr Vector4X<T> operator-(const Vector4X<T> &lhs, const Vector4X<T> &rhs)
 {
     return {lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w};
+}
+
+template <typename T>
+constexpr Vector2X<T> &operator-=(Vector2X<T> &lhs, const Vector2X<T> &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    return lhs;
+}
+
+template <typename T>
+constexpr Vector3X<T> &operator-=(Vector3X<T> &lhs, const Vector3X<T> &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    return lhs;
+}
+
+template <typename T>
+constexpr Vector4X<T> &operator-=(Vector4X<T> &lhs, const Vector4X<T> &rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    lhs.w -= rhs.w;
+    return lhs;
 }
 
 template <typename T>
@@ -401,6 +509,33 @@ constexpr Vector4X<T> operator*(T scalar, const Vector4X<T> &vector)
 }
 
 template <typename T>
+constexpr Vector2X<T> &operator*=(Vector2X<T> &vector, T scalar)
+{
+    vector.x *= scalar;
+    vector.y *= scalar;
+    return vector;
+}
+
+template <typename T>
+constexpr Vector3X<T> &operator*=(Vector3X<T> &vector, T scalar)
+{
+    vector.x *= scalar;
+    vector.y *= scalar;
+    vector.z *= scalar;
+    return vector;
+}
+
+template <typename T>
+constexpr Vector4X<T> &operator*=(Vector4X<T> &vector, T scalar)
+{
+    vector.x *= scalar;
+    vector.y *= scalar;
+    vector.z *= scalar;
+    vector.w *= scalar;
+    return vector;
+}
+
+template <typename T>
 constexpr Vector2X<T> operator/(const Vector2X<T> &vector, T scalar)
 {
     return {vector.x / scalar, vector.y / scalar};
@@ -419,156 +554,31 @@ constexpr Vector4X<T> operator/(const Vector4X<T> &vector, T scalar)
 }
 
 template <typename T>
-constexpr Vector2X<T> &operator+=(Vector2X<T> &lhs, const Vector2X<T> &rhs)
+constexpr Vector2X<T> &operator/=(Vector2X<T> &vector, T scalar)
 {
-    lhs.x += rhs.x;
-    lhs.y += rhs.y;
-    return lhs;
+    vector.x /= scalar;
+    vector.y /= scalar;
+    return vector;
 }
 
 template <typename T>
-constexpr Vector3X<T> &operator+=(Vector3X<T> &lhs, const Vector3X<T> &rhs)
+constexpr Vector3X<T> &operator/=(Vector3X<T> &vector, T scalar)
 {
-    lhs.x += rhs.x;
-    lhs.y += rhs.y;
-    lhs.z += rhs.z;
-    return lhs;
+    vector.x /= scalar;
+    vector.y /= scalar;
+    vector.z /= scalar;
+    return vector;
 }
 
 template <typename T>
-constexpr Vector4X<T> &operator+=(Vector4X<T> &lhs, const Vector4X<T> &rhs)
+constexpr Vector4X<T> &operator/=(Vector4X<T> &vector, T scalar)
 {
-    lhs.x += rhs.x;
-    lhs.y += rhs.y;
-    lhs.z += rhs.z;
-    lhs.w += rhs.w;
-    return lhs;
+    vector.x /= scalar;
+    vector.y /= scalar;
+    vector.z /= scalar;
+    vector.w /= scalar;
+    return vector;
 }
-
-template <typename T>
-constexpr Vector2X<T> &operator-=(Vector2X<T> &lhs, const Vector2X<T> &rhs)
-{
-    lhs.x -= rhs.x;
-    lhs.y -= rhs.y;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector3X<T> &operator-=(Vector3X<T> &lhs, const Vector3X<T> &rhs)
-{
-    lhs.x -= rhs.x;
-    lhs.y -= rhs.y;
-    lhs.z -= rhs.z;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector4X<T> &operator-=(Vector4X<T> &lhs, const Vector4X<T> &rhs)
-{
-    lhs.x -= rhs.x;
-    lhs.y -= rhs.y;
-    lhs.z -= rhs.z;
-    lhs.w -= rhs.w;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector2X<T> &operator*=(Vector2X<T> &lhs, T scalar)
-{
-    lhs.x *= scalar;
-    lhs.y *= scalar;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector3X<T> &operator*=(Vector3X<T> &lhs, T scalar)
-{
-    lhs.x *= scalar;
-    lhs.y *= scalar;
-    lhs.z *= scalar;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector4X<T> &operator*=(Vector4X<T> &lhs, T scalar)
-{
-    lhs.x *= scalar;
-    lhs.y *= scalar;
-    lhs.z *= scalar;
-    lhs.w *= scalar;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector2X<T> &operator/=(Vector2X<T> &lhs, T scalar)
-{
-    lhs.x /= scalar;
-    lhs.y /= scalar;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector3X<T> &operator/=(Vector3X<T> &lhs, T scalar)
-{
-    lhs.x /= scalar;
-    lhs.y /= scalar;
-    lhs.z /= scalar;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector4X<T> &operator/=(Vector4X<T> &lhs, T scalar)
-{
-    lhs.x /= scalar;
-    lhs.y /= scalar;
-    lhs.z /= scalar;
-    lhs.w /= scalar;
-    return lhs;
-}
-
-template <typename T>
-constexpr Vector2X<T> min(const Vector2X<T> &a, const Vector2X<T> &b)
-{
-    return {std::min(a.x, b.x), std::min(a.y, b.y)};
-}
-
-template <typename T>
-constexpr Vector3X<T> min(const Vector3X<T> &a, const Vector3X<T> &b)
-{
-    return {std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)};
-}
-
-template <typename T>
-constexpr Vector4X<T> min(const Vector4X<T> &a, const Vector4X<T> &b)
-{
-    return {std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z), std::min(a.w, b.w)};
-}
-
-template <typename T>
-constexpr Vector2X<T> max(const Vector2X<T> &a, const Vector2X<T> &b)
-{
-    return {std::max(a.x, b.x), std::max(a.y, b.y)};
-}
-
-template <typename T>
-constexpr Vector3X<T> max(const Vector3X<T> &a, const Vector3X<T> &b)
-{
-    return {std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)};
-}
-
-template <typename T>
-constexpr Vector4X<T> max(const Vector4X<T> &a, const Vector4X<T> &b)
-{
-    return {std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z), std::max(a.w, b.w)};
-}
-
-Vector2 round(const Vector2 &vector);
-Vector3 round(const Vector3 &vector);
-Vector4 round(const Vector4 &vector);
-
-Vector2 pow(const Vector2 &base, const Vector2 &exponent);
-Vector3 pow(const Vector3 &base, const Vector3 &exponent);
-Vector4 pow(const Vector4 &base, const Vector4 &exponent);
 
 constexpr float dot(const Vector2 &lhs, const Vector2 &rhs)
 {
@@ -588,6 +598,24 @@ constexpr float dot(const Vector4 &lhs, const Vector4 &rhs)
 constexpr Vector3 cross(const Vector3 &lhs, const Vector3 &rhs)
 {
     return {lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x};
+}
+
+template <typename T>
+constexpr Vector2X<T> scale(const Vector2X<T> &lhs, const Vector2X<T> &rhs)
+{
+    return {lhs.x * rhs.x, lhs.y * rhs.y};
+}
+
+template <typename T>
+constexpr Vector3X<T> scale(const Vector3X<T> &lhs, const Vector3X<T> &rhs)
+{
+    return {lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z};
+}
+
+template <typename T>
+constexpr Vector4X<T> scale(const Vector4X<T> &lhs, const Vector4X<T> &rhs)
+{
+    return {lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w};
 }
 
 template <typename T>
@@ -618,6 +646,50 @@ template <typename T>
 constexpr T reflect(const T &ray, const T &normal)
 {
     return ray - vector_projection(ray, normal) * 2.0f;
+}
+
+Vector2 round(const Vector2 &vector);
+Vector3 round(const Vector3 &vector);
+Vector4 round(const Vector4 &vector);
+
+Vector2 pow(const Vector2 &base, const Vector2 &exponent);
+Vector3 pow(const Vector3 &base, const Vector3 &exponent);
+Vector4 pow(const Vector4 &base, const Vector4 &exponent);
+
+template <typename T>
+constexpr Vector2X<T> min(const Vector2X<T> &lhs, const Vector2X<T> &rhs)
+{
+    return {std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y)};
+}
+
+template <typename T>
+constexpr Vector3X<T> min(const Vector3X<T> &lhs, const Vector3X<T> &rhs)
+{
+    return {std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y), std::min(lhs.z, rhs.z)};
+}
+
+template <typename T>
+constexpr Vector4X<T> min(const Vector4X<T> &lhs, const Vector4X<T> &rhs)
+{
+    return {std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y), std::min(lhs.z, rhs.z), std::min(lhs.w, rhs.w)};
+}
+
+template <typename T>
+constexpr Vector2X<T> max(const Vector2X<T> &lhs, const Vector2X<T> &rhs)
+{
+    return {std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y)};
+}
+
+template <typename T>
+constexpr Vector3X<T> max(const Vector3X<T> &lhs, const Vector3X<T> &rhs)
+{
+    return {std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z)};
+}
+
+template <typename T>
+constexpr Vector4X<T> max(const Vector4X<T> &lhs, const Vector4X<T> &rhs)
+{
+    return {std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z), std::max(lhs.w, rhs.w)};
 }
 
 #define VECTOR2_SWIZZLE(a, b)                                                                                          \

@@ -20,8 +20,8 @@ struct RectangleX
 
     template <typename U>
     explicit constexpr RectangleX(const RectangleX<U> &rect)
-        : position{static_cast<Vector2X<T>>(rect.position)}
-        , size{static_cast<Vector2X<T>>(rect.size)}
+        : position{rect.position}
+        , size{rect.size}
     {
     }
 
@@ -33,11 +33,9 @@ using RectangleI = RectangleX<int>;
 using RectangleU = RectangleX<unsigned int>;
 
 template <typename T>
-constexpr Rectangle scale(const Rectangle &rect, const Vector2X<T> &scaling)
+constexpr RectangleX<T> scale(const RectangleX<T> &rect, const Vector2X<T> &scaling)
 {
-    return {
-        {rect.position.x * scaling.x, rect.position.y * scaling.y}, {rect.size.x * scaling.x, rect.size.y * scaling.y}
-    };
+    return {Math::scale(rect.position, scaling), Math::scale(rect.size, scaling)};
 }
 
 Rectangle round(const Rectangle &rect);

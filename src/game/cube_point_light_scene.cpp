@@ -141,7 +141,9 @@ void calc_cube_point_light_matrix(CubePointLight &cube_point_light, const Core::
         Core::get_entity_component<Gfx::WorldToViewMatrix>(cube_point_light.camera_id).matrix;
 
     Math::Vector4 light_view_position{world_to_view_matrix * Math::Vector4{transform.position, 1.0f}};
-    Math::Matrix4 view_to_light_matrix{Core::transform_matrix(transform).invert() * world_to_view_matrix.inverted()};
+    Math::Matrix4 view_to_light_matrix{
+        Math::inverse(Core::transform_matrix(transform)) * Math::inverse(world_to_view_matrix)
+    };
 
     cube_point_light.uniform_buffer.update(
         {.view_position = light_view_position, .view_to_light_matrix = view_to_light_matrix}

@@ -197,5 +197,5 @@ void for_each_camera_stack(TCameraIterator camera_it, TCameraIterator camera_end
     }
 }
 
-Math::RectangleI calc_camera_viewport_rect(const CameraRenderState &camera_render_state);
+MappedViewport mapped_camera_viewport(const CameraRenderState &camera_render_state);
 } // namespace Age::Gfx
