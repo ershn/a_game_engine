@@ -79,7 +79,7 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
 );
 
 template <>
-std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessEqual>(
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessOrEqual>(
     DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,

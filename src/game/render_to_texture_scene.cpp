@@ -245,7 +245,7 @@ void RenderToTextureScene::render()
 
         Gfx::copy_framebuffer_to_texture(camera_render_state.framebuffer_id, pipeline_data.color_texture_id);
 
-        Gfx::execute_draw_calls<Util::LessEqual>(
+        Gfx::execute_draw_calls<Util::LessOrEqual>(
             Gfx::DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer
         );
     });

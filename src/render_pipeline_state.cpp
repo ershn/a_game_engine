@@ -5,19 +5,24 @@ namespace Age::Gfx
 {
 namespace
 {
+constexpr GLenum s_comparison_operator_to_gl_enum[] = {
+    GL_NEVER, GL_LESS, GL_LEQUAL, GL_EQUAL, GL_GEQUAL, GL_GREATER, GL_NOTEQUAL, GL_ALWAYS
+};
+
+constexpr GLenum to_gl_enum(ComparisonOperator comparison)
+{
+    return s_comparison_operator_to_gl_enum[static_cast<std::size_t>(comparison)];
+}
+
 constexpr RenderPipelineState DEFAULT_RENDER_STATE{
-    .depth_clamping = false, .front_face = FrontFace::COUNTER_CLOCKWISE, .cull_mode = CullMode::NONE
+    .front_face = FrontFace::COUNTER_CLOCKWISE,
+    .cull_mode = CullMode::NONE,
+    .depth_clamping = false,
+    .depth_testing = false,
+    .depth_comparison = ComparisonOperator::LESS
 };
 
 RenderPipelineState s_current_render_state{DEFAULT_RENDER_STATE};
-
-void enable_depth_clamping(bool enable)
-{
-    if (enable)
-        glEnable(GL_DEPTH_CLAMP);
-    else
-        glDisable(GL_DEPTH_CLAMP);
-}
 
 void set_front_face(FrontFace front_face)
 {
@@ -53,18 +58,43 @@ void set_cull_mode(CullMode cull_mode)
         break;
     }
 }
+
+void enable_depth_clamping(bool enable)
+{
+    if (enable)
+        glEnable(GL_DEPTH_CLAMP);
+    else
+        glDisable(GL_DEPTH_CLAMP);
+}
+
+void enable_depth_testing(bool enable)
+{
+    if (enable)
+        glEnable(GL_DEPTH_TEST);
+    else
+        glDisable(GL_DEPTH_TEST);
+}
+
+void set_depth_comparison(ComparisonOperator depth_comparison)
+{
+    glDepthFunc(to_gl_enum(depth_comparison));
+}
 } // namespace
 
 void update_render_pipeline_state(RenderPipelineState render_state)
 {
     RenderPipelineState current_render_state{s_current_render_state};
 
-    if (render_state.depth_clamping != current_render_state.depth_clamping)
-        enable_depth_clamping(render_state.depth_clamping);
     if (render_state.front_face != current_render_state.front_face)
         set_front_face(render_state.front_face);
     if (render_state.cull_mode != current_render_state.cull_mode)
         set_cull_mode(render_state.cull_mode);
+    if (render_state.depth_clamping != current_render_state.depth_clamping)
+        enable_depth_clamping(render_state.depth_clamping);
+    if (render_state.depth_testing != current_render_state.depth_testing)
+        enable_depth_testing(render_state.depth_testing);
+    if (render_state.depth_comparison != current_render_state.depth_comparison)
+        set_depth_comparison(render_state.depth_comparison);
 
     s_current_render_state = render_state;
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type_traits>
+#include <concepts>
 #include <utility>
 
 namespace Age::Util
@@ -14,7 +14,7 @@ struct Less
     }
 };
 
-struct LessEqual
+struct LessOrEqual
 {
     template <typename T, typename U>
     constexpr auto operator()(T &&lhs, U &&rhs) const -> decltype(std::forward<T>(lhs) <= std::forward<U>(rhs))
@@ -24,5 +24,5 @@ struct LessEqual
 };
 
 template <typename T>
-concept LessComparison = std::is_same_v<T, Less> || std::is_same_v<T, LessEqual>;
+concept LessComparison = std::same_as<T, Less> || std::same_as<T, LessOrEqual>;
 } // namespace Age::Util

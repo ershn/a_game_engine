@@ -144,8 +144,6 @@ void init_rendering_system(GLFWwindow *window)
 
     glfwSwapInterval(1);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
     glDepthMask(true);
 }
 
@@ -229,7 +227,7 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
 }
 
 template <>
-std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessEqual>(
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessOrEqual>(
     DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,
@@ -280,7 +278,7 @@ void default_render()
 
             auto dc_key_it = draw_call_keys.cbegin();
             auto dc_key_end = draw_call_keys.cend();
-            execute_draw_calls<Util::LessEqual>(DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer);
+            execute_draw_calls<Util::LessOrEqual>(DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer);
         }
     });
 }
