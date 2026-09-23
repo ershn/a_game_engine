@@ -143,8 +143,6 @@ void init_rendering_system(GLFWwindow *window)
     init_texture_system();
 
     glfwSwapInterval(1);
-
-    glDepthMask(true);
 }
 
 void init_renderer(Core::EntityId entity_id, unsigned int options)

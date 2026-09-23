@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\common_viewport.cpp" />
+    <ClCompile Include="src\opengl\opengl_render_pipeline_state.cpp" />
     <ClCompile Include="src\opengl\opengl_texture.cpp" />
     <ClCompile Include="src\opengl\opengl_viewport.cpp" />
     <ClCompile Include="src\common_texture.cpp" />
@@ -261,6 +262,7 @@
     <ClInclude Include="include\opengl\opengl_api.hpp" />
     <ClInclude Include="include\opengl\opengl_image_formats.hpp" />
     <ClInclude Include="include\opengl\opengl_renderbuffer.hpp" />
+    <ClInclude Include="include\opengl\opengl_render_pipeline_state.hpp" />
     <ClInclude Include="include\opengl\opengl_texture.hpp" />
     <ClInclude Include="include\opengl\opengl_viewport.hpp" />
     <ClInclude Include="include\packing.hpp" />
@@ -271,6 +273,7 @@
     <ClInclude Include="include\rectangle.hpp" />
     <ClInclude Include="include\renderbuffer.hpp" />
     <ClInclude Include="include\rendering.hpp" />
+    <ClInclude Include="include\common_render_pipeline_state.hpp" />
     <ClInclude Include="include\render_pipeline_state.hpp" />
     <ClInclude Include="include\render_target.hpp" />
     <ClInclude Include="include\shader.hpp" />
