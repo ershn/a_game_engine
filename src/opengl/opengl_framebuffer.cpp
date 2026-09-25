@@ -32,7 +32,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     s_framebuffer_real_size_changed = true;
 }
 
-Util::IdGenerator<FramebufferId> s_framebuffer_id_generator{FramebufferId{2}};
+Core::IdGenerator<FramebufferId> s_framebuffer_id_generator{FramebufferId{2}};
 std::vector<Framebuffer> s_framebuffers{Framebuffer{.gl_object = 0}};
 std::vector<FramebufferAttachments> s_framebuffer_attachments{{}};
 std::vector<FramebufferMask> s_framebuffer_masks{{.color_buffers = 0b1, .depth_buffer = true, .stencil_buffer = true}};

@@ -9,9 +9,9 @@
 
 #include "draw_queue.hpp"
 #include "id_generator.hpp"
+#include "opengl/opengl_api.hpp"
 #include "render_pipeline_state.hpp"
 #include "uniform_buffer.hpp"
-#include "opengl/opengl_api.hpp"
 
 namespace Age::Gfx
 {
@@ -61,7 +61,7 @@ struct IdentifiedShader
     TShader &shader;
 };
 
-extern Util::IdGenerator<ShaderId> g_shader_id_generator;
+extern Core::IdGenerator<ShaderId> g_shader_id_generator;
 extern std::vector<std::unique_ptr<Shader>> g_shaders;
 
 void init_shader_system();

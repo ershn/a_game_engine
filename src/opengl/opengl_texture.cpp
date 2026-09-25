@@ -6,7 +6,7 @@
 #include "opengl/opengl_api.hpp"
 #include "opengl/opengl_image_formats.hpp"
 #include "opengl/opengl_texture.hpp"
-#include "utils.hpp"
+#include "utils/types.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -75,11 +75,11 @@ constexpr std::size_t to_index(SamplerId id)
 
 std::vector<TextureUnit> s_texture_units;
 
-Util::IdGenerator<TextureId> s_texture_id_generator{FIRST_TEXTURE_ID};
+Core::IdGenerator<TextureId> s_texture_id_generator{FIRST_TEXTURE_ID};
 std::vector<Texture> s_textures;
 std::vector<TextureDesc> s_texture_descs;
 
-Util::IdGenerator<SamplerId> s_sampler_id_generator{SamplerId{1}};
+Core::IdGenerator<SamplerId> s_sampler_id_generator{SamplerId{1}};
 std::vector<Sampler> s_samplers;
 std::vector<SamplerParams> s_sampler_params;
 
@@ -560,7 +560,7 @@ GLuint create_texture_from_bytes(const TextureData &texture_data, TextureCreatio
         }
     }
 
-    Core::log_error("Unsupported texture type: {}", Util::to_underlying(texture_data.desc.type));
+    Core::log_error("Unsupported texture type: {}", Utils::to_underlying(texture_data.desc.type));
     return 0;
 }
 
@@ -668,8 +668,8 @@ void init_texture_system()
 
 bool is_texture_id(RenderTargetId id)
 {
-    return Util::to_underlying(FIRST_TEXTURE_ID) <= Util::to_underlying(id) &&
-           Util::to_underlying(id) <= Util::to_underlying(LAST_TEXTURE_ID);
+    return Utils::to_underlying(FIRST_TEXTURE_ID) <= Utils::to_underlying(id) &&
+           Utils::to_underlying(id) <= Utils::to_underlying(LAST_TEXTURE_ID);
 }
 
 RenderTargetId to_render_target_id(TextureId id)

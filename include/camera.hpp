@@ -7,8 +7,8 @@
 #include "framebuffer.hpp"
 #include "matrix.hpp"
 #include "transform.hpp"
-#include "tuple.hpp"
 #include "uniform_buffer.hpp"
+#include "utils/tuple.hpp"
 #include "viewport.hpp"
 
 namespace Age::Gfx
@@ -139,13 +139,13 @@ struct CameraStackIterator
     CameraStackIterator(TCameraIterator camera_it, TCameraIterator camera_end)
         : camera_it{camera_it}
         , camera_end{camera_end}
-        , camera_stack{Util::get_ref<CameraStackOrder>(*camera_it).stack}
+        , camera_stack{Utils::get_ref<CameraStackOrder>(*camera_it).stack}
     {
     }
 
     operator bool() const
     {
-        return camera_it != camera_end && Util::get_ref<CameraStackOrder>(*camera_it).stack == camera_stack;
+        return camera_it != camera_end && Utils::get_ref<CameraStackOrder>(*camera_it).stack == camera_stack;
     }
 
     CameraStackIterator &operator++()
@@ -160,13 +160,13 @@ struct CameraStackIterator
     }
 };
 
-template <Util::LessComparison TCameraStackCmp, typename TCameraIterator>
+template <Core::LessComparison TCameraStackCmp, typename TCameraIterator>
 TCameraIterator for_each_camera_stack(
     CameraStack max_camera_stack, TCameraIterator camera_it, TCameraIterator camera_end, auto callback
 )
 {
     while (camera_it != camera_end &&
-           TCameraStackCmp{}(Util::get_ref<CameraStackOrder>(*camera_it).stack, max_camera_stack))
+           TCameraStackCmp{}(Utils::get_ref<CameraStackOrder>(*camera_it).stack, max_camera_stack))
     {
         CameraStackIterator camera_stack_it{camera_it, camera_end};
 

@@ -14,7 +14,7 @@
 - fix the texture origin mismatch between DDS and OpenGL
 - implement frustum culling
 - sort draw calls according to distance from camera
-- remove dependencies to OpenGL from the public API: mesh, render_pipeline_state, shader, uniform_buffer
+- remove dependencies to OpenGL from the public API: mesh, shader, uniform_buffer
 
 # Shader
 - add a diffuse only shader

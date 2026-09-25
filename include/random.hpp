@@ -1,8 +1,8 @@
 #pragma once
 
-#include "hash.hpp"
+#include <cstddef>
 
-namespace Age::Util
+namespace Age::Core
 {
 class Random
 {
@@ -13,4 +13,4 @@ class Random
 
     std::size_t next_integer();
 };
-} // namespace Age::Util
+} // namespace Age::Core

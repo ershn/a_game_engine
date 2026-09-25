@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace Age::Util
+namespace Age::Utils
 {
 template <typename... TArgs>
 struct TypePack
@@ -25,4 +25,4 @@ constexpr std::underlying_type_t<T> to_underlying(T enum_value)
 {
     return static_cast<std::underlying_type_t<T>>(enum_value);
 }
-} // namespace Age::Util
+} // namespace Age::Utils

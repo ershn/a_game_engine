@@ -1,6 +1,6 @@
 #include "opengl/opengl_image_formats.hpp"
 #include "error_handling.hpp"
-#include "utils.hpp"
+#include "utils/types.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -383,8 +383,8 @@ GLint get_internal_format(ImageFormat format, bool force_srgb_internal_format)
 {
     GLint internal_format{};
 
-    auto format_index = Util::to_underlying(format);
-    if (format_index < Util::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT))
+    auto format_index = Utils::to_underlying(format);
+    if (format_index < Utils::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT))
     {
         if (format_index < std::size(s_internal_formats_dxgi))
         {
@@ -396,7 +396,7 @@ GLint get_internal_format(ImageFormat format, bool force_srgb_internal_format)
     }
     else
     {
-        auto offset = format_index - Util::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT);
+        auto offset = format_index - Utils::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT);
         if (offset < std::size(s_internal_formats_custom))
         {
             if (force_srgb_internal_format)
@@ -419,15 +419,15 @@ PixelDataFormat get_pixel_data_format(ImageFormat format)
 {
     PixelDataFormat pixel_data_format{};
 
-    auto format_index = Util::to_underlying(format);
-    if (format_index < Util::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT))
+    auto format_index = Utils::to_underlying(format);
+    if (format_index < Utils::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT))
     {
         if (format_index < std::size(s_pixel_data_formats_dxgi))
             pixel_data_format = s_pixel_data_formats_dxgi[format_index];
     }
     else
     {
-        auto offset = format_index - Util::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT);
+        auto offset = format_index - Utils::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT);
         if (offset < std::size(s_pixel_data_formats_custom))
             pixel_data_format = s_pixel_data_formats_custom[offset];
     }

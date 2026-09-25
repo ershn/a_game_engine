@@ -209,7 +209,7 @@ void DoubleProjectionScene::init()
     // Cube
     {
         auto [material_id, material] = Gfx::create_material<Gfx::LitDiffuseTextureMaterial>(
-            lit_diffuse_texture_shader_id, Gfx::RenderPipelineState::Diff{.depth_clamping{true}}
+            lit_diffuse_texture_shader_id, Gfx::RenderPipelineState::Diff{.clamp_depth{true}}
         );
         material.light_buffer_range_id = light_buffer_range_id;
         material.texture_id = checkerboard_texture_id;

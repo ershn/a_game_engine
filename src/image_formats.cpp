@@ -1,6 +1,6 @@
 #include "image_formats.hpp"
 #include "error_handling.hpp"
-#include "utils.hpp"
+#include "utils/types.hpp"
 
 namespace Age::Gfx
 {
@@ -133,26 +133,26 @@ unsigned int s_pixel_data_bpp_custom[] = {
 
 bool is_compressed_format(ImageFormat format)
 {
-    auto format_value = Util::to_underlying(format);
-    return Util::to_underlying(ImageFormat::BC1_TYPELESS) <= format_value &&
-               format_value <= Util::to_underlying(ImageFormat::BC5_SNORM) ||
-           Util::to_underlying(ImageFormat::BC6H_TYPELESS) <= format_value &&
-               format_value <= Util::to_underlying(ImageFormat::BC7_UNORM_SRGB);
+    auto format_value = Utils::to_underlying(format);
+    return Utils::to_underlying(ImageFormat::BC1_TYPELESS) <= format_value &&
+               format_value <= Utils::to_underlying(ImageFormat::BC5_SNORM) ||
+           Utils::to_underlying(ImageFormat::BC6H_TYPELESS) <= format_value &&
+               format_value <= Utils::to_underlying(ImageFormat::BC7_UNORM_SRGB);
 }
 
 unsigned int get_pixel_data_bpp(ImageFormat format)
 {
     unsigned int bpp{};
 
-    auto format_index = Util::to_underlying(format);
-    if (format_index < Util::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT))
+    auto format_index = Utils::to_underlying(format);
+    if (format_index < Utils::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT))
     {
         if (format_index < std::size(s_pixel_data_bpp_dxgi))
             bpp = s_pixel_data_bpp_dxgi[format_index];
     }
     else
     {
-        auto offset = format_index - Util::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT);
+        auto offset = format_index - Utils::to_underlying(ImageFormat::FIRST_CUSTOM_FORMAT);
         if (offset < std::size(s_pixel_data_bpp_custom))
             bpp = s_pixel_data_bpp_custom[offset];
     }

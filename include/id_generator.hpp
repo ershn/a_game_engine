@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "utils.hpp"
+#include "utils/types.hpp"
 
-namespace Age::Util
+namespace Age::Core
 {
 template <typename T>
 class IdGenerator
@@ -27,7 +27,7 @@ class IdGenerator
             if constexpr (std::is_enum_v<T>)
             {
                 T id{_next_id};
-                _next_id = static_cast<T>(to_underlying(_next_id) + 1);
+                _next_id = static_cast<T>(Utils::to_underlying(_next_id) + 1);
                 return id;
             }
             else
@@ -48,4 +48,4 @@ class IdGenerator
         _free_ids.emplace_back(id);
     }
 };
-} // namespace Age::Util
+} // namespace Age::Core

@@ -13,7 +13,7 @@ std::size_t s_uniform_buffer_offset_alignment;
 std::vector<std::uint32_t> s_binding_use_counts;
 std::vector<UniformBufferRangeId> s_binding_uniform_buffer_ranges;
 
-Util::IdGenerator<UniformBufferRangeId> s_uniform_buffer_range_id_generator{UniformBufferRangeId{1}};
+Core::IdGenerator<UniformBufferRangeId> s_uniform_buffer_range_id_generator{UniformBufferRangeId{1}};
 std::vector<UniformBufferRange> s_uniform_buffer_ranges;
 std::vector<UniformBufferBinding> s_uniform_buffer_range_bindings;
 

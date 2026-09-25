@@ -12,9 +12,7 @@ struct std::hash<std::span<const Age::Core::ComponentType>>
     {
         std::size_t seed{};
         for (auto type : types)
-        {
-            Age::Util::hash_combine(seed, std::hash<Age::Core::ComponentType>{}(type));
-        }
+            Age::Core::hash_combine(seed, std::hash<Age::Core::ComponentType>{}(type));
         return seed;
     }
 };
@@ -88,7 +86,7 @@ static std::unordered_map<std::size_t, ArchetypeId> s_component_types_to_archety
 std::vector<std::vector<ArchetypeId>> g_component_archetype_ids{};
 std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets{};
 
-Util::IdGenerator<EntityId> g_entity_id_generator{1};
+IdGenerator<EntityId> g_entity_id_generator{1};
 std::vector<EntityLocation> g_entity_locations{};
 
 void init_ecs(std::size_t user_component_type_count)

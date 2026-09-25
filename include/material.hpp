@@ -45,7 +45,7 @@ struct MaterialRef
     MaterialId material_id{};
 };
 
-extern Util::IdGenerator<MaterialId> g_material_id_generator;
+extern Core::IdGenerator<MaterialId> g_material_id_generator;
 extern std::vector<std::unique_ptr<Material>> g_materials;
 
 void init_material_system();

@@ -2,7 +2,7 @@
 
 #include <tuple>
 
-namespace Age::Util
+namespace Age::Utils
 {
 template <typename T, typename TTuple, typename = TTuple>
 struct TupleElement
@@ -74,4 +74,4 @@ auto get_ref(const std::tuple<Ts...> &tuple) -> decltype(TupleElement<T, std::tu
 {
     return TupleElement<T, std::tuple<Ts...>>::get(tuple);
 }
-} // namespace Age::Util
+} // namespace Age::Utils

@@ -90,7 +90,7 @@ Shader::Shader(
 {
 }
 
-Util::IdGenerator<ShaderId> g_shader_id_generator{ShaderId{0}};
+Core::IdGenerator<ShaderId> g_shader_id_generator{ShaderId{0}};
 std::vector<std::unique_ptr<Shader>> g_shaders{};
 
 void init_shader_system()

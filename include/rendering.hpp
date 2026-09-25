@@ -70,7 +70,7 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls(
 ) = delete;
 
 template <>
-std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Core::Less>(
     DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,
@@ -79,7 +79,7 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
 );
 
 template <>
-std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessOrEqual>(
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Core::LessOrEqual>(
     DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,

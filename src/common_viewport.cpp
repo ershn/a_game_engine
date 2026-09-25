@@ -7,7 +7,7 @@ namespace Age::Gfx
 {
 namespace
 {
-Util::IdGenerator<ViewportId> s_viewport_id_generator{ViewportId{2}};
+Core::IdGenerator<ViewportId> s_viewport_id_generator{ViewportId{2}};
 std::vector<Viewport> s_viewports{Viewport{.rect{{0.0f, 0.0f}, {1.0f, 1.0f}}}};
 
 constexpr std::size_t to_index(ViewportId id)

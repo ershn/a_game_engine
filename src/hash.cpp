@@ -1,6 +1,6 @@
 #include "hash.hpp"
 
-namespace Age::Util
+namespace Age::Core
 {
 // Moremur mixer (https://mostlymangling.blogspot.com/2019/12/stronger-better-morer-moremur-better.html)
 std::size_t hash_mix(std::size_t hash)
@@ -18,4 +18,4 @@ void hash_combine(std::size_t &seed, std::size_t hash)
 {
     seed = hash_mix(seed + hash + 0x9e3779b97f4a7c15ULL);
 }
-} // namespace Age::Util
+} // namespace Age::Core

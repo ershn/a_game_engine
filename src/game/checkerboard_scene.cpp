@@ -12,7 +12,7 @@
 #include "texture.hpp"
 #include "time.hpp"
 #include "transformations.hpp"
-#include "utils.hpp"
+#include "utils/types.hpp"
 
 #include "game/big_plane_mesh.hpp"
 #include "game/checkerboard_scene.hpp"
@@ -99,12 +99,12 @@ void control_scene(CheckerboardSceneController &scene_controller)
     if (Input::is_key_pressed(GLFW_KEY_W, scene_controller.pressed_keys))
     {
         material.texture_id = scene_controller.mipmap_texture_id;
-        Core::log_info("Using mipmap texture: id = {}", Util::to_underlying(material.texture_id));
+        Core::log_info("Using mipmap texture: id = {}", Utils::to_underlying(material.texture_id));
     }
     else if (Input::is_key_pressed(GLFW_KEY_F, scene_controller.pressed_keys))
     {
         material.texture_id = scene_controller.checkerboard_texture_id;
-        Core::log_info("Using checkerboard texture: id = {}", Util::to_underlying(material.texture_id));
+        Core::log_info("Using checkerboard texture: id = {}", Utils::to_underlying(material.texture_id));
     }
 
     if (Input::is_key_pressed(GLFW_KEY_S, scene_controller.pressed_keys))

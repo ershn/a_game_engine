@@ -210,7 +210,7 @@ void sort_draw_calls(std::vector<DrawCallKey> &draw_call_keys)
 }
 
 template <>
-std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Core::Less>(
     DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,
@@ -225,7 +225,7 @@ std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::Less>(
 }
 
 template <>
-std::vector<DrawCallKey>::const_iterator execute_draw_calls<Util::LessOrEqual>(
+std::vector<DrawCallKey>::const_iterator execute_draw_calls<Core::LessOrEqual>(
     DrawQueue max_draw_queue,
     std::vector<DrawCallKey>::const_iterator dc_key_it,
     std::vector<DrawCallKey>::const_iterator dc_key_end,
@@ -276,7 +276,7 @@ void default_render()
 
             auto dc_key_it = draw_call_keys.cbegin();
             auto dc_key_end = draw_call_keys.cend();
-            execute_draw_calls<Util::LessOrEqual>(DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer);
+            execute_draw_calls<Core::LessOrEqual>(DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer);
         }
     });
 }

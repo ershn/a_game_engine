@@ -16,7 +16,7 @@
 #include "rendering.hpp"
 #include "spherical_camera.hpp"
 #include "transformations.hpp"
-#include "tuple.hpp"
+#include "utils/tuple.hpp"
 
 #include "game/game_controllers.hpp"
 #include "game/render_to_texture_scene.hpp"
@@ -215,7 +215,7 @@ void RenderToTextureScene::render()
     Core::fill_with_entity_components(cameras);
 
     std::sort(cameras.begin(), cameras.end(), [](const auto &camera1, const auto &camera2) {
-        return Util::get_ref<Gfx::CameraStackOrder>(camera1) < Util::get_ref<Gfx::CameraStackOrder>(camera2);
+        return Utils::get_ref<Gfx::CameraStackOrder>(camera1) < Utils::get_ref<Gfx::CameraStackOrder>(camera2);
     });
 
     auto &pipeline_data = get_global<RenderPipelineData>();
@@ -239,13 +239,13 @@ void RenderToTextureScene::render()
 
         auto dc_key_it = draw_call_keys.cbegin();
         auto dc_key_end = draw_call_keys.cend();
-        dc_key_it = Gfx::execute_draw_calls<Util::Less>(
+        dc_key_it = Gfx::execute_draw_calls<Core::Less>(
             Gfx::DrawQueue::max_opaque, dc_key_it, dc_key_end, wv_matrix, projection_buffer
         );
 
         Gfx::copy_framebuffer_to_texture(camera_render_state.framebuffer_id, pipeline_data.color_texture_id);
 
-        Gfx::execute_draw_calls<Util::LessOrEqual>(
+        Gfx::execute_draw_calls<Core::LessOrEqual>(
             Gfx::DrawQueue::max, dc_key_it, dc_key_end, wv_matrix, projection_buffer
         );
     });

@@ -19,7 +19,7 @@ Material::Material(Shader &shader, RenderPipelineState render_state, DrawQueue d
 {
 }
 
-Util::IdGenerator<MaterialId> g_material_id_generator{MaterialId{0}};
+Core::IdGenerator<MaterialId> g_material_id_generator{MaterialId{0}};
 std::vector<std::unique_ptr<Material>> g_materials{};
 
 void init_material_system()

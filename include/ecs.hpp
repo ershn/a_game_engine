@@ -13,7 +13,7 @@
 #include "inplace_list.hpp"
 #include "memory.hpp"
 #include "multi_span.hpp"
-#include "utils.hpp"
+#include "utils/types.hpp"
 
 namespace Age::Core
 {
@@ -71,7 +71,7 @@ extern std::vector<Archetype> g_archetypes;
 extern std::vector<std::vector<ArchetypeId>> g_component_archetype_ids;
 extern std::vector<std::vector<ComponentOffset>> g_component_archetype_offsets;
 
-extern Util::IdGenerator<EntityId> g_entity_id_generator;
+extern IdGenerator<EntityId> g_entity_id_generator;
 extern std::vector<EntityLocation> g_entity_locations;
 
 void init_ecs(std::size_t user_component_type_count);
@@ -471,7 +471,7 @@ void process_components(void (*function)(EntityId, TComponents &...))
 }
 
 template <typename TContainer, typename... TComponents>
-void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePack<TComponents &...>)
+void fill_with_entity_components_impl(TContainer &cmpts_container, Utils::TypePack<TComponents &...>)
 {
     std::uint32_t entity_count{};
     execute([&](std::uint32_t count, TComponents *...components) {
@@ -481,7 +481,7 @@ void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePac
 }
 
 template <typename TContainer, typename... TComponents>
-void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePack<TComponents *...>)
+void fill_with_entity_components_impl(TContainer &cmpts_container, Utils::TypePack<TComponents *...>)
 {
     std::uint32_t entity_count{};
     execute([&](std::uint32_t count, TComponents *...components) {
@@ -491,7 +491,7 @@ void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePac
 }
 
 template <typename TContainer, typename... TComponents>
-void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePack<EntityId, TComponents &...>)
+void fill_with_entity_components_impl(TContainer &cmpts_container, Utils::TypePack<EntityId, TComponents &...>)
 {
     std::uint32_t entity_count{};
     execute([&](std::uint32_t count, const EntityId *entity_ids, TComponents *...components) {
@@ -501,7 +501,7 @@ void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePac
 }
 
 template <typename TContainer, typename... TComponents>
-void fill_with_entity_components_impl(TContainer &cmpts_container, Util::TypePack<EntityId, TComponents *...>)
+void fill_with_entity_components_impl(TContainer &cmpts_container, Utils::TypePack<EntityId, TComponents *...>)
 {
     std::uint32_t entity_count{};
     execute([&](std::uint32_t count, const EntityId *entity_ids, TComponents *...components) {
@@ -514,7 +514,7 @@ template <typename TContainer>
 void fill_with_entity_components(TContainer &cmpts_container)
 {
     fill_with_entity_components_impl(
-        cmpts_container, typename Util::TypeArgs<typename TContainer::value_type>::TypePack{}
+        cmpts_container, typename Utils::TypeArgs<typename TContainer::value_type>::TypePack{}
     );
 }
 } // namespace Age::Core

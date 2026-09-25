@@ -3,7 +3,7 @@
 #include "id_generator.hpp"
 #include "opengl/opengl_image_formats.hpp"
 #include "opengl/opengl_renderbuffer.hpp"
-#include "utils.hpp"
+#include "utils/types.hpp"
 
 namespace Age::Gfx::OGL
 {
@@ -18,7 +18,7 @@ constexpr std::size_t to_index(RenderbufferId id)
     return static_cast<std::size_t>(id) - static_cast<std::size_t>(FIRST_RENDERBUFFER_ID);
 }
 
-Util::IdGenerator<RenderbufferId> s_renderbuffer_id_generator{FIRST_RENDERBUFFER_ID};
+Core::IdGenerator<RenderbufferId> s_renderbuffer_id_generator{FIRST_RENDERBUFFER_ID};
 std::vector<Renderbuffer> s_renderbuffers;
 std::vector<RenderbufferDesc> s_renderbuffer_descs;
 } // namespace
@@ -33,8 +33,8 @@ void init_renderbuffer_system()
 
 bool is_renderbuffer_id(RenderTargetId id)
 {
-    return Util::to_underlying(FIRST_RENDERBUFFER_ID) <= Util::to_underlying(id) &&
-           Util::to_underlying(id) <= Util::to_underlying(LAST_RENDERBUFFER_ID);
+    return Utils::to_underlying(FIRST_RENDERBUFFER_ID) <= Utils::to_underlying(id) &&
+           Utils::to_underlying(id) <= Utils::to_underlying(LAST_RENDERBUFFER_ID);
 }
 
 RenderTargetId to_render_target_id(RenderbufferId id)

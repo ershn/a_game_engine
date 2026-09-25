@@ -177,7 +177,6 @@
     <ClCompile Include="src\opengl\opengl_image_formats.cpp" />
     <ClCompile Include="src\path.cpp" />
     <ClCompile Include="src\opengl\opengl_renderbuffer.cpp" />
-    <ClCompile Include="src\render_pipeline_state.cpp" />
     <ClCompile Include="src\third_parties\glad.c" />
     <ClCompile Include="src\transform.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -212,6 +211,7 @@
     <ClInclude Include="include\build.hpp" />
     <ClInclude Include="include\camera.hpp" />
     <ClInclude Include="include\color.hpp" />
+    <ClInclude Include="include\common_framebuffer.hpp" />
     <ClInclude Include="include\common_viewport.hpp" />
     <ClInclude Include="include\comparisons.hpp" />
     <ClInclude Include="include\components.hpp" />
@@ -284,10 +284,12 @@
     <ClInclude Include="include\time.hpp" />
     <ClInclude Include="include\transform.hpp" />
     <ClInclude Include="include\transformations.hpp" />
-    <ClInclude Include="include\tuple.hpp" />
+    <ClInclude Include="include\utils\default.hpp" />
+    <ClInclude Include="include\utils\tuple.hpp" />
     <ClInclude Include="include\uniform_buffer.hpp" />
     <ClInclude Include="include\uniform_blocks.hpp" />
-    <ClInclude Include="include\utils.hpp" />
+    <ClInclude Include="include\utils\types.hpp" />
+    <ClInclude Include="include\utils\array.hpp" />
     <ClInclude Include="include\vector.hpp" />
     <ClInclude Include="include\viewport.hpp" />
   </ItemGroup>

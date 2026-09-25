@@ -3,7 +3,7 @@
 #include <concepts>
 #include <utility>
 
-namespace Age::Util
+namespace Age::Core
 {
 struct Less
 {
@@ -25,4 +25,4 @@ struct LessOrEqual
 
 template <typename T>
 concept LessComparison = std::same_as<T, Less> || std::same_as<T, LessOrEqual>;
-} // namespace Age::Util
+} // namespace Age::Core
