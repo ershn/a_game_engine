@@ -221,6 +221,9 @@
     <ClInclude Include="include\error_handling.hpp" />
     <ClInclude Include="include\fly_camera.hpp" />
     <ClInclude Include="include\framebuffer.hpp" />
+    <ClInclude Include="include\memory\best_fit_linear_allocator.hpp" />
+    <ClInclude Include="include\memory\memory_size.hpp" />
+    <ClInclude Include="include\memory\pool_allocator.hpp" />
     <ClInclude Include="include\opengl\opengl_errors.hpp" />
     <ClInclude Include="include\opengl\opengl_framebuffer.hpp" />
     <ClInclude Include="include\game\big_plane_mesh.hpp" />
@@ -255,7 +258,6 @@
     <ClInclude Include="include\default_materials.hpp" />
     <ClInclude Include="include\math.hpp" />
     <ClInclude Include="include\matrix.hpp" />
-    <ClInclude Include="include\memory.hpp" />
     <ClInclude Include="include\mesh.hpp" />
     <ClInclude Include="include\default_meshes.hpp" />
     <ClInclude Include="include\multi_span.hpp" />

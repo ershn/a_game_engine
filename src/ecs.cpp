@@ -4,6 +4,7 @@
 #include "ecs.hpp"
 #include "error_handling.hpp"
 #include "hash.hpp"
+#include "memory/memory_size.hpp"
 
 template <>
 struct std::hash<std::span<const Age::Core::ComponentType>>

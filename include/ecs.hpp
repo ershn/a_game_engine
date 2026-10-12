@@ -10,8 +10,7 @@
 
 #include "components.hpp"
 #include "id_generator.hpp"
-#include "inplace_list.hpp"
-#include "memory.hpp"
+#include "memory/pool_allocator.hpp"
 #include "multi_span.hpp"
 #include "utils/types.hpp"
 

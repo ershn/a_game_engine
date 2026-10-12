@@ -31,6 +31,6 @@
 # Performance
 
 # Refactoring
-- use scoped enums instead of plain integers where appropriate
-- use bit-fields instead of bit masks
+- use scoped enums instead of plain integers where appropriate: EntityId, MeshId, TextureUnitId ?
+- use bit-fields instead of bit masks: init_renderer options
 - replace uses of Core::process_components with Core::execute and remove Core::process_components

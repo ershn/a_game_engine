@@ -5,12 +5,6 @@
 
 namespace Age::Memory
 {
-template <std::size_t N>
-constexpr std::size_t padding_to(std::size_t size)
-{
-    return (N - size % N) % N;
-}
-
 template <std::size_t AllocSize, std::size_t ChunkSize>
 class PoolAllocator
 {
@@ -19,7 +13,7 @@ class PoolAllocator
 
     constexpr static std::size_t CHUNK_COUNT_PER_PAGE{AllocSize / ChunkSize};
 
-    std::byte *_last_allocated_page{nullptr};
+    std::byte *_last_allocated_page{};
     std::size_t _page_next_free_chunk_index{};
     std::vector<void *> _returned_chunks{};
 
